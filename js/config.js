@@ -7,60 +7,45 @@ window.battleConfig = battleConfig;
 window.configLoaded = configLoaded;
 
 // Загрузка и парсинг конфигурации
-function loadConfigFile(file) {
+async function loadConfigFile(file) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const config = JSON.parse(e.target.result);
-            
-            // Проверяем структуру конфигурации
-            if (!config.unitTypes || !config.armies || !config.armies.attackers || !config.armies.defenders) {
+            if (!config.armies || !config.armies.attackers || !config.armies.defenders) {
                 throw new Error('Неверная структура файла конфигурации');
             }
-            
+            // Загружаем типы монстров
+            const monsters = await window.loadMonstersConfig();
+            config.unitTypes = monsters;
             battleConfig = config;
             configLoaded = true;
-            
-            // Обновляем глобальные переменные
             window.battleConfig = battleConfig;
             window.configLoaded = configLoaded;
-            
-            // Обновляем интерфейс
             const statusDiv = document.getElementById('file-status');
             const description = config.battleConfig.description ? ` - ${config.battleConfig.description}` : '';
             statusDiv.textContent = `✅ Загружена конфигурация: "${config.battleConfig.name}"${description}`;
             statusDiv.className = 'file-status success';
-            
-            // Активируем кнопку боя
             const battleBtn = document.getElementById('battle-btn');
             battleBtn.disabled = false;
-            
         } catch (error) {
             console.error('Ошибка при загрузке конфигурации:', error);
-            
             const statusDiv = document.getElementById('file-status');
             statusDiv.textContent = `❌ Ошибка загрузки: ${error.message}`;
             statusDiv.className = 'file-status error';
-            
             battleConfig = null;
             configLoaded = false;
-            
-            // Обновляем глобальные переменные
             window.battleConfig = battleConfig;
             window.configLoaded = configLoaded;
-            
-            // Деактивируем кнопку боя
             const battleBtn = document.getElementById('battle-btn');
             battleBtn.disabled = true;
         }
     };
-    
     reader.onerror = function() {
         const statusDiv = document.getElementById('file-status');
         statusDiv.textContent = '❌ Ошибка чтения файла';
         statusDiv.className = 'file-status error';
     };
-    
     reader.readAsText(file);
 }
 
@@ -72,44 +57,30 @@ async function loadDefaultConfig() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const config = await response.json();
-        
-        // Проверяем структуру конфигурации
-        if (!config.unitTypes || !config.armies || !config.armies.attackers || !config.armies.defenders) {
+        if (!config.armies || !config.armies.attackers || !config.armies.defenders) {
             throw new Error('Неверная структура файла конфигурации');
         }
-        
+        const monsters = await window.loadMonstersConfig();
+        config.unitTypes = monsters;
         battleConfig = config;
         configLoaded = true;
-        
-        // Обновляем глобальные переменные
         window.battleConfig = battleConfig;
         window.configLoaded = configLoaded;
-        
-        // Обновляем интерфейс
         const statusDiv = document.getElementById('file-status');
         const description = config.battleConfig.description ? ` - ${config.battleConfig.description}` : '';
         statusDiv.textContent = `✅ Загружена конфигурация: "${config.battleConfig.name}"${description}`;
         statusDiv.className = 'file-status success';
-        
-        // Активируем кнопку боя
         const battleBtn = document.getElementById('battle-btn');
         battleBtn.disabled = false;
-        
     } catch (error) {
         console.error('Ошибка при загрузке стандартной конфигурации:', error);
-        
         const statusDiv = document.getElementById('file-status');
         statusDiv.textContent = `❌ Ошибка загрузки стандартной конфигурации: ${error.message}`;
         statusDiv.className = 'file-status error';
-        
         battleConfig = null;
         configLoaded = false;
-        
-        // Обновляем глобальные переменные
         window.battleConfig = battleConfig;
         window.configLoaded = configLoaded;
-        
-        // Деактивируем кнопку боя
         const battleBtn = document.getElementById('battle-btn');
         battleBtn.disabled = true;
     }
@@ -120,26 +91,7 @@ function downloadSampleConfig() {
     const sampleConfig = {
         "battleConfig": {
             "name": "Образец конфигурации",
-            "description": "Пример настройки боя для создания собственной конфигурации",
-            "maxUnitsPerArmy": 10,
-            "hitThreshold": 11,
-            "criticalHit": 20
-        },
-        "unitTypes": {
-            "warrior": {
-                "id": "warrior",
-                "name": "Воин",
-                "hp": 12,
-                "damage": "1d6",
-                "view": "⚔️"
-            },
-            "archer": {
-                "id": "archer",
-                "name": "Лучник",
-                "hp": 8,
-                "damage": "1d6",
-                "view": "🏹"
-            }
+            "description": "Пример настройки боя для создания собственной конфигурации"
         },
         "armies": {
             "attackers": {
@@ -158,10 +110,7 @@ function downloadSampleConfig() {
                     {"id": "archer", "count": 1}
                 ]
             }
-        },
-          "battleSettings": {
-    "showDetailedLog": true
-  }
+        }
     };
     
     const blob = new Blob([JSON.stringify(sampleConfig, null, 2)], { type: 'application/json' });

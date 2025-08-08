@@ -31,11 +31,10 @@ function parseDamage(damageStr) {
 
 // Создание юнита из конфигурации
 function createUnit(typeId, unitId) {
-    if (!window.battleConfig || !window.battleConfig.unitTypes[typeId]) {
+    if (!window.battleConfig || !window.battleConfig.unitTypes || !window.battleConfig.unitTypes[typeId]) {
         console.error(`Тип юнита ${typeId} не найден в конфигурации`);
         return null;
     }
-    
     const type = window.battleConfig.unitTypes[typeId];
     return {
         id: unitId,
