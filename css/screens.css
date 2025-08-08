@@ -1,0 +1,130 @@
+/* Стили экранов - стартовый экран, экран боя, компоновка */
+
+/* Стартовый экран */
+#intro-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-width: 100vw;
+    background-color: #0d0d0d;
+    box-sizing: border-box;
+}
+
+/* Рамка на весь экран */
+#intro-screen::before {
+    content: '';
+    position: fixed;
+    top: 10px; left: 5px; right: 5px; bottom: 10px;
+    border: 5px solid #654321;
+    border-radius: 24px;
+    pointer-events: none;
+    z-index: 1;
+    box-sizing: border-box;
+}
+
+.intro-table-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(26, 26, 26, 0.97);
+    border: 3px solid #654321;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 2px 8px rgba(0,0,0,0.3);
+    padding: 48px 32px 36px 32px;
+    margin: 32px auto;
+    min-width: 500px;
+    max-width: 1000px;
+    width: 100%;
+    min-height: 420px;
+    z-index: 2;
+}
+
+.intro-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 18px;
+}
+
+.intro-table td {
+    padding: 0;
+    text-align: center;
+    background: none;
+    border: none;
+}
+
+.config-section {
+    margin: 20px 0;
+    text-align: center;
+    background: rgba(26, 26, 26, 0.6);
+    border: 2px solid #654321;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+.config-info {
+    margin-bottom: 20px;
+}
+
+.config-actions {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.action-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-group:first-child {
+    flex: 1;
+    max-width: 300px;
+}
+
+.action-group:last-child {
+    flex: 0 0 auto;
+}
+
+#intro-screen h1 {
+    font-size: 3.5em;
+    color: #cd853f;
+    margin-bottom: 50px;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    letter-spacing: 3px;
+    font-weight: 600;
+}
+
+/* Экран боя */
+#battle-screen {
+    height: 100vh;
+    background-color: #0d0d0d;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content {
+    display: flex;
+    flex: 1;
+    height: calc(100vh - 75px);
+}
+
+.battlefield-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    background-color: #0d0d0d;
+    position: relative;
+}
+
+.battlefield-content {
+    flex: 1;
+}
