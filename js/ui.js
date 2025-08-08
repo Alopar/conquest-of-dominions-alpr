@@ -100,10 +100,21 @@ function showUnitInfo(unit) {
     const statusSpan = document.getElementById('unit-status');
     
     if (panel && typeSpan && hpSpan && damageSpan && statusSpan) {
-        typeSpan.textContent = unit.name;
+        // Добавляем иконку юнита перед названием
+        typeSpan.innerHTML = `${unit.view} ${unit.name}`;
         hpSpan.textContent = `${unit.hp}/${unit.maxHp}`;
         damageSpan.textContent = unit.damage;
-        statusSpan.textContent = unit.alive ? (unit.hasAttackedThisTurn ? 'Атаковал' : 'Готов') : 'Мертв';
+        
+        // Добавляем иконки статуса
+        let statusText = '';
+        if (!unit.alive) {
+            statusText = '💀 Мертв';
+        } else if (unit.hasAttackedThisTurn) {
+            statusText = '⚔️ Атаковал';
+        } else {
+            statusText = '✅ Готов';
+        }
+        statusSpan.innerHTML = statusText;
         
         panel.style.display = 'block';
     }
