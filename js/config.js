@@ -159,12 +159,9 @@ function downloadSampleConfig() {
                 ]
             }
         },
-        "battleSettings": {
-            "turnBased": true,
-            "randomUnitSelection": true,
-            "allowMultipleAttacksPerTurn": false,
-            "showDetailedLog": true
-        }
+          "battleSettings": {
+    "showDetailedLog": true
+  }
     };
     
     const blob = new Blob([JSON.stringify(sampleConfig, null, 2)], { type: 'application/json' });

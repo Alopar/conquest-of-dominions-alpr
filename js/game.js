@@ -61,7 +61,8 @@ function initializeArmies() {
     window.gameState.defenders = [];
     
     let unitIdCounter = 0;
-    const maxUnits = window.battleConfig.battleConfig?.maxUnitsPerArmy || 10;
+    const currentSettings = window.getCurrentSettings();
+    const maxUnits = currentSettings.maxUnitsPerArmy;
     
     // Обновляем названия армий
     const attackersLabel = document.getElementById('attackers-label');
@@ -146,8 +147,9 @@ function executeStep(army) {
 }
 
 function performAttack(attacker, target, army) {
-    const hitThreshold = window.battleConfig.battleConfig?.hitThreshold || 11;
-    const criticalHit = window.battleConfig.battleConfig?.criticalHit || 20;
+    const currentSettings = window.getCurrentSettings();
+    const hitThreshold = currentSettings.hitThreshold;
+    const criticalHit = currentSettings.criticalHit;
     
     // Бросаем кубик на попадание
     const attackRoll = rollDice(20);

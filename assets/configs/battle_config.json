@@ -1,10 +1,7 @@
 {
   "battleConfig": {
     "name": "Стандартное сражение",
-    "description": "Базовая конфигурация боя между людьми и орками",
-    "maxUnitsPerArmy": 10,
-    "hitThreshold": 11,
-    "criticalHit": 20
+    "description": "Базовая конфигурация боя между людьми и орками"
   },
   "unitTypes": {
     "warrior": {
@@ -131,11 +128,5 @@
         {"id": "spider", "count": 1}
       ]
     }
-  },
-  "battleSettings": {
-    "turnBased": true,
-    "randomUnitSelection": true,
-    "allowMultipleAttacksPerTurn": false,
-    "showDetailedLog": true
   }
 }

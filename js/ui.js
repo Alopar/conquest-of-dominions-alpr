@@ -130,6 +130,14 @@ function hideUnitInfo() {
 
 // Добавить запись в лог
 function addToLog(message) {
+    const currentSettings = window.getCurrentSettings();
+    
+    // Проверяем, нужно ли показывать подробный лог
+    if (!currentSettings.battleSettings.showDetailedLog && 
+        (message.includes('промахивается') || message.includes('атакует'))) {
+        return; // Пропускаем детальные сообщения об атаках
+    }
+    
     const logDiv = document.getElementById('battle-log');
     if (!logDiv) return;
     

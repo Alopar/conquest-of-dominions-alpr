@@ -1,7 +1,7 @@
 // Основное приложение - инициализация и обработчики событий
 
 // Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const fileInput = document.getElementById('config-file');
     const customBtn = document.getElementById('custom-file-btn');
     if (fileInput && customBtn) {
@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Инициализируем настройки
+    await initializeSettings();
     
     // Автоматически загружаем стандартную конфигурацию
     loadDefaultConfig();
