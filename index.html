@@ -94,8 +94,7 @@
                     <div id="attackers-line" class="army-line"></div>
                     
                     <div class="controls">
-                        <button class="btn" onclick="executeStep('attackers')" id="attackers-btn">Ход Атакующих</button>
-                        <button class="btn" onclick="executeStep('defenders')" id="defenders-btn">Ход Защитников</button>
+                        <button class="btn" onclick="step()" id="step-btn">Шаг</button>
                         <button class="btn" onclick="nextTurn()" id="next-turn-btn">Следующий ход</button>
                     </div>
                 </div>
@@ -155,6 +154,12 @@
                             <div class="custom-checkbox">
                                 <input type="checkbox" id="showDetailedLog" checked>
                                 <label for="showDetailedLog">Подробный лог</label>
+                            </div>
+                        </div>
+                        <div class="setting-group">
+                            <div class="custom-checkbox">
+                                <input type="checkbox" id="attackAlternate" checked>
+                                <label for="attackAlternate">Атака по очереди</label>
                             </div>
                         </div>
                     </div>

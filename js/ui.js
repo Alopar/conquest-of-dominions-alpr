@@ -57,37 +57,32 @@ function renderArmies() {
 
 // Обновление состояния кнопок
 function updateButtonStates() {
-    const attackersBtn = document.getElementById('attackers-btn');
-    const defendersBtn = document.getElementById('defenders-btn');
+    const stepBtn = document.getElementById('step-btn');
     const nextTurnBtn = document.getElementById('next-turn-btn');
-    
+
+    if (!stepBtn || !nextTurnBtn) return;
+
     if (window.gameState.battleEnded) {
-        attackersBtn.disabled = true;
-        defendersBtn.disabled = true;
+        stepBtn.disabled = true;
         nextTurnBtn.disabled = true;
         return;
     }
-    
-    let attackersCanAttack = 0;
-    let defendersCanAttack = 0;
+
     let totalCanAttack = 0;
-    
+
     for (let unit of window.gameState.attackers) {
         if (unit.alive && !unit.hasAttackedThisTurn) {
-            attackersCanAttack++;
             totalCanAttack++;
         }
     }
-    
+
     for (let unit of window.gameState.defenders) {
         if (unit.alive && !unit.hasAttackedThisTurn) {
-            defendersCanAttack++;
             totalCanAttack++;
         }
     }
-    
-    attackersBtn.disabled = (attackersCanAttack === 0);
-    defendersBtn.disabled = (defendersCanAttack === 0);
+
+    stepBtn.disabled = (totalCanAttack === 0);
     nextTurnBtn.disabled = (totalCanAttack > 0);
 }
 
