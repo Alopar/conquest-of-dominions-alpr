@@ -54,6 +54,9 @@
                             <button class="btn" onclick="showSettings()" style="width: 200px; font-size:1.1em;">
                                 ⚙️ Настройки
                             </button>
+                            <button class="btn" onclick="showBestiary()" style="width: 200px; font-size:1.1em;">
+                                🐉 Бестиарий
+                            </button>
                             <button class="btn" id="battle-btn" onclick="startBattle()" disabled style="width: 250px; font-size:1.15em;">
                                 🚩 Начать бой! 🚩
                             </button>
@@ -165,8 +168,45 @@
         </div>
     </div>
 
+        <!-- Экран Бестиарий -->
+    <div id="bestiary-screen" class="screen" style="display: none !important;">
+        <div class="menu-bar">
+            <div class="menu-left">
+                <button class="btn" onclick="backToIntroFromBestiary()">Главная</button>
+            </div>
+        </div>
+        
+        <div class="settings-container">
+            <div class="settings-content">
+                <h2>🐉 Бестиарий</h2>
+                <div style="margin-bottom: 18px; display: flex; gap: 18px; justify-content: center;">
+                    <input type="file" id="monsters-file" accept=".json" style="display:none" onchange="uploadMonstersConfigFile(this)">
+                    <button class="btn" onclick="document.getElementById('monsters-file').click()">📁 Загрузить конфиг</button>
+                    <button class="btn secondary-btn" onclick="downloadMonstersConfig()">💾 Скачать конфиг</button>
+                </div>
+                <div class="bestiary-table-wrapper">
+                    <table class="bestiary-table unit-info-table">
+                        <thead>
+                            <tr>
+                                <th class="icon-cell">👤</th>
+                                <th>Имя</th>
+                                <th>ID</th>
+                                <th>❤️ HP</th>
+                                <th>💥 Урон</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bestiary-table">
+                            <tr><td colspan="5">Загрузка...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Подключение JavaScript файлов -->
     <script src="js/monsters.js"></script>
+    <script src="js/bestiary.js"></script>
     <script src="js/config.js"></script>
     <script src="js/settings.js"></script>
     <script src="js/game.js"></script>

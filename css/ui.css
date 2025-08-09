@@ -1,3 +1,83 @@
+.bestiary-table thead tr {
+    background: linear-gradient(90deg, #2d1a0b 0%, #654321 100%);
+    color: #cd853f;
+    font-size: 1.08em;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.bestiary-table thead th {
+    padding: 7px 10px;
+    border-right: 1px solid #8b7355;
+    background: transparent;
+    font-weight: 600;
+    text-align: center;
+}
+.bestiary-table thead th:first-child {
+    border-radius: 8px 0 0 0;
+}
+.bestiary-table thead th:last-child {
+    border-radius: 0 8px 0 0;
+    border-right: none;
+}
+
+/* Кастомный скроллбар для таблицы бестиария */
+.bestiary-table-wrapper {
+    scrollbar-width: thin;
+    scrollbar-color: #cd853f #1a1a1a;
+}
+.bestiary-table-wrapper::-webkit-scrollbar {
+    width: 10px;
+    background: #1a1a1a;
+    border-radius: 8px;
+}
+.bestiary-table-wrapper::-webkit-scrollbar-thumb {
+    background: linear-gradient(145deg, #8b7355, #cd853f);
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+.bestiary-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(145deg, #cd853f, #a0845c);
+}
+.bestiary-table-wrapper {
+    max-height: 340px; /* 10 строк по 34px */
+    overflow-y: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    margin-bottom: 10px;
+    display: block;
+}
+.bestiary-table th, .bestiary-table td {
+    padding: 4px 8px;
+    font-size: 0.98em;
+    height: 32px;
+    line-height: 1.1;
+}
+.bestiary-table td.icon-cell {
+    font-size: 1.15em !important;
+    width: 38px;
+    min-width: 38px;
+    max-width: 38px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.bestiary-table th, .bestiary-table td {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+    border-right: 1px solid #654321;
+    border-bottom: 1px solid #654321;
+    background: transparent;
+    padding: 7px 12px;
+}
+.bestiary-table th:last-child, .bestiary-table td:last-child {
+    border-right: none;
+}
+.bestiary-table tr:last-child td {
+    border-bottom: none;
+}
+.bestiary-table tr:hover td {
+    background: rgba(205,133,63,0.08);
+}
 /* UI компоненты - кнопки, формы, панели, меню */
 
 .btn {
