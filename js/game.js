@@ -106,6 +106,11 @@ function initializeArmies() {
     const cfg = window.battleConfig && window.battleConfig.battleConfig ? window.battleConfig.battleConfig : {};
     const firstSide = (cfg.defendersStart === false) ? 'attackers' : 'defenders';
     window.gameState.activeSide = firstSide;
+
+    const logDiv = document.getElementById('battle-log');
+    if (logDiv) {
+        logDiv.innerHTML = '';
+    }
 }
 
 // Логика боя

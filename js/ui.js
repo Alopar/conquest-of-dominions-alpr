@@ -157,6 +157,8 @@ function showIntro() {
     introScreen.style.display = 'flex';
     battleScreen.classList.remove('active');
     battleScreen.style.display = 'none';
+    const logDiv = document.getElementById('battle-log');
+    if (logDiv) logDiv.innerHTML = '';
 }
 
 function showBattle() {
@@ -168,6 +170,8 @@ function showBattle() {
     const battleScreen = document.getElementById('battle-screen');
     battleScreen.classList.add('active');
     battleScreen.style.display = 'flex';
+    const logDiv = document.getElementById('battle-log');
+    if (logDiv) logDiv.innerHTML = '';
 }
 
 // Экран "Схватка"
@@ -181,6 +185,8 @@ function showFight() {
     const fightScreen = document.getElementById('fight-screen');
     fightScreen.classList.add('active');
     fightScreen.style.display = 'flex';
+    const logDiv = document.getElementById('battle-log');
+    if (logDiv) logDiv.innerHTML = '';
 }
 
 function backToIntroFromFight() {
@@ -193,6 +199,8 @@ function backToIntroFromFight() {
     const introScreen = document.getElementById('intro-screen');
     introScreen.classList.add('active');
     introScreen.style.display = 'flex';
+    const logDiv = document.getElementById('battle-log');
+    if (logDiv) logDiv.innerHTML = '';
 }
 
 // Запуск боя
@@ -201,7 +209,10 @@ function startBattle() {
         alert('Сначала загрузите конфигурацию!');
         return;
     }
-
+    const logDiv = document.getElementById('battle-log');
+    if (logDiv) {
+        logDiv.innerHTML = '';
+    }
     initializeArmies();
     renderArmies();
     showBattle();
