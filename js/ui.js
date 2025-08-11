@@ -160,13 +160,39 @@ function showIntro() {
 }
 
 function showBattle() {
-    const introScreen = document.getElementById('intro-screen');
+    // Скрываем все экраны и показываем только экран боя
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
     const battleScreen = document.getElementById('battle-screen');
-    
-    introScreen.classList.remove('active');
-    introScreen.style.display = 'none';
     battleScreen.classList.add('active');
     battleScreen.style.display = 'flex';
+}
+
+// Экран "Схватка"
+function showFight() {
+    // Скрываем все экраны
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    // Показываем экран схватки
+    const fightScreen = document.getElementById('fight-screen');
+    fightScreen.classList.add('active');
+    fightScreen.style.display = 'flex';
+}
+
+function backToIntroFromFight() {
+    // Скрываем все экраны
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    // Показываем главный экран
+    const introScreen = document.getElementById('intro-screen');
+    introScreen.classList.add('active');
+    introScreen.style.display = 'flex';
 }
 
 // Запуск боя
@@ -175,11 +201,11 @@ function startBattle() {
         alert('Сначала загрузите конфигурацию!');
         return;
     }
-    
+
     initializeArmies();
     renderArmies();
     showBattle();
-    
+
     window.addToLog('🚩 Бой начался!');
     window.addToLog(`Атакующие: ${window.gameState.attackers.length} юнитов`);
     window.addToLog(`Защитники: ${window.gameState.defenders.length} юнитов`);
@@ -189,6 +215,8 @@ function startBattle() {
 window.startBattle = startBattle;
 window.showIntro = showIntro;
 window.showBattle = showBattle;
+window.showFight = showFight;
+window.backToIntroFromFight = backToIntroFromFight;
 window.addToLog = addToLog;
 window.showUnitInfo = showUnitInfo;
 window.hideUnitInfo = hideUnitInfo;
