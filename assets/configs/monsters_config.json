@@ -110,5 +110,61 @@
     "damage": "1d6",
     "view": "🕷️",
     "price": 8
+  },
+  "rat": {
+    "id": "rat",
+    "name": "Крыса",
+    "hp": 2,
+    "damage": "1d2",
+    "view": "🐭",
+    "price": 3
+  },
+  "chicken": {
+    "id": "chicken",
+    "name": "Курица",
+    "hp": 2,
+    "damage": "1d1",
+    "view": "🐔",
+    "price": 2
+  },
+  "frog": {
+    "id": "frog",
+    "name": "Лягушка",
+    "hp": 3,
+    "damage": "1d2",
+    "view": "🐸",
+    "price": 3
+  },
+  "bat": {
+    "id": "bat",
+    "name": "Летучая мышь",
+    "hp": 3,
+    "damage": "1d2",
+    "view": "🦇",
+    "price": 3
+  },
+  "rabbit": {
+    "id": "rabbit",
+    "name": "Кролик",
+    "hp": 2,
+    "damage": "1d1",
+    "view": "🐰",
+    "price": 2
+  },
+  "dragon": {
+    "id": "dragon",
+    "name": "Дракон",
+    "hp": 40,
+    "damage": "2d8",
+    "view": "🐉",
+    "price": 60
+  },
+  "vampire": {
+    "id": "vampire",
+    "name": "Вампир",
+    "hp": 16,
+    "damage": "1d8",
+    "view": "🧛",
+    "price": 25
   }
 }

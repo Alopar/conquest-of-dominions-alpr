@@ -7,6 +7,8 @@ let adventureState = {
     lastResult: ''
 };
 
+let adventureUserLoaded = false;
+
 function showAdventureSetup() {
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
     const scr = document.getElementById('adventure-setup-screen');
@@ -25,15 +27,16 @@ function showAdventureSetup() {
         input._bound = true;
     }
     restoreAdventure();
-    if (!adventureState.config) {
-        loadDefaultAdventure();
-    } else {
+    if (adventureState.config) {
         const cfg = adventureState.config;
         const statusDiv = document.getElementById('adventure-file-status');
         const d = cfg.adventure && cfg.adventure.description ? ` - ${cfg.adventure.description}` : '';
         if (statusDiv) { statusDiv.textContent = `✅ Загружено приключение: "${cfg.adventure.name}"${d}`; statusDiv.className = 'file-status success'; }
         const beginBtn = document.getElementById('adventure-begin-btn');
         if (beginBtn) beginBtn.disabled = false;
+    }
+    if (!adventureUserLoaded) {
+        loadDefaultAdventure();
     }
 }
 
@@ -55,6 +58,7 @@ async function loadAdventureFile(file) {
             if (statusDiv) { statusDiv.textContent = `✅ Загружено приключение: "${cfg.adventure.name}"${d}`; statusDiv.className = 'file-status success'; }
             const beginBtn = document.getElementById('adventure-begin-btn');
             if (beginBtn) beginBtn.disabled = false;
+            adventureUserLoaded = true;
         } catch (err) {
             const statusDiv = document.getElementById('adventure-file-status');
             if (statusDiv) { statusDiv.textContent = `❌ Ошибка загрузки: ${err.message}`; statusDiv.className = 'file-status error'; }
