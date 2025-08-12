@@ -241,3 +241,38 @@ window.showUnitInfo = showUnitInfo;
 window.hideUnitInfo = hideUnitInfo;
 window.renderArmies = renderArmies;
 window.updateButtonStates = updateButtonStates;
+
+async function showRules() {
+    // Скрываем все экраны
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
+    const screen = document.getElementById('rules-screen');
+    if (!screen) return;
+    screen.classList.add('active');
+    screen.style.display = 'flex';
+
+    const container = document.getElementById('rules-content');
+    if (!container) return;
+    container.textContent = 'Загрузка правил...';
+    try {
+        const url = 'RULES.md?_=' + Date.now();
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const md = await res.text();
+        // Простая конвертация Markdown -> HTML (заголовки и списки)
+        const html = md
+            .replace(/^###\s+(.*)$/gm, '<h3>$1</h3>')
+            .replace(/^##\s+(.*)$/gm, '<h2>$1</h2>')
+            .replace(/^#\s+(.*)$/gm, '<h1>$1</h1>')
+            .replace(/^-\s+(.*)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>)(\s*(<li>.*<\/li>))+?/gms, m => `<ul>${m}</ul>`)
+            .replace(/`([^`]+)`/g, '<code>$1</code>');
+        container.innerHTML = html;
+    } catch (e) {
+        container.textContent = 'Не удалось загрузить правила';
+    }
+}
+
+window.showRules = showRules;

@@ -29,10 +29,28 @@
                             <button class="btn" onclick="showFight()" style="width: 220px; font-size:1.1em;">⚔️ Схватка</button>
                             <button class="btn" onclick="showBestiary()" style="width: 220px; font-size:1.1em;">🐉 Бестиарий</button>
                             <button class="btn" onclick="showSettings()" style="width: 220px; font-size:1.1em;">⚙️ Настройки</button>
+                             <button class="btn" onclick="showRules()" style="width: 220px; font-size:1.1em;">📜 Правила</button>
                         </div>
                     </td>
                 </tr>
             </table>
+        </div>
+    </div>
+
+    <!-- Экран Правила -->
+    <div id="rules-screen" class="screen" style="display: none !important;">
+        <div class="menu-bar">
+            <div class="menu-left">
+                <button class="btn" onclick="showIntro()">Главная</button>
+            </div>
+        </div>
+        <div class="settings-container">
+            <div class="settings-content" style="max-width: 900px;">
+                <h2>📜 Правила</h2>
+                <div id="rules-content" class="bestiary-table-wrapper" style="padding: 16px;">
+                    Загрузка правил...
+                </div>
+            </div>
         </div>
     </div>
 
