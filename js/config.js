@@ -22,6 +22,7 @@ async function loadConfigFile(file) {
             configLoaded = true;
             window.battleConfig = battleConfig;
             window.configLoaded = configLoaded;
+            window.battleConfigSource = 'fight';
             const statusDiv = document.getElementById('file-status');
             const description = config.battleConfig.description ? ` - ${config.battleConfig.description}` : '';
             statusDiv.textContent = `✅ Загружена конфигурация: "${config.battleConfig.name}"${description}`;
@@ -37,6 +38,7 @@ async function loadConfigFile(file) {
             configLoaded = false;
             window.battleConfig = battleConfig;
             window.configLoaded = configLoaded;
+            window.battleConfigSource = undefined;
             const battleBtn = document.getElementById('battle-btn');
             battleBtn.disabled = true;
         }
@@ -67,6 +69,7 @@ async function loadDefaultConfig() {
         configLoaded = true;
         window.battleConfig = battleConfig;
         window.configLoaded = configLoaded;
+        window.battleConfigSource = 'fight';
         const statusDiv = document.getElementById('file-status');
         const description = config.battleConfig.description ? ` - ${config.battleConfig.description}` : '';
         statusDiv.textContent = `✅ Загружена конфигурация: "${config.battleConfig.name}"${description}`;
@@ -82,6 +85,7 @@ async function loadDefaultConfig() {
         configLoaded = false;
         window.battleConfig = battleConfig;
         window.configLoaded = configLoaded;
+        window.battleConfigSource = undefined;
         const battleBtn = document.getElementById('battle-btn');
         battleBtn.disabled = true;
     }

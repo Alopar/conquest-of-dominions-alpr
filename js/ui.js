@@ -67,8 +67,9 @@ function updateButtonStates() {
     if (window.gameState.battleEnded) {
         stepBtn.disabled = true;
         nextTurnBtn.disabled = true;
-        if (finishBtn) finishBtn.style.display = (typeof window.adventureState !== 'undefined' && window.adventureState && window.adventureState.config) ? '' : 'none';
-        if (retryBtn) retryBtn.style.display = !(typeof window.adventureState !== 'undefined' && window.adventureState && window.adventureState.config) ? '' : 'none';
+        const isAdventureBattle = (typeof window.battleConfigSource !== 'undefined' && window.battleConfigSource === 'adventure');
+        if (finishBtn) finishBtn.style.display = isAdventureBattle ? '' : 'none';
+        if (retryBtn) retryBtn.style.display = isAdventureBattle ? 'none' : '';
         return;
     } else {
         if (finishBtn) finishBtn.style.display = 'none';
@@ -165,13 +166,15 @@ function addToLog(message) {
 
 // Переключение экранов
 function showIntro() {
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
     const introScreen = document.getElementById('intro-screen');
-    const battleScreen = document.getElementById('battle-screen');
-    
     introScreen.classList.add('active');
     introScreen.style.display = 'flex';
-    battleScreen.classList.remove('active');
-    battleScreen.style.display = 'none';
+    // Сбрасываем источник конфига при возврате на главную, чтобы новый старт схватки подхватил свой конфиг
+    try { window.battleConfigSource = undefined; } catch {}
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
 }
@@ -224,10 +227,30 @@ function startBattle() {
         alert('Сначала загрузите конфигурацию!');
         return;
     }
+    // Обеспечиваем, что используется конфиг схватки, а не приключения
+    if (window.battleConfigSource !== 'fight') {
+        const warn = 'Конфигурация боя не из режима Схватка. Перезагружаю стандартную.';
+        try { console.warn(warn); } catch {}
+        if (window.loadDefaultConfig) {
+            // Перегружаем стандартный конфиг синхронно через then
+            window.loadDefaultConfig().then(() => {
+                proceedStartBattle();
+            }).catch(() => {
+                proceedStartBattle();
+            });
+            return;
+        }
+    }
+    proceedStartBattle();
+}
+
+function proceedStartBattle() {
     const logDiv = document.getElementById('battle-log');
     if (logDiv) {
         logDiv.innerHTML = '';
     }
+    const btnHome = document.getElementById('battle-btn-home');
+    if (btnHome) btnHome.style.display = '';
     initializeArmies();
     renderArmies();
     showBattle();
@@ -239,6 +262,7 @@ function startBattle() {
 
 // Делаем функции доступными глобально
 window.startBattle = startBattle;
+window.proceedStartBattle = proceedStartBattle;
 window.showIntro = showIntro;
 window.showBattle = showBattle;
 window.showFight = showFight;

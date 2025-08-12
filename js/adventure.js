@@ -297,6 +297,7 @@ function startAdventureBattle() {
             cfg.unitTypes = types;
             window.battleConfig = cfg;
             window.configLoaded = true;
+            window.battleConfigSource = 'adventure';
             adventureState.inBattle = true;
             persistAdventure();
             const logDiv = document.getElementById('battle-log');
@@ -310,6 +311,7 @@ function startAdventureBattle() {
         }).catch(() => {
             window.battleConfig = cfg;
             window.configLoaded = true;
+            window.battleConfigSource = 'adventure';
             adventureState.inBattle = true;
             persistAdventure();
             const logDiv = document.getElementById('battle-log');
@@ -325,6 +327,7 @@ function startAdventureBattle() {
     }
     window.battleConfig = cfg;
     window.configLoaded = true;
+    window.battleConfigSource = 'adventure';
     adventureState.inBattle = true;
     persistAdventure();
     window.adventureState = adventureState;

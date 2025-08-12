@@ -95,14 +95,14 @@ function resetSettingsToDefault() {
 
 // Показать экран настроек
 function showSettings() {
-    const introScreen = document.getElementById('intro-screen');
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active');
+        s.style.display = 'none';
+    });
     const settingsScreen = document.getElementById('settings-screen');
-    
-    introScreen.classList.remove('active');
-    introScreen.style.display = 'none';
     settingsScreen.classList.add('active');
     settingsScreen.style.display = 'flex';
-    
+
     displaySettings();
 }
 
