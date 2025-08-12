@@ -30,6 +30,18 @@ function parseDamage(damageStr) {
     return 1;
 }
 
+function getMaxDamageValue(damageStr) {
+    const match = damageStr && typeof damageStr === 'string' ? damageStr.match(/(\d+)d(\d+)/) : null;
+    if (match) {
+        const count = parseInt(match[1]);
+        const sides = parseInt(match[2]);
+        if (Number.isFinite(count) && Number.isFinite(sides) && count > 0 && sides > 0) {
+            return count * sides;
+        }
+    }
+    return 1;
+}
+
 // Создание юнита из конфигурации
 function createUnit(typeId, unitId) {
     if (!window.battleConfig || !window.battleConfig.unitTypes || !window.battleConfig.unitTypes[typeId]) {
@@ -44,6 +56,7 @@ function createUnit(typeId, unitId) {
         hp: type.hp,
         maxHp: type.hp,
         damage: type.damage,
+        targets: Math.max(1, Number(type.targets || 1)),
         view: type.view,
         hasAttackedThisTurn: false,
         alive: true
@@ -303,32 +316,59 @@ function step() {
 
 function performAttack(attacker, target, army) {
     const currentSettings = window.getCurrentSettings();
-    const hitThreshold = currentSettings.hitThreshold;
-    const criticalHit = currentSettings.criticalHit;
-    
-    // Бросаем кубик на попадание
-    const attackRoll = rollDice(20);
-    
-    if (attackRoll >= hitThreshold) {
-        // Попадание!
-        let damage = parseDamage(attacker.damage);
-        
-        if (attackRoll >= criticalHit) {
-            damage *= 2;
-            window.addToLog(`🎯 ${attacker.name} наносит критический удар ${target.name} (${damage} урона)!`);
+    const meleeHit = Number(currentSettings.meleeHitThreshold ?? 5);
+    const rangeHit = Number(currentSettings.rangeHitThreshold ?? 11);
+
+    const role = getUnitRole(attacker);
+
+    const attempts = Math.max(1, Number(attacker.targets || 1));
+    const actedTargets = new Set();
+    for (let i = 0; i < attempts; i++) {
+        const enemies = army === 'attackers' ? window.gameState.defenders : window.gameState.attackers;
+        const aliveEnemies = enemies.filter(u => u.alive && !actedTargets.has(u.id));
+        if (aliveEnemies.length === 0) break;
+        const currentTarget = selectTargetByRules(attacker, aliveEnemies);
+        if (!currentTarget) break;
+        actedTargets.add(currentTarget.id);
+
+        if (role === 'support') {
+            const damage = parseDamage(attacker.damage);
+            window.addToLog(`⚡ ${attacker.name} атакует ${currentTarget.name} (${damage} урона)`);
+            currentTarget.hp -= damage;
+            if (currentTarget.hp <= 0) {
+                currentTarget.hp = 0;
+                currentTarget.alive = false;
+                window.addToLog(`💀 ${currentTarget.name} погибает!`);
+            }
+            continue;
+        }
+
+        const attackRoll = rollDice(20);
+        if (attackRoll === 20) {
+            const damage = getMaxDamageValue(attacker.damage) * 2;
+            window.addToLog(`🎯 ${attacker.name} наносит критический удар ${currentTarget.name} (${damage} урона)!`);
+            currentTarget.hp -= damage;
+            if (currentTarget.hp <= 0) {
+                currentTarget.hp = 0;
+                currentTarget.alive = false;
+                window.addToLog(`💀 ${currentTarget.name} погибает!`);
+            }
+            continue;
+        }
+
+        const hitThreshold = (role === 'range') ? rangeHit : meleeHit;
+        if (attackRoll >= hitThreshold) {
+            const damage = parseDamage(attacker.damage);
+            window.addToLog(`⚔️ ${attacker.name} атакует ${currentTarget.name} (${damage} урона)`);
+            currentTarget.hp -= damage;
+            if (currentTarget.hp <= 0) {
+                currentTarget.hp = 0;
+                currentTarget.alive = false;
+                window.addToLog(`💀 ${currentTarget.name} погибает!`);
+            }
         } else {
-            window.addToLog(`⚔️ ${attacker.name} атакует ${target.name} (${damage} урона)`);
+            window.addToLog(`❌ ${attacker.name} промахивается по ${currentTarget.name}`);
         }
-        
-        target.hp -= damage;
-        
-        if (target.hp <= 0) {
-            target.hp = 0;
-            target.alive = false;
-            window.addToLog(`💀 ${target.name} погибает!`);
-        }
-    } else {
-        window.addToLog(`❌ ${attacker.name} промахивается по ${target.name}`);
     }
 }
 

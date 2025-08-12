@@ -223,9 +223,11 @@
                 <div id="unit-info-panel" class="unit-info-panel">
                     <table class="unit-info-table">
                         <tr>
+                            <td class="unit-info-label"><span class="unit-info-value" id="unit-name"></span></td>
                             <td class="unit-info-label">ТИП: <span class="unit-info-value" id="unit-type"></span></td>
                             <td class="unit-info-label">HP: <span class="unit-info-value" id="unit-hp"></span> ❤️</td>
                             <td class="unit-info-label">УРОН: <span class="unit-info-value" id="unit-damage"></span> 💥</td>
+                            <td class="unit-info-label">ЦЕЛИ: <span class="unit-info-value" id="unit-targets"></span> 🎯</td>
                             <td class="unit-info-label">СТАТУС: <span class="unit-info-value" id="unit-status"></span></td>
                         </tr>
                     </table>
@@ -259,12 +261,12 @@
                             <label for="maxUnitsPerArmy">Максимум юнитов в армии</label>
                         </div>
                         <div class="setting-group">
-                            <input type="number" id="hitThreshold" min="1" max="20" value="11">
-                            <label for="hitThreshold">Порог попадания</label>
+                            <input type="number" id="meleeHitThreshold" min="1" max="20" value="5">
+                            <label for="meleeHitThreshold">Порог попадания (melee)</label>
                         </div>
                         <div class="setting-group">
-                            <input type="number" id="criticalHit" min="1" max="20" value="20">
-                            <label for="criticalHit">Критическое попадание</label>
+                            <input type="number" id="rangeHitThreshold" min="1" max="20" value="11">
+                            <label for="rangeHitThreshold">Порог попадания (range)</label>
                         </div>
                     </div>
                     
@@ -316,12 +318,14 @@
                                 <th class="icon-cell">👤</th>
                                 <th>Имя</th>
                                 <th>ID</th>
+                                <th>Тип</th>
                                 <th>❤️ HP</th>
                                 <th>💥 Урон</th>
+                                <th>🎯 Цели</th>
                             </tr>
                         </thead>
                         <tbody id="bestiary-table">
-                            <tr><td colspan="5">Загрузка...</td></tr>
+                            <tr><td colspan="7">Загрузка...</td></tr>
                         </tbody>
                     </table>
                 </div>

@@ -4,14 +4,16 @@
     "name": "Воин",
     "hp": 12,
     "damage": "1d6",
+    "targets": 1,
     "view": "⚔️",
     "type": "melee"
   },
   "rogue": {
     "id": "rogue",
     "name": "Вор",
-    "hp": 10,
-    "damage": "1d6",
+    "hp": 8,
+    "damage": "1d3",
+    "targets": 2,
     "view": "🔪",
     "type": "melee"
   },
@@ -20,6 +22,7 @@
     "name": "Лучник",
     "hp": 8,
     "damage": "1d6",
+    "targets": 1,
     "view": "🏹",
     "type": "range"
   },
@@ -28,6 +31,7 @@
     "name": "Рыцарь",
     "hp": 20,
     "damage": "1d8",
+    "targets": 1,
     "view": "🛡️",
     "type": "melee"
   },
@@ -35,7 +39,8 @@
     "id": "mage",
     "name": "Маг",
     "hp": 6,
-    "damage": "1d8",
+    "damage": "1d3",
+    "targets": 3,
     "view": "🔮",
     "type": "support"
   },
@@ -44,6 +49,7 @@
     "name": "Орк",
     "hp": 10,
     "damage": "1d6",
+    "targets": 1,
     "view": "👹",
     "type": "melee"
   },
@@ -52,6 +58,7 @@
     "name": "Гоблин",
     "hp": 4,
     "damage": "1d3",
+    "targets": 1,
     "view": "👺",
     "type": "range"
   },
@@ -60,6 +67,7 @@
     "name": "Тролль",
     "hp": 25,
     "damage": "2d6",
+    "targets": 1,
     "view": "👿",
     "type": "melee"
   },
@@ -67,7 +75,8 @@
     "id": "wizard",
     "name": "Волшебник",
     "hp": 8,
-    "damage": "1d10",
+    "damage": "1d6",
+    "targets": 5,
     "view": "🧙‍♂️",
     "type": "support"
   },
@@ -76,6 +85,7 @@
     "name": "Скелет",
     "hp": 6,
     "damage": "1d4",
+    "targets": 1,
     "view": "💀",
     "type": "melee"
   },
@@ -84,14 +94,16 @@
     "name": "Вампир",
     "hp": 16,
     "damage": "1d8",
+    "targets": 3,
     "view": "🧛",
-    "type": "range"
+    "type": "support"
   },
   "wolf": {
     "id": "wolf",
     "name": "Волк",
     "hp": 7,
     "damage": "1d6",
+    "targets": 1,
     "view": "🐺",
     "type": "melee"
   },
@@ -100,6 +112,7 @@
     "name": "Медведь",
     "hp": 18,
     "damage": "2d4",
+    "targets": 2,
     "view": "🐻",
     "type": "melee"
   },
@@ -108,6 +121,7 @@
     "name": "Гигантская змея",
     "hp": 10,
     "damage": "1d8",
+    "targets": 1,
     "view": "🐍",
     "type": "melee"
   },
@@ -116,6 +130,7 @@
     "name": "Кабан",
     "hp": 9,
     "damage": "1d6",
+    "targets": 1,
     "view": "🐗",
     "type": "melee"
   },
@@ -124,6 +139,7 @@
     "name": "Ядовитый паук",
     "hp": 5,
     "damage": "1d6",
+    "targets": 1,
     "view": "🕷️",
     "type": "melee"
   },
@@ -132,6 +148,7 @@
     "name": "Крыса",
     "hp": 2,
     "damage": "1d2",
+    "targets": 1,
     "view": "🐭",
     "type": "melee"
   },
@@ -140,6 +157,7 @@
     "name": "Курица",
     "hp": 2,
     "damage": "1d1",
+    "targets": 1,
     "view": "🐔",
     "type": "melee"
   },
@@ -148,6 +166,7 @@
     "name": "Лягушка",
     "hp": 3,
     "damage": "1d2",
+    "targets": 1,
     "view": "🐸",
     "type": "melee"
   },
@@ -156,6 +175,7 @@
     "name": "Летучая мышь",
     "hp": 3,
     "damage": "1d2",
+    "targets": 1,
     "view": "🦇",
     "type": "range"
   },
@@ -164,6 +184,7 @@
     "name": "Кролик",
     "hp": 2,
     "damage": "1d1",
+    "targets": 1,
     "view": "🐰",
     "type": "melee"
   },
@@ -172,6 +193,7 @@
     "name": "Дракон",
     "hp": 40,
     "damage": "2d8",
+    "targets": 5,
     "view": "🐉",
     "type": "range"
   }

@@ -89,16 +89,24 @@ function updateButtonStates() {
 // Показать информацию о юните
 function showUnitInfo(unit) {
     const panel = document.getElementById('unit-info-panel');
+    const nameSpan = document.getElementById('unit-name');
     const typeSpan = document.getElementById('unit-type');
     const hpSpan = document.getElementById('unit-hp');
     const damageSpan = document.getElementById('unit-damage');
+    const targetsSpan = document.getElementById('unit-targets');
     const statusSpan = document.getElementById('unit-status');
     
-    if (panel && typeSpan && hpSpan && damageSpan && statusSpan) {
-        // Добавляем иконку юнита перед названием
-        typeSpan.innerHTML = `${unit.view} ${unit.name}`;
+    if (panel && nameSpan && typeSpan && hpSpan && damageSpan && targetsSpan && statusSpan) {
+        // Имя с иконкой
+        nameSpan.innerHTML = `${unit.view} ${unit.name}`;
+        // Тип
+        const types = (window.battleConfig && window.battleConfig.unitTypes) ? window.battleConfig.unitTypes : {};
+        const t = types[unit.typeId];
+        const role = t && t.type ? String(t.type) : '';
+        typeSpan.textContent = role;
         hpSpan.textContent = `${unit.hp}/${unit.maxHp}`;
-        damageSpan.textContent = unit.damage;
+        damageSpan.textContent = `${unit.damage}`;
+        targetsSpan.textContent = `${Number(unit.targets || 1)}`;
         
         // Добавляем иконки статуса
         let statusText = '';
