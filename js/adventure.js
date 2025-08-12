@@ -132,6 +132,7 @@ function initAdventureState(cfg) {
     adventureState.inBattle = false;
     adventureState.lastResult = '';
     persistAdventure();
+    window.adventureState = adventureState;
 }
 
 function showAdventure() {
@@ -301,9 +302,7 @@ function startAdventureBattle() {
             const logDiv = document.getElementById('battle-log');
             if (logDiv) logDiv.innerHTML = '';
             const btnHome = document.getElementById('battle-btn-home');
-            const btnReset = document.getElementById('battle-btn-reset');
             if (btnHome) btnHome.style.display = 'none';
-            if (btnReset) btnReset.style.display = 'none';
             window.initializeArmies();
             window.renderArmies();
             window.showBattle();
@@ -316,9 +315,7 @@ function startAdventureBattle() {
             const logDiv = document.getElementById('battle-log');
             if (logDiv) logDiv.innerHTML = '';
             const btnHome = document.getElementById('battle-btn-home');
-            const btnReset = document.getElementById('battle-btn-reset');
             if (btnHome) btnHome.style.display = 'none';
-            if (btnReset) btnReset.style.display = 'none';
             window.initializeArmies();
             window.renderArmies();
             window.showBattle();
@@ -330,12 +327,11 @@ function startAdventureBattle() {
     window.configLoaded = true;
     adventureState.inBattle = true;
     persistAdventure();
+    window.adventureState = adventureState;
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
     const btnHome = document.getElementById('battle-btn-home');
-    const btnReset = document.getElementById('battle-btn-reset');
     if (btnHome) btnHome.style.display = 'none';
-    if (btnReset) btnReset.style.display = 'none';
     window.initializeArmies();
     window.renderArmies();
     window.showBattle();
@@ -366,22 +362,10 @@ function finishAdventureBattle(winner) {
     }
     adventureState.inBattle = false;
     persistAdventure();
+    window.adventureState = adventureState;
     const btnHome = document.getElementById('battle-btn-home');
-    const btnReset = document.getElementById('battle-btn-reset');
-    if (btnHome) btnHome.style.display = '';
-    if (btnReset) btnReset.style.display = '';
-
-    const hasAnyUnits = Object.values(adventureState.pool).some(v => v > 0);
-    const moreEncounters = !!currentEncounter();
-    if (!hasAnyUnits) {
-        showAdventureResult('💀💀💀 Поражение! Вся армия потеряна! 💀💀💀');
-        return;
-    }
-    if (!moreEncounters && winner === 'attackers') {
-        showAdventureResult('✨🏆✨ Победа! Все испытания пройдены! ✨🏆✨');
-        return;
-    }
-    showAdventure();
+    if (btnHome) btnHome.style.display = 'none';
+    if (window.addToLog) window.addToLog('📯 Бой завершён. Нажмите «Завершить бой», чтобы вернуться к приключению.');
 }
 
 function persistAdventure() {

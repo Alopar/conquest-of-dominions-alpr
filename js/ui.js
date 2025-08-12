@@ -59,13 +59,20 @@ function renderArmies() {
 function updateButtonStates() {
     const stepBtn = document.getElementById('step-btn');
     const nextTurnBtn = document.getElementById('next-turn-btn');
+    const finishBtn = document.getElementById('battle-finish-btn');
+    const retryBtn = document.getElementById('battle-retry-btn');
 
     if (!stepBtn || !nextTurnBtn) return;
 
     if (window.gameState.battleEnded) {
         stepBtn.disabled = true;
         nextTurnBtn.disabled = true;
+        if (finishBtn) finishBtn.style.display = (typeof window.adventureState !== 'undefined' && window.adventureState && window.adventureState.config) ? '' : 'none';
+        if (retryBtn) retryBtn.style.display = !(typeof window.adventureState !== 'undefined' && window.adventureState && window.adventureState.config) ? '' : 'none';
         return;
+    } else {
+        if (finishBtn) finishBtn.style.display = 'none';
+        if (retryBtn) retryBtn.style.display = 'none';
     }
 
     let totalCanAttack = 0;
@@ -241,6 +248,36 @@ window.showUnitInfo = showUnitInfo;
 window.hideUnitInfo = hideUnitInfo;
 window.renderArmies = renderArmies;
 window.updateButtonStates = updateButtonStates;
+
+function finishBattleToAdventure() {
+    if (!window.adventureState || !window.adventureState.config) return;
+    // Возврат на экран приключения
+    const hasAnyUnits = Object.values(window.adventureState.pool || {}).some(v => v > 0);
+    const encLeft = (function(){
+        try {
+            const idx = window.adventureState.currentEncounterIndex;
+            const encs = (window.adventureState.config && window.adventureState.config.encounters) || [];
+            return idx < encs.length;
+        } catch { return false; }
+    })();
+    if (!hasAnyUnits) {
+        window.showAdventureResult('💀💀💀 Поражение! Вся армия потеряна! 💀💀💀');
+        return;
+    }
+    if (!encLeft) {
+        window.showAdventureResult('✨🏆✨ Победа! Все испытания пройдены! ✨🏆✨');
+        return;
+    }
+    window.showAdventure();
+}
+
+function retryBattle() {
+    if (window.adventureState && window.adventureState.inBattle) return; // Не показываем в приключении
+    window.resetBattle();
+}
+
+window.finishBattleToAdventure = finishBattleToAdventure;
+window.retryBattle = retryBattle;
 
 async function showRules() {
     // Скрываем все экраны
