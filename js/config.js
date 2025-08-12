@@ -52,7 +52,8 @@ async function loadConfigFile(file) {
 // Загрузка стандартной конфигурации
 async function loadDefaultConfig() {
     try {
-        const response = await fetch('assets/configs/battle_config.json');
+        const url = 'assets/configs/battle_config.json?_=' + Date.now();
+        const response = await fetch(url, { cache: 'no-store' });
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }

@@ -73,7 +73,8 @@ async function loadAdventureFile(file) {
 
 async function loadDefaultAdventure() {
     try {
-        const response = await fetch('assets/configs/adventure_config.json');
+        const url = 'assets/configs/adventure_config.json?_=' + Date.now();
+        const response = await fetch(url, { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const cfg = await response.json();
         validateAdventureConfig(cfg);

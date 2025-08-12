@@ -50,6 +50,61 @@ function createUnit(typeId, unitId) {
     };
 }
 
+function arrangeUnitsIntoFormation(units) {
+    if (!Array.isArray(units) || units.length === 0) return units;
+    const types = (window.battleConfig && window.battleConfig.unitTypes) ? window.battleConfig.unitTypes : {};
+    const getRole = (u) => {
+        const t = types[u.typeId];
+        const v = t && t.type ? String(t.type).toLowerCase() : 'melee';
+        if (v === 'melee' || v === 'range' || v === 'support') return v;
+        return 'melee';
+    };
+    const melee = [];
+    const range = [];
+    const support = [];
+    for (const u of units) {
+        const r = getRole(u);
+        if (r === 'melee') melee.push(u); else if (r === 'range') range.push(u); else support.push(u);
+    }
+    const byHpDesc = (a, b) => (b.maxHp || b.hp || 0) - (a.maxHp || a.hp || 0);
+    const meleeSorted = melee.sort(byHpDesc).slice();
+    const rangeSorted = range.sort(byHpDesc).slice();
+    const supportSorted = support.sort(byHpDesc).slice();
+    let centerUnit = null;
+    const leftMelee = [], rightMelee = [];
+    const leftRange = [], rightRange = [];
+    const leftSupport = [], rightSupport = [];
+    const distribute = (arr, left, right) => {
+        for (let i = 0; i < arr.length; i++) {
+            if (i % 2 === 0) left.push(arr[i]); else right.push(arr[i]);
+        }
+    };
+    if (meleeSorted.length > 0) {
+        centerUnit = meleeSorted[0];
+        for (let i = 1; i < meleeSorted.length; i++) {
+            if (i % 2 === 1) leftMelee.push(meleeSorted[i]); else rightMelee.push(meleeSorted[i]);
+        }
+        distribute(rangeSorted, leftRange, rightRange);
+        distribute(supportSorted, leftSupport, rightSupport);
+    } else if (rangeSorted.length > 0) {
+        centerUnit = rangeSorted[0];
+        distribute(rangeSorted.slice(1), leftRange, rightRange);
+        distribute(supportSorted, leftSupport, rightSupport);
+    } else {
+        if (supportSorted.length > 0) {
+            centerUnit = supportSorted[0];
+            distribute(supportSorted.slice(1), leftSupport, rightSupport);
+        }
+    }
+    const leftSide = [...leftSupport.reverse(), ...leftRange.reverse(), ...leftMelee.reverse()];
+    const rightSide = [...rightMelee, ...rightRange, ...rightSupport];
+    const result = [];
+    result.push(...leftSide);
+    if (centerUnit) result.push(centerUnit);
+    result.push(...rightSide);
+    return result;
+}
+
 // Инициализация армий из конфигурации
 function initializeArmies() {
     if (!window.battleConfig) {
@@ -87,6 +142,8 @@ function initializeArmies() {
             }
         }
     }
+    // Формирование построения атакующих
+    window.gameState.attackers = arrangeUnitsIntoFormation(window.gameState.attackers);
     
     // Создание защитников из конфигурации
     for (const unitGroup of window.battleConfig.armies.defenders.units) {
@@ -97,6 +154,8 @@ function initializeArmies() {
             }
         }
     }
+    // Формирование построения защитников
+    window.gameState.defenders = arrangeUnitsIntoFormation(window.gameState.defenders);
     
     window.gameState.battleEnded = false;
     window.gameState.battleLog = [];
