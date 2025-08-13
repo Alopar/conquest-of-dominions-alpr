@@ -16,6 +16,8 @@ function renderArmies() {
         else if (unit.hasAttackedThisTurn) className += ' attacked';
         
         unitDiv.className = className;
+        unitDiv.dataset.unitId = unit.id;
+        unitDiv.dataset.army = 'defenders';
         const displayIcon = unit.alive ? unit.view : '💀';
         unitDiv.innerHTML = `
             ${displayIcon}
@@ -38,6 +40,8 @@ function renderArmies() {
         else if (unit.hasAttackedThisTurn) className += ' attacked';
         
         unitDiv.className = className;
+        unitDiv.dataset.unitId = unit.id;
+        unitDiv.dataset.army = 'attackers';
         const displayIcon = unit.alive ? unit.view : '💀';
         unitDiv.innerHTML = `
             ${displayIcon}
@@ -52,6 +56,7 @@ function renderArmies() {
         attackersLine.appendChild(unitDiv);
     });
     
+    if (window.applyPendingAnimations) window.applyPendingAnimations();
     updateButtonStates();
 }
 

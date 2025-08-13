@@ -324,6 +324,7 @@ function performAttack(attacker, target, army) {
     const attempts = Math.max(1, Number(attacker.targets || 1));
     const actedTargets = new Set();
     for (let i = 0; i < attempts; i++) {
+        if (window.queueAnimation) window.queueAnimation({ type: 'attack', unitId: attacker.id, army });
         const enemies = army === 'attackers' ? window.gameState.defenders : window.gameState.attackers;
         const aliveEnemies = enemies.filter(u => u.alive && !actedTargets.has(u.id));
         if (aliveEnemies.length === 0) break;
@@ -335,10 +336,12 @@ function performAttack(attacker, target, army) {
             const damage = parseDamage(attacker.damage);
             window.addToLog(`⚡ ${attacker.name} атакует ${currentTarget.name} (${damage} урона)`);
             currentTarget.hp -= damage;
+            if (window.queueAnimation) window.queueAnimation({ type: 'hit', unitId: currentTarget.id, army: army === 'attackers' ? 'defenders' : 'attackers', hitColor: 'yellow' });
             if (currentTarget.hp <= 0) {
                 currentTarget.hp = 0;
                 currentTarget.alive = false;
                 window.addToLog(`💀 ${currentTarget.name} погибает!`);
+                if (window.queueAnimation) window.queueAnimation({ type: 'kill', unitId: currentTarget.id, army: army === 'attackers' ? 'defenders' : 'attackers' });
             }
             continue;
         }
@@ -348,10 +351,12 @@ function performAttack(attacker, target, army) {
             const damage = getMaxDamageValue(attacker.damage) * 2;
             window.addToLog(`🎯 ${attacker.name} наносит критический удар ${currentTarget.name} (${damage} урона)!`);
             currentTarget.hp -= damage;
+            if (window.queueAnimation) window.queueAnimation({ type: 'hit', unitId: currentTarget.id, army: army === 'attackers' ? 'defenders' : 'attackers', hitColor: (role === 'support' ? 'yellow' : 'red') });
             if (currentTarget.hp <= 0) {
                 currentTarget.hp = 0;
                 currentTarget.alive = false;
                 window.addToLog(`💀 ${currentTarget.name} погибает!`);
+                if (window.queueAnimation) window.queueAnimation({ type: 'kill', unitId: currentTarget.id, army: army === 'attackers' ? 'defenders' : 'attackers' });
             }
             continue;
         }
@@ -361,13 +366,16 @@ function performAttack(attacker, target, army) {
             const damage = parseDamage(attacker.damage);
             window.addToLog(`⚔️ ${attacker.name} атакует ${currentTarget.name} (${damage} урона)`);
             currentTarget.hp -= damage;
+            if (window.queueAnimation) window.queueAnimation({ type: 'hit', unitId: currentTarget.id, army: army === 'attackers' ? 'defenders' : 'attackers', hitColor: (role === 'support' ? 'yellow' : 'red') });
             if (currentTarget.hp <= 0) {
                 currentTarget.hp = 0;
                 currentTarget.alive = false;
                 window.addToLog(`💀 ${currentTarget.name} погибает!`);
+                if (window.queueAnimation) window.queueAnimation({ type: 'kill', unitId: currentTarget.id, army: army === 'attackers' ? 'defenders' : 'attackers' });
             }
         } else {
             window.addToLog(`❌ ${attacker.name} промахивается по ${currentTarget.name}`);
+            if (window.queueAnimation) window.queueAnimation({ type: 'dodge', unitId: currentTarget.id, army: army === 'attackers' ? 'defenders' : 'attackers' });
         }
     }
 }
