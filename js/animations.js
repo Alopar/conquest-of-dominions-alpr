@@ -11,6 +11,19 @@ const GAP = {
 };
 
 const keyOf = (unitId, army) => `${army}::${unitId}`;
+const AnimEvt = { Attack: 'attack', Hit: 'hit', Kill: 'kill', Dodge: 'dodge' };
+const HitColor = { Red: 'red', Yellow: 'yellow' };
+
+const anim = {
+    attack(unitId, army) { return { type: AnimEvt.Attack, unitId, army }; },
+    hit(unitId, army, color) { return { type: AnimEvt.Hit, unitId, army, hitColor: color }; },
+    kill(unitId, army) { return { type: AnimEvt.Kill, unitId, army }; },
+    dodge(unitId, army) { return { type: AnimEvt.Dodge, unitId, army }; }
+};
+function selectNode(unitId, army) {
+    const selector = `.army-line [data-unit-id="${unitId}"][data-army="${army}"]`;
+    return document.querySelector(selector);
+}
 window._pendingKillVisual = window._pendingKillVisual || new Set();
 window.isKillPending = function(unitId, army){
     return window._pendingKillVisual.has(keyOf(unitId, army));
@@ -25,22 +38,31 @@ window.queueAnimation = function (evt) {
 };
 
 function applyEvt(evt) {
-    const selector = `.army-line [data-unit-id="${evt.unitId}"][data-army="${evt.army}"]`;
-    const el = document.querySelector(selector);
-    if (!el) return;
+    const initial = selectNode(evt.unitId, evt.army);
+    if (!initial) {
+        // Элемента пока нет — эффекты будут применяться в отложенных коллбэках через повторный поиск
+    }
 
     if (evt.type === 'attack') {
         const cls = evt.army === 'attackers' ? 'anim-attack-up' : 'anim-attack-down';
-        el.classList.add(cls);
-        setTimeout(() => el.classList.remove(cls), DURATION.attack);
+        const elNow = selectNode(evt.unitId, evt.army);
+        if (elNow) elNow.classList.add(cls);
+        setTimeout(() => {
+            const elLater = selectNode(evt.unitId, evt.army);
+            if (elLater) elLater.classList.remove(cls);
+        }, DURATION.attack);
         return;
     }
 
     if (evt.type === 'hit') {
         const color = (evt.hitColor === 'yellow') ? 'anim-hit-yellow' : 'anim-hit-red';
         setTimeout(() => {
-            el.classList.add(color);
-            setTimeout(() => el.classList.remove(color), DURATION.hit);
+            const elStart = selectNode(evt.unitId, evt.army);
+            if (elStart) elStart.classList.add(color);
+            setTimeout(() => {
+                const elEnd = selectNode(evt.unitId, evt.army);
+                if (elEnd) elEnd.classList.remove(color);
+            }, DURATION.hit);
         }, GAP.attackToImpact);
         return;
     }
@@ -48,14 +70,22 @@ function applyEvt(evt) {
     if (evt.type === 'kill') {
         const delay = GAP.attackToImpact + DURATION.hit + GAP.impactToDeath;
         setTimeout(() => {
+            const elNode = selectNode(evt.unitId, evt.army);
+            if (!elNode) {
+                window._pendingKillVisual.delete(keyOf(evt.unitId, evt.army));
+                return;
+            }
             try {
-                const hp = el.querySelector('.hp-bar');
+                const hp = elNode.querySelector('.hp-bar');
                 const w = hp ? hp.style.width : '';
-                el.innerHTML = `💀` + (w ? `<div class="hp-bar" style="width: ${w}"></div>` : '');
+                elNode.innerHTML = `💀` + (w ? `<div class="hp-bar" style="width: ${w}"></div>` : '');
             } catch {}
             window._pendingKillVisual.delete(keyOf(evt.unitId, evt.army));
-            el.classList.add('anim-kill');
-            setTimeout(() => el.classList.remove('anim-kill'), DURATION.kill);
+            elNode.classList.add('anim-kill');
+            setTimeout(() => {
+                const endNode = selectNode(evt.unitId, evt.army);
+                if (endNode) endNode.classList.remove('anim-kill');
+            }, DURATION.kill);
         }, delay);
         return;
     }
@@ -63,8 +93,12 @@ function applyEvt(evt) {
     if (evt.type === 'dodge') {
         const cls = evt.army === 'attackers' ? 'anim-dodge-down' : 'anim-dodge-up';
         setTimeout(() => {
-            el.classList.add(cls);
-            setTimeout(() => el.classList.remove(cls), DURATION.dodge);
+            const elStart = selectNode(evt.unitId, evt.army);
+            if (elStart) elStart.classList.add(cls);
+            setTimeout(() => {
+                const elEnd = selectNode(evt.unitId, evt.army);
+                if (elEnd) elEnd.classList.remove(cls);
+            }, DURATION.dodge);
         }, GAP.attackToImpact);
         return;
     }
@@ -74,3 +108,22 @@ window.applyPendingAnimations = function () {
     const queued = window._animQueue.splice(0);
     queued.forEach(applyEvt);
 };
+
+window.AnimEvt = AnimEvt;
+window.HitColor = HitColor;
+window.anim = anim;
+
+// Подписка на события (минимальное внедрение, не меняет поведение)
+if (window.eventBus) {
+    try {
+        window.eventBus.on('combat:hit', (p) => {
+            if (!p || !p.target || !p.army) return;
+            const color = p.role === 'support' ? (window.HitColor ? window.HitColor.Yellow : 'yellow') : (window.HitColor ? window.HitColor.Red : 'red');
+            window.queueAnimation(anim.hit(p.target.id, p.army === 'attackers' ? 'defenders' : 'attackers', color));
+        });
+        window.eventBus.on('combat:miss', (p) => {
+            if (!p || !p.target || !p.army) return;
+            window.queueAnimation(anim.dodge(p.target.id, p.army === 'attackers' ? 'defenders' : 'attackers'));
+        });
+    } catch {}
+}

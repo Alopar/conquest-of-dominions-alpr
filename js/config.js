@@ -6,29 +6,42 @@ let configLoaded = false;
 window.battleConfig = battleConfig;
 window.configLoaded = configLoaded;
 
+// Инициализация боевой конфигурации (централизовано)
+async function initBattleConfig(config, source) {
+    // Обеспечиваем наличие unitTypes
+    if (!config.unitTypes) {
+        const monsters = await window.loadMonstersConfig();
+        config.unitTypes = monsters;
+    }
+
+    battleConfig = config;
+    configLoaded = true;
+    if (window.setBattleConfig) window.setBattleConfig(battleConfig, source || 'fight');
+    else {
+        window.battleConfig = battleConfig;
+        window.configLoaded = configLoaded;
+        window.battleConfigSource = source || 'fight';
+    }
+
+    // Обновление статуса UI, если доступен
+    const statusDiv = document.getElementById('file-status');
+    if (statusDiv && config && config.battleConfig) {
+        const description = config.battleConfig.description ? ` - ${config.battleConfig.description}` : '';
+        statusDiv.textContent = `✅ Загружена конфигурация: "${config.battleConfig.name}"${description}`;
+        statusDiv.className = 'file-status success';
+    }
+    const battleBtn = document.getElementById('battle-btn');
+    if (battleBtn) battleBtn.disabled = false;
+}
+
 // Загрузка и парсинг конфигурации
 async function loadConfigFile(file) {
     const reader = new FileReader();
     reader.onload = async function(e) {
         try {
             const config = JSON.parse(e.target.result);
-            if (!config.armies || !config.armies.attackers || !config.armies.defenders) {
-                throw new Error('Неверная структура файла конфигурации');
-            }
-            // Загружаем типы монстров
-            const monsters = await window.loadMonstersConfig();
-            config.unitTypes = monsters;
-            battleConfig = config;
-            configLoaded = true;
-            window.battleConfig = battleConfig;
-            window.configLoaded = configLoaded;
-            window.battleConfigSource = 'fight';
-            const statusDiv = document.getElementById('file-status');
-            const description = config.battleConfig.description ? ` - ${config.battleConfig.description}` : '';
-            statusDiv.textContent = `✅ Загружена конфигурация: "${config.battleConfig.name}"${description}`;
-            statusDiv.className = 'file-status success';
-            const battleBtn = document.getElementById('battle-btn');
-            battleBtn.disabled = false;
+            window.validateBattleConfig(config);
+            await initBattleConfig(config, 'fight');
         } catch (error) {
             console.error('Ошибка при загрузке конфигурации:', error);
             const statusDiv = document.getElementById('file-status');
@@ -60,22 +73,8 @@ async function loadDefaultConfig() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const config = await response.json();
-        if (!config.armies || !config.armies.attackers || !config.armies.defenders) {
-            throw new Error('Неверная структура файла конфигурации');
-        }
-        const monsters = await window.loadMonstersConfig();
-        config.unitTypes = monsters;
-        battleConfig = config;
-        configLoaded = true;
-        window.battleConfig = battleConfig;
-        window.configLoaded = configLoaded;
-        window.battleConfigSource = 'fight';
-        const statusDiv = document.getElementById('file-status');
-        const description = config.battleConfig.description ? ` - ${config.battleConfig.description}` : '';
-        statusDiv.textContent = `✅ Загружена конфигурация: "${config.battleConfig.name}"${description}`;
-        statusDiv.className = 'file-status success';
-        const battleBtn = document.getElementById('battle-btn');
-        battleBtn.disabled = false;
+        window.validateBattleConfig(config);
+        await initBattleConfig(config, 'fight');
     } catch (error) {
         console.error('Ошибка при загрузке стандартной конфигурации:', error);
         const statusDiv = document.getElementById('file-status');
@@ -94,14 +93,7 @@ async function loadDefaultConfig() {
 // Скачивание образца конфигурации
 async function downloadSampleConfig() {
     try {
-        const res = await fetch('assets/configs/samples/battle_config_sample.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        const blob = new Blob([text], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'battle_config_sample.json';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        await window.downloadFile('assets/configs/samples/battle_config_sample.json', 'battle_config_sample.json');
     } catch (e) {
         console.error('Не удалось скачать образец боя:', e);
     }
@@ -111,3 +103,4 @@ async function downloadSampleConfig() {
 window.loadConfigFile = loadConfigFile;
 window.loadDefaultConfig = loadDefaultConfig;
 window.downloadSampleConfig = downloadSampleConfig;
+window.initBattleConfig = initBattleConfig;

@@ -51,7 +51,7 @@ async function loadAdventureFile(file) {
     reader.onload = async function(e) {
         try {
             const cfg = JSON.parse(e.target.result);
-            validateAdventureConfig(cfg);
+            window.validateAdventureConfig(cfg);
             initAdventureState(cfg);
             const statusDiv = document.getElementById('adventure-file-status');
             const d = cfg.adventure && cfg.adventure.description ? ` - ${cfg.adventure.description}` : '';
@@ -77,7 +77,7 @@ async function loadDefaultAdventure() {
         const response = await fetch(url, { cache: 'no-store' });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const cfg = await response.json();
-        validateAdventureConfig(cfg);
+        window.validateAdventureConfig(cfg);
         initAdventureState(cfg);
         const statusDiv = document.getElementById('adventure-file-status');
         const d = cfg.adventure && cfg.adventure.description ? ` - ${cfg.adventure.description}` : '';
@@ -92,14 +92,7 @@ async function loadDefaultAdventure() {
 
 async function downloadSampleAdventureConfig() {
     try {
-        const res = await fetch('assets/configs/samples/adventure_config_sample.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const text = await res.text();
-        const blob = new Blob([text], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'adventure_config_sample.json';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        await window.downloadFile('assets/configs/samples/adventure_config_sample.json', 'adventure_config_sample.json');
     } catch (e) {
         console.error('Не удалось скачать образец приключения:', e);
     }
