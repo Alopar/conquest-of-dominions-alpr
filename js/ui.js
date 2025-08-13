@@ -18,7 +18,8 @@ function renderArmies() {
         unitDiv.className = className;
         unitDiv.dataset.unitId = unit.id;
         unitDiv.dataset.army = 'defenders';
-        const displayIcon = unit.alive ? unit.view : '💀';
+        const isPendingKill = (typeof window.isKillPending === 'function') && window.isKillPending(unit.id, 'defenders');
+        const displayIcon = (unit.alive || isPendingKill) ? unit.view : '💀';
         unitDiv.innerHTML = `
             ${displayIcon}
             <div class="hp-bar" style="width: ${(unit.hp / unit.maxHp) * 100}%"></div>
@@ -42,7 +43,8 @@ function renderArmies() {
         unitDiv.className = className;
         unitDiv.dataset.unitId = unit.id;
         unitDiv.dataset.army = 'attackers';
-        const displayIcon = unit.alive ? unit.view : '💀';
+        const isPendingKillA = (typeof window.isKillPending === 'function') && window.isKillPending(unit.id, 'attackers');
+        const displayIcon = (unit.alive || isPendingKillA) ? unit.view : '💀';
         unitDiv.innerHTML = `
             ${displayIcon}
             <div class="hp-bar" style="width: ${(unit.hp / unit.maxHp) * 100}%"></div>
