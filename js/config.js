@@ -92,42 +92,19 @@ async function loadDefaultConfig() {
 }
 
 // Скачивание образца конфигурации
-function downloadSampleConfig() {
-    const sampleConfig = {
-        "battleConfig": {
-            "name": "Образец конфигурации",
-            "description": "Пример настройки боя для создания собственной конфигурации",
-            "defendersStart": true
-        },
-        "armies": {
-            "attackers": {
-                "name": "Армия Света",
-                "description": "Благородные воины",
-                "units": [
-                    {"id": "warrior", "count": 3},
-                    {"id": "archer", "count": 2}
-                ]
-            },
-            "defenders": {
-                "name": "Армия Тьмы",
-                "description": "Жестокие монстры",
-                "units": [
-                    {"id": "warrior", "count": 2},
-                    {"id": "archer", "count": 1}
-                ]
-            }
-        }
-    };
-    
-    const blob = new Blob([JSON.stringify(sampleConfig, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'battle_config_sample.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+async function downloadSampleConfig() {
+    try {
+        const res = await fetch('assets/configs/samples/battle_config_sample.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const text = await res.text();
+        const blob = new Blob([text], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'battle_config_sample.json';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error('Не удалось скачать образец боя:', e);
+    }
 }
 
 // Делаем функции доступными глобально
