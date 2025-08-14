@@ -417,7 +417,16 @@
             const tip = ensureTip();
             try {
                 const val = (typeof contentOrFn === 'function') ? contentOrFn(target) : contentOrFn;
-                tip.textContent = String(val || '');
+                while (tip.firstChild) tip.removeChild(tip.firstChild);
+                if (val instanceof HTMLElement) {
+                    tip.appendChild(val);
+                } else if (typeof val === 'string') {
+                    tip.textContent = val;
+                } else if (val != null) {
+                    tip.textContent = String(val);
+                } else {
+                    tip.textContent = '';
+                }
             } catch { tip.textContent = ''; }
         }
 

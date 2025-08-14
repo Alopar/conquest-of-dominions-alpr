@@ -29,9 +29,41 @@ function renderUnit(unit, army) {
         <div class="hp-bar"></div>
     `;
     unitDiv.style.setProperty('--hp', hpPct + '%');
-    unitDiv.title = `${unit.name} (${unit.hp}/${unit.maxHp} HP)`;
     unitDiv.addEventListener('mouseenter', () => showUnitInfo(unit));
     unitDiv.addEventListener('mouseleave', hideUnitInfo);
+	try {
+		if (window.UI && typeof window.UI.attachTooltip === 'function') {
+			window.UI.attachTooltip(unitDiv, function(){
+				const wrap = document.createElement('div');
+				wrap.style.display = 'flex';
+				wrap.style.alignItems = 'center';
+				const name = document.createElement('span');
+				name.textContent = String(unit.name || '');
+				const sep1 = document.createElement('span');
+				sep1.textContent = '|';
+				sep1.style.opacity = '0.6';
+				sep1.style.margin = '0 8px';
+				const hp = document.createElement('span');
+				hp.textContent = `${unit.hp}/${unit.maxHp} ❤️`;
+				const sep2 = document.createElement('span');
+				sep2.textContent = '|';
+				sep2.style.opacity = '0.6';
+				sep2.style.margin = '0 8px';
+				const status = document.createElement('span');
+				let statusText = '';
+				if (!unit.alive) statusText = '💀 Мертв';
+				else if (unit.hasAttackedThisTurn) statusText = '⚔️ Атаковал';
+				else statusText = '✅ Готов';
+				status.textContent = statusText;
+				wrap.appendChild(name);
+				wrap.appendChild(sep1);
+				wrap.appendChild(hp);
+				wrap.appendChild(sep2);
+				wrap.appendChild(status);
+				return wrap;
+			}, { delay: 500, hideDelay: 100 });
+		}
+	} catch {}
     return unitDiv;
 }
 
