@@ -263,7 +263,7 @@ function renderPool() {
     }
     html += '</tbody></table>';
     container.innerHTML = html;
-    
+
 }
 
 function priceFor(typeId) {
@@ -339,7 +339,7 @@ function renderEncounterPreview() {
     html += '</tbody></table>';
     html += `<div style="margin-top:8px;">Награда: ${enc.rewardGold} 💰</div>`;
     box.innerHTML = html;
-    
+
 }
 
 function updateAdventureStartButton() {
@@ -492,4 +492,3 @@ window.beginAdventureFromSetup = beginAdventureFromSetup;
 window.startAdventureBattle = startAdventureBattle;
 window.renderAdventure = renderAdventure;
 window.showAdventureResult = showAdventureResult;
-

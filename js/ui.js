@@ -103,7 +103,7 @@ function showUnitInfo(unit) {
     const damageSpan = document.getElementById('unit-damage');
     const targetsSpan = document.getElementById('unit-targets');
     const statusSpan = document.getElementById('unit-status');
-    
+
     if (panel && nameSpan && typeSpan && hpSpan && damageSpan && targetsSpan && statusSpan) {
         // Имя с иконкой
         nameSpan.innerHTML = `${unit.view} ${unit.name}`;
@@ -115,7 +115,7 @@ function showUnitInfo(unit) {
         hpSpan.textContent = `${unit.hp}/${unit.maxHp}`;
         damageSpan.textContent = `${unit.damage}`;
         targetsSpan.textContent = `${Number(unit.targets || 1)}`;
-        
+
         // Добавляем иконки статуса
         let statusText = '';
         if (!unit.alive) {
@@ -126,7 +126,7 @@ function showUnitInfo(unit) {
             statusText = '✅ Готов';
         }
         statusSpan.innerHTML = statusText;
-        
+
         panel.style.display = 'block';
     }
 }
@@ -142,20 +142,20 @@ function hideUnitInfo() {
 // Добавить запись в лог
 function addToLog(message) {
     const currentSettings = window.getCurrentSettings();
-    
+
     // Проверяем, нужно ли показывать подробный лог
-    if (!currentSettings.battleSettings.showDetailedLog && 
+    if (!currentSettings.battleSettings.showDetailedLog &&
         (message.includes('промахивается') || message.includes('атакует'))) {
         return; // Пропускаем детальные сообщения об атаках
     }
-    
+
     const logDiv = document.getElementById('battle-log');
     if (!logDiv) return;
-    
+
     const entry = document.createElement('div');
     entry.className = 'log-entry';
     entry.textContent = message;
-    
+
     // Добавляем новую запись в начало
     if (logDiv.firstChild) {
         logDiv.insertBefore(entry, logDiv.firstChild);

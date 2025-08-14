@@ -1,48 +1,48 @@
 <div id="battle-screen" class="screen" style="display: none !important;">
-	<div class="menu-bar">
-		<div class="menu-left">
-			<button class="btn" id="battle-btn-home" onclick="showIntro()">Главная</button>
-		</div>
-	</div>
-	<div class="main-content">
-		<div class="battlefield-container">
-			<div class="battlefield-content">
-				<div class="battle-info">
-					<h2>Поле боя</h2>
-					<div id="battle-status">Бой готов к началу</div>
-					<div class="turn-info">
-						<div id="turn-counter">Ход: 1</div>
-					</div>
-				</div>
-				<div class="army-label" id="defenders-label">Защитники</div>
-				<div id="defenders-line" class="army-line"></div>
-				<div class="army-label" id="attackers-label">Атакующие</div>
-				<div id="attackers-line" class="army-line"></div>
-				<div class="controls">
-					<button class="btn" onclick="step()" id="step-btn">⏳ Шаг</button>
-					<button class="btn" onclick="nextTurn()" id="next-turn-btn">🔄 Ход</button>
-					<div style="display:flex; gap:12px; justify-content:center; margin-top:10px;">
-						<button class="btn" id="battle-finish-btn" onclick="finishBattleToAdventure()" style="display:none;">🗺️ Завершить бой</button>
-						<button class="btn" id="battle-retry-btn" onclick="retryBattle()" style="display:none;">⚔️ Повторить бой</button>
-					</div>
-				</div>
-			</div>
-			<div id="unit-info-panel" class="unit-info-panel">
-				<table class="unit-info-table">
-					<tr>
-						<td class="unit-info-label"><span class="unit-info-value" id="unit-name"></span></td>
-						<td class="unit-info-label">ТИП: <span class="unit-info-value" id="unit-type"></span></td>
-						<td class="unit-info-label">HP: <span class="unit-info-value" id="unit-hp"></span> ❤️</td>
-						<td class="unit-info-label">УРОН: <span class="unit-info-value" id="unit-damage"></span> 💥</td>
-						<td class="unit-info-label">ЦЕЛИ: <span class="unit-info-value" id="unit-targets"></span> 🎯</td>
-						<td class="unit-info-label">СТАТУС: <span class="unit-info-value" id="unit-status"></span></td>
-					</tr>
-				</table>
-			</div>
-		</div>
-		<div class="log-panel">
-			<h3>Лог боя</h3>
-			<div id="battle-log"></div>
-		</div>
-	</div>
+    <div class="menu-bar">
+        <div class="menu-left">
+            <button class="btn" id="battle-btn-home" onclick="showIntro()">Главная</button>
+        </div>
+    </div>
+    <div class="main-content">
+        <div class="battlefield-container">
+            <div class="battlefield-content">
+                <div class="battle-info">
+                    <h2>Поле боя</h2>
+                    <div id="battle-status">Бой готов к началу</div>
+                    <div class="turn-info">
+                        <div id="turn-counter">Ход: 1</div>
+                    </div>
+                </div>
+                <div class="army-label" id="defenders-label">Защитники</div>
+                <div id="defenders-line" class="army-line"></div>
+                <div class="army-label" id="attackers-label">Атакующие</div>
+                <div id="attackers-line" class="army-line"></div>
+                <div class="controls">
+                    <button class="btn" onclick="step()" id="step-btn">⏳ Шаг</button>
+                    <button class="btn" onclick="nextTurn()" id="next-turn-btn">🔄 Ход</button>
+                    <div style="display:flex; gap:12px; justify-content:center; margin-top:10px;">
+                        <button class="btn" id="battle-finish-btn" onclick="finishBattleToAdventure()" style="display:none;">🗺️ Завершить бой</button>
+                        <button class="btn" id="battle-retry-btn" onclick="retryBattle()" style="display:none;">⚔️ Повторить бой</button>
+                    </div>
+                </div>
+            </div>
+            <div id="unit-info-panel" class="unit-info-panel">
+                <table class="unit-info-table">
+                    <tr>
+                        <td class="unit-info-label"><span class="unit-info-value" id="unit-name"></span></td>
+                        <td class="unit-info-label">ТИП: <span class="unit-info-value" id="unit-type"></span></td>
+                        <td class="unit-info-label">HP: <span class="unit-info-value" id="unit-hp"></span> ❤️</td>
+                        <td class="unit-info-label">УРОН: <span class="unit-info-value" id="unit-damage"></span> 💥</td>
+                        <td class="unit-info-label">ЦЕЛИ: <span class="unit-info-value" id="unit-targets"></span> 🎯</td>
+                        <td class="unit-info-label">СТАТУС: <span class="unit-info-value" id="unit-status"></span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="log-panel">
+            <h3>Лог боя</h3>
+            <div id="battle-log"></div>
+        </div>
+    </div>
 </div>

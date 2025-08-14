@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
         });
     }
-    
+
     // Инициализируем настройки
     await initializeSettings();
-    
+
     // Автоматически загружаем стандартную конфигурацию
     loadDefaultConfig().then(() => {
         if (typeof window.syncFightUI === 'function') window.syncFightUI();

@@ -57,7 +57,7 @@ function displaySettings() {
     const rangeEl = document.getElementById('rangeHitThreshold');
     if (meleeEl) meleeEl.value = gameSettings.meleeHitThreshold;
     if (rangeEl) rangeEl.value = gameSettings.rangeHitThreshold;
-    
+
     document.getElementById('showDetailedLog').checked = gameSettings.battleSettings.showDetailedLog;
     const altEl = document.getElementById('attackAlternate');
     if (altEl) altEl.checked = !!gameSettings.battleSettings.attackAlternate;
@@ -70,11 +70,11 @@ function saveSettingsFromScreen() {
     const rangeEl = document.getElementById('rangeHitThreshold');
     gameSettings.meleeHitThreshold = parseInt(meleeEl ? meleeEl.value : 5);
     gameSettings.rangeHitThreshold = parseInt(rangeEl ? rangeEl.value : 11);
-    
+
     gameSettings.battleSettings.showDetailedLog = document.getElementById('showDetailedLog').checked;
     const altEl = document.getElementById('attackAlternate');
     if (altEl) gameSettings.battleSettings.attackAlternate = altEl.checked;
-    
+
     saveGameSettings();
 }
 

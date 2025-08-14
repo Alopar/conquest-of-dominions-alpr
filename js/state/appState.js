@@ -45,8 +45,6 @@ window.getMonsters = getMonsters;
 window.setGameState = setGameState;
 window.setAdventureState = setAdventureState;
 
-
-
 // Роутер экранов и саб-вью
 (function(){
     window.AppState = window.AppState || { screen: 'intro', subscreen: null, params: {} };
