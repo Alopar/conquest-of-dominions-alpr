@@ -202,23 +202,42 @@ async function showFight() {
     } catch { showScreen('fight-screen'); }
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
+    try {
+        if (!window.configLoaded && typeof window.loadDefaultConfig === 'function') {
+            await window.loadDefaultConfig();
+        }
+    } catch {}
     if (typeof window.syncFightUI === 'function') window.syncFightUI();
 
-    const fileInput = document.getElementById('config-file');
-    const customBtn = document.getElementById('custom-file-btn');
-    if (fileInput && customBtn && !fileInput._bound) {
-        try {
-            fileInput.addEventListener('change', function() {
-                if (fileInput.files && fileInput.files[0]) {
-                    customBtn.textContent = fileInput.files[0].name;
-                    if (window.loadConfigFile) window.loadConfigFile(fileInput.files[0]);
-                } else {
-                    customBtn.textContent = '📁 ВЫБРАТЬ ФАЙЛ';
+    try {
+        const host = document.getElementById('fight-config-panel');
+        if (host && window.UI && typeof window.UI.mountConfigPanel === 'function') {
+            host.innerHTML = '';
+            window.UI.mountConfigPanel(host, {
+                title: '⚙️ Конфигурация боя',
+                fileLabelText: '',
+                statusId: 'file-status',
+                inputId: 'config-file',
+                onFile: function(file){ if (window.loadConfigFile) window.loadConfigFile(file); },
+                onSample: function(){ try { downloadSampleConfig(); } catch {} },
+                primaryText: '🚩 Начать бой! 🚩',
+                primaryId: 'battle-btn',
+                primaryDisabled: true,
+                onPrimary: function(){ try { startBattle(); } catch {} },
+                getStatusText: function(){
+                    try {
+                        if (window.configLoaded && window.battleConfig && window.battleConfig.battleConfig) {
+                            const cfg = window.battleConfig.battleConfig;
+                            const description = cfg.description ? ' - ' + cfg.description : '';
+                            return `✅ Загружена конфигурация: "${cfg.name}"${description}`;
+                        }
+                    } catch {}
+                    return '';
                 }
             });
-            fileInput._bound = true;
-        } catch {}
-    }
+            try { if (typeof window.syncFightUI === 'function') window.syncFightUI(); } catch {}
+        }
+    } catch {}
 }
 
 function backToIntroFromFight() {

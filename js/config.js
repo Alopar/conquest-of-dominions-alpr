@@ -10,7 +10,9 @@ window.configLoaded = configLoaded;
 async function initBattleConfig(config, source) {
     // Обеспечиваем наличие unitTypes
     if (!config.unitTypes) {
-        const monsters = await window.loadMonstersConfig();
+        let monsters = null;
+        if (typeof window.getMonstersConfigCached === 'function') monsters = window.getMonstersConfigCached();
+        if (!monsters && typeof window.loadMonstersConfig === 'function') monsters = await window.loadMonstersConfig();
         config.unitTypes = monsters;
     }
 

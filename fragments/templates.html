@@ -1,0 +1,51 @@
+<template id="tpl-menu-bar">
+    <div class="menu-bar">
+        <div class="menu-left">
+            <button class="btn" data-action="back" data-slot="backLabel">Главная</button>
+        </div>
+    </div>
+</template>
+
+<template id="tpl-unit-table-head">
+    <thead>
+        <tr>
+            <th class="icon-cell">👤</th>
+            <th>Имя</th>
+            <th>ID</th>
+            <th data-slot="extraCol1">Тип</th>
+            <th data-slot="extraCol2">❤️ HP</th>
+            <th data-slot="extraCol3">💥 Урон</th>
+            <th data-slot="extraCol4">🎯 Цели</th>
+        </tr>
+    </thead>
+</template>
+
+<template id="tpl-button-row">
+    <div style="display:flex; gap:12px; justify-content:center;"></div>
+</template>
+
+<template id="tpl-file-input">
+    <div class="action-group">
+        <label class="file-label" data-slot="labelText">Загрузить файл</label>
+        <label class="custom-file-btn" data-action="open" data-slot="buttonText">📁 ВЫБРАТЬ ФАЙЛ</label>
+        <input type="file" class="file-input" />
+    </div>
+</template>
+
+<template id="tpl-config-panel">
+	<div class="config-section">
+		<div class="config-info">
+			<h3 class="section-title" data-slot="title">⚙️ Конфигурация</h3>
+			<div class="file-status" data-role="status"></div>
+		</div>
+		<div class="config-actions" data-role="actions">
+			<div data-role="file-slot"></div>
+			<div class="action-group" data-role="sample-slot">
+				<button class="btn secondary-btn btn-w-200" data-action="sample">📥 ОБРАЗЕЦ</button>
+			</div>
+		</div>
+		<!-- Кнопка действия вынесена на уровень экрана -->
+	</div>
+</template>
+
+

@@ -5,9 +5,12 @@
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const html = await res.text();
         const doc = new DOMParser().parseFromString(html, 'text/html');
-        doc.querySelectorAll('template').forEach(t => document.body.appendChild(t));
+        doc.querySelectorAll('template').forEach(function(t){ document.body.appendChild(t); });
         const el = doc.getElementById(id) || doc.querySelector('.screen');
-        if (el) document.body.insertBefore(el, document.body.lastElementChild);
+        if (el) {
+            const screenLayer = document.getElementById('screen-layer') || document.body;
+            screenLayer.appendChild(el);
+        }
     }
 
     function ensureMenuBar(screenId, options) {
@@ -105,7 +108,9 @@
             if (input) {
                 input.addEventListener('change', function(){
                     try {
-                        if (btn && input.files && input.files[0]) btn.textContent = input.files[0].name;
+                        if (!options || options.keepButtonText !== true) {
+                            if (btn && input.files && input.files[0]) btn.textContent = input.files[0].name;
+                        }
                         if (options && typeof options.onFile === 'function' && input.files && input.files[0]) {
                             options.onFile(input.files[0]);
                         }
@@ -114,6 +119,42 @@
             }
             return groupRoot;
         } catch { return null; }
+    }
+
+    function mountConfigPanel(container, options) {
+        if (!container) return null;
+        const panel = mountTemplate('tpl-config-panel', container, { slots: { title: (options && options.title) || '⚙️ Конфигурация' } });
+        if (!panel) return null;
+        const status = panel.querySelector('[data-role="status"]');
+        const fileSlot = panel.querySelector('[data-role="file-slot"]');
+        const sampleBtnWrap = panel.querySelector('[data-role="sample-slot"]');
+        const primaryRow = panel.querySelector('[data-role="primary-row"]');
+        const primaryBtn = panel.querySelector('[data-action="primary"]');
+
+        if (status && options && options.statusId) { try { status.id = options.statusId; } catch {} }
+        if (status && options && typeof options.getStatusText === 'function') {
+            try { status.textContent = String(options.getStatusText()); } catch {}
+        }
+        if (fileSlot && (options && options.fileInput !== false)) {
+            mountFileInput(fileSlot, {
+                labelText: (options && typeof options.fileLabelText === 'string') ? options.fileLabelText : 'Загрузить файл',
+                buttonText: (options && options.fileButtonText) || '📁 ЗАГРУЗИТЬ',
+                accept: (options && options.accept) || '.json,application/json',
+                id: (options && options.inputId) || undefined,
+                onFile: (options && typeof options.onFile === 'function') ? options.onFile : undefined,
+                keepButtonText: true,
+                showLabel: !!(options && options.fileLabelText)
+            });
+        } else if (fileSlot) { fileSlot.remove(); }
+
+        if (sampleBtnWrap) {
+            if (options && typeof options.onSample === 'function') sampleBtnWrap.querySelector('[data-action="sample"]').addEventListener('click', options.onSample);
+            else sampleBtnWrap.remove();
+        }
+
+        if (primaryRow) { primaryRow.remove(); }
+
+        return panel;
     }
 
     let modalStack = [];
@@ -439,5 +480,5 @@
         };
     }
 
-    window.UI = { ensureScreenLoaded, ensureMenuBar, mountTemplate, cloneTemplate, applyTableHead, mountFileInput, showModal, confirm: confirmModal, alert: alertModal, showToast, attachTooltip, closeTopModal };
+    window.UI = { ensureScreenLoaded, ensureMenuBar, mountTemplate, cloneTemplate, applyTableHead, mountFileInput, mountConfigPanel, showModal, confirm: confirmModal, alert: alertModal, showToast, attachTooltip, closeTopModal };
 })();

@@ -11,73 +11,12 @@
     <link rel="stylesheet" href="css/screens.css">
 </head>
 <body>
-    <!-- Стартовый экран -->
-    <div id="intro-screen" class="screen active">
-        <div class="intro-table-container">
-            <table class="intro-table">
-                <tr>
-                    <td colspan="2">
-                        <h1 style="font-size:3.5em; color:#cd853f; margin-bottom:32px; text-shadow:2px 2px 8px rgba(0,0,0,0.8); letter-spacing:3px; font-weight:600;">
-                            <span style="font-size:1.1em; vertical-align:middle;">🏰</span> Conquest of Dominions <span style="font-size:1.1em; vertical-align:middle;">⚔️</span>
-                        </h1>
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="2">
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 20px;">
-                            <button class="btn btn-w-220 fs-110em" onclick="showAdventureSetup()">🗺️ Приключение</button>
-                            <button class="btn btn-w-220 fs-110em" onclick="showFight()">⚔️ Схватка</button>
-                            <button class="btn btn-w-220 fs-110em" onclick="showBestiary()">🐉 Бестиарий</button>
-                            <button class="btn btn-w-220 fs-110em" onclick="showSettings()">⚙️ Настройки</button>
-                             <button class="btn btn-w-220 fs-110em" onclick="showRules()">📜 Правила</button>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
     <div id="app-shell">
         <div id="screen-layer"></div>
         <div id="modal-layer" aria-live="assertive"></div>
         <div id="toast-layer" aria-live="polite"></div>
         <div id="tooltip-layer"></div>
     </div>
-
-    <!-- Templates -->
-    <template id="tpl-menu-bar">
-        <div class="menu-bar">
-            <div class="menu-left">
-                <button class="btn" data-action="back" data-slot="backLabel">Главная</button>
-            </div>
-        </div>
-    </template>
-
-    <template id="tpl-unit-table-head">
-        <thead>
-            <tr>
-                <th class="icon-cell">👤</th>
-                <th>Имя</th>
-                <th>ID</th>
-                <th data-slot="extraCol1">Тип</th>
-                <th data-slot="extraCol2">❤️ HP</th>
-                <th data-slot="extraCol3">💥 Урон</th>
-                <th data-slot="extraCol4">🎯 Цели</th>
-            </tr>
-        </thead>
-    </template>
-
-    <template id="tpl-button-row">
-        <div style="display:flex; gap:12px; justify-content:center;"></div>
-    </template>
-
-    <template id="tpl-file-input">
-        <div class="action-group">
-            <label class="file-label" data-slot="labelText">Загрузить файл</label>
-            <label class="custom-file-btn" data-action="open" data-slot="buttonText">📁 ВЫБРАТЬ ФАЙЛ</label>
-            <input type="file" class="file-input" />
-        </div>
-    </template>
 
     <!-- Подключение JavaScript файлов -->
     <!-- IO -->

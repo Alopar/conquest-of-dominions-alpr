@@ -50,7 +50,7 @@ window.setAdventureState = setAdventureState;
     window.AppState = window.AppState || { screen: 'intro', subscreen: null, params: {} };
 
     const screens = {
-        'intro': { id: 'intro-screen' },
+        'intro': { id: 'intro-screen', frag: 'fragments/intro.html' },
         'fight': { id: 'fight-screen', frag: 'fragments/fight-screen.html', menu: { backLabel: 'Главная', back: function(){ if (window.backToIntroFromFight) window.backToIntroFromFight(); else if (window.showIntro) window.showIntro(); } } },
         'battle': { id: 'battle-screen', frag: 'fragments/battle-screen.html', menu: { backLabel: 'Главная' } },
         'settings': { id: 'settings-screen', frag: 'fragments/settings.html' },

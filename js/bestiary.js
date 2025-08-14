@@ -18,6 +18,13 @@ async function showBestiary() {
         }
     } catch {}
     if (typeof window.showScreen === 'function') window.showScreen('bestiary-screen');
+    try { ensureBestiaryPanel(); } catch {}
+    try {
+        if (!window.bestiaryMonsters || Object.keys(bestiaryMonsters || {}).length === 0) {
+            bestiaryMonsters = window.getMonstersConfigCached ? window.getMonstersConfigCached() : null;
+            if (!bestiaryMonsters && window.loadMonstersConfig) bestiaryMonsters = await window.loadMonstersConfig();
+        }
+    } catch {}
     loadAndRenderBestiary();
 }
 
@@ -30,6 +37,15 @@ function backToIntroFromBestiary() {
 async function loadAndRenderBestiary() {
     try {
         bestiaryMonsters = await window.loadMonstersConfig();
+        const status = document.querySelector('#bestiary-config-panel [data-role="status"]');
+        if (status) {
+            try {
+                const name = window._monstersMetaName || 'Базовый бестиарий';
+                const desc = window._monstersMetaDescription ? ' - ' + window._monstersMetaDescription : '';
+                status.textContent = '✅ Загружен бестиарий: "' + name + '"' + desc;
+                status.className = 'file-status success';
+            } catch {}
+        }
         renderBestiaryTable();
     } catch (e) {
         document.getElementById('bestiary-table').innerHTML = '<tr><td colspan="7">Ошибка загрузки конфига монстров</td></tr>';
@@ -56,6 +72,55 @@ function renderBestiaryTable() {
         `;
         table.appendChild(row);
     }
+}
+
+// Панель действий: загрузка/выгрузка конфига монстров
+function ensureBestiaryPanel() {
+    const host = document.getElementById('bestiary-config-panel');
+    if (!host || !window.UI || typeof window.UI.mountConfigPanel !== 'function') return;
+    host.innerHTML = '';
+    window.UI.mountConfigPanel(host, {
+        title: '⚙️ Конфигурация бестиария',
+        fileLabelText: '',
+        onFile: function(file){
+            const reader = new FileReader();
+            reader.onload = function(e){
+                try {
+                    const config = JSON.parse(e.target.result);
+                    if (typeof config !== 'object' || Array.isArray(config)) throw new Error();
+                    bestiaryMonsters = config.unitTypes || config;
+                    try { window._monstersRaw = config; } catch {}
+                    try {
+                        if (config._meta) {
+                            window._monstersMetaName = config._meta.name || window._monstersMetaName;
+                            window._monstersMetaDescription = config._meta.description || window._monstersMetaDescription;
+                        }
+                        const status = document.querySelector('#bestiary-config-panel [data-role="status"]');
+                        if (status) {
+                            const name = window._monstersMetaName || 'Бестиарий';
+                            const desc = window._monstersMetaDescription ? ' - ' + window._monstersMetaDescription : '';
+                            status.textContent = '✅ Загружен бестиарий: "' + name + '"' + desc;
+                            status.className = 'file-status success';
+                        }
+                    } catch {}
+                    try {
+                        if (window.setMonstersConfig) window.setMonstersConfig(config);
+                        else localStorage.setItem('monsters_config', JSON.stringify(config));
+                    } catch {}
+                    renderBestiaryTable();
+                } catch {
+                    try {
+                        if (window.UI && typeof window.UI.alert === 'function') window.UI.alert('Ошибка: некорректный файл конфигурации монстров!');
+                        else alert('Ошибка: некорректный файл конфигурации монстров!');
+                    } catch {}
+                }
+            };
+            reader.readAsText(file);
+        },
+        onSample: function(){ try { window.downloadMonstersConfig && downloadMonstersConfig(); } catch {} },
+        primaryText: 'Обновить таблицу',
+        onPrimary: function(){ renderBestiaryTable(); }
+    });
 }
 
 // Загрузить monsters_config.json с диска
@@ -87,7 +152,18 @@ function uploadMonstersConfigFile(input) {
 
 // Скачать текущий monsters_config.json
 function downloadMonstersConfig() {
-    const blob = new Blob([JSON.stringify(bestiaryMonsters, null, 2)], { type: 'application/json' });
+    let data = null;
+    try { data = window._monstersRaw || null; } catch {}
+    if (!data) {
+        data = {
+            _meta: {
+                name: (window._monstersMetaName || 'Бестиарий'),
+                description: (window._monstersMetaDescription || '')
+            },
+            unitTypes: bestiaryMonsters
+        };
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
