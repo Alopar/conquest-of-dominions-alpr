@@ -29,8 +29,7 @@ function renderUnit(unit, army) {
         <div class="hp-bar"></div>
     `;
     unitDiv.style.setProperty('--hp', hpPct + '%');
-    unitDiv.addEventListener('mouseenter', () => showUnitInfo(unit));
-    unitDiv.addEventListener('mouseleave', hideUnitInfo);
+    // Панель устарела — убираем hover-логику
     unitDiv.addEventListener('click', function(){
         try {
             if (!(window.UI && typeof window.UI.showModal === 'function')) return;
@@ -171,50 +170,7 @@ function updateButtonStates() {
     nextTurnBtn.disabled = (totalCanAttack > 0);
 }
 
-// Показать информацию о юните
-function showUnitInfo(unit) {
-    const panel = document.getElementById('unit-info-panel');
-    const nameSpan = document.getElementById('unit-name');
-    const typeSpan = document.getElementById('unit-type');
-    const hpSpan = document.getElementById('unit-hp');
-    const damageSpan = document.getElementById('unit-damage');
-    const targetsSpan = document.getElementById('unit-targets');
-    const statusSpan = document.getElementById('unit-status');
-
-    if (panel && nameSpan && typeSpan && hpSpan && damageSpan && targetsSpan && statusSpan) {
-        // Имя с иконкой
-        nameSpan.innerHTML = `${unit.view} ${unit.name}`;
-        // Тип
-        const types = (window.battleConfig && window.battleConfig.unitTypes) ? window.battleConfig.unitTypes : {};
-        const t = types[unit.typeId];
-        const role = t && t.type ? String(t.type) : '';
-        typeSpan.textContent = role;
-        hpSpan.textContent = `${unit.hp}/${unit.maxHp}`;
-        damageSpan.textContent = `${unit.damage}`;
-        targetsSpan.textContent = `${Number(unit.targets || 1)}`;
-
-        // Добавляем иконки статуса
-        let statusText = '';
-        if (!unit.alive) {
-            statusText = '💀 Мертв';
-        } else if (unit.hasAttackedThisTurn) {
-            statusText = '⚔️ Атаковал';
-        } else {
-            statusText = '✅ Готов';
-        }
-        statusSpan.innerHTML = statusText;
-
-        panel.style.display = 'block';
-    }
-}
-
-// Скрыть информацию о юните
-function hideUnitInfo() {
-    const panel = document.getElementById('unit-info-panel');
-    if (panel) {
-        panel.style.display = 'none';
-    }
-}
+// Устаревшая панель информации о юните удалена
 
 // Добавить запись в лог
 function addToLog(message) {
@@ -378,8 +334,6 @@ window.showBattle = showBattle;
 window.showFight = showFight;
 window.backToIntroFromFight = backToIntroFromFight;
 window.addToLog = addToLog;
-window.showUnitInfo = showUnitInfo;
-window.hideUnitInfo = hideUnitInfo;
 window.renderArmies = renderArmies;
 window.updateButtonStates = updateButtonStates;
 

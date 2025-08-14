@@ -169,7 +169,7 @@ function renderAdventure() {
     const nameEl = document.getElementById('adventure-name');
     if (nameEl) {
         const n = adventureState.config && adventureState.config.adventure ? adventureState.config.adventure.name : 'Приключение';
-        nameEl.innerHTML = '🗺️ ' + n;
+        nameEl.innerHTML = '🧭 ' + n;
     }
     const summary = document.getElementById('adventure-summary');
     if (summary) {
