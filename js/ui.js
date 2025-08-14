@@ -31,6 +31,51 @@ function renderUnit(unit, army) {
     unitDiv.style.setProperty('--hp', hpPct + '%');
     unitDiv.addEventListener('mouseenter', () => showUnitInfo(unit));
     unitDiv.addEventListener('mouseleave', hideUnitInfo);
+    unitDiv.addEventListener('click', function(){
+        try {
+            if (!(window.UI && typeof window.UI.showModal === 'function')) return;
+            const tpl = document.getElementById('tpl-unit-modal-body');
+            const types = (window.battleConfig && window.battleConfig.unitTypes) ? window.battleConfig.unitTypes : {};
+            const t = types[unit.typeId];
+            const role = t && t.type ? String(t.type) : '';
+            const targets = Number(unit.targets || 1);
+            let body = null;
+            if (tpl) {
+                const frag = tpl.content.cloneNode(true);
+                body = document.createElement('div');
+                body.appendChild(frag);
+                const root = body.querySelector('table');
+                if (root) {
+                    const iconNameEl = body.querySelector('[data-role="iconName"]');
+                    const typeEl = body.querySelector('[data-role="type"]');
+                    const hpEl = body.querySelector('[data-role="hp"]');
+                    const damageEl = body.querySelector('[data-role="damage"]');
+                    const targetsEl = body.querySelector('[data-role="targets"]');
+
+                    if (iconNameEl) iconNameEl.textContent = `${String(unit.view || '')} ${String(unit.name || '')}`;
+                    if (typeEl) typeEl.textContent = `ТИП: ${String(role || '')}`;
+                    if (hpEl) hpEl.textContent = `НР: ${unit.hp}/${unit.maxHp} ❤️`;
+                    if (damageEl) damageEl.textContent = `УРОН: ${unit.damage} 💥`;
+                    if (targetsEl) targetsEl.textContent = `ЦЕЛИ: ${targets} 🎯`;
+
+                    try {
+                        root.querySelectorAll('td').forEach(function(td){ td.style.textTransform = 'uppercase'; });
+                    } catch {}
+                }
+            } else {
+                body = document.createElement('div');
+                const row1 = document.createElement('div');
+                row1.textContent = `${unit.view} ${unit.name}  |  ТИП: ${role}`;
+                const row2 = document.createElement('div');
+                row2.textContent = `НР: ${unit.hp}/${unit.maxHp} ❤️  |  УРОН: ${unit.damage} 💥  |  ЦЕЛИ: ${targets} 🎯`;
+                row1.style.textTransform = 'uppercase';
+                row2.style.textTransform = 'uppercase';
+                body.appendChild(row1);
+                body.appendChild(row2);
+            }
+            window.UI.showModal(body, { type: 'info', title: 'Описание существа' });
+        } catch {}
+    });
 	try {
 		if (window.UI && typeof window.UI.attachTooltip === 'function') {
 			window.UI.attachTooltip(unitDiv, function(){

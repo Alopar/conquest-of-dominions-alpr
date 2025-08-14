@@ -253,6 +253,9 @@
     border-right: 1px solid #654321;
     background-color: transparent;
 }
+.unit-modal-table td { font-weight: 600; }
+.unit-modal-table tr:first-child td { border-bottom: 1px solid #654321; }
+.unit-modal-table td:last-child { border-right: none; }
 
 .unit-info-table td:last-child {
     border-right: none;
@@ -331,6 +334,6 @@
 	min-width: 280px;
 	max-width: 90vw;
 }
-.modal-title { font-size: 1.1em; margin-bottom: 8px; color: #cd853f; display:none; }
+.modal-title { font-size: 1.1em; margin-bottom: 12px; color: #cd853f; display:none; text-align: center; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #654321; padding-bottom: 8px; }
 .modal-body { margin: 8px 0 12px 0; }
-.modal-actions { display:flex; justify-content:center; gap:12px; }
+.modal-actions { display:flex; justify-content:center; gap:12px; border-top: 1px solid #654321; padding-top: 10px; }

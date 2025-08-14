@@ -189,14 +189,29 @@
         const tplId = type === 'confirm' ? 'tpl-modal-confirm' : (type === 'dialog' ? 'tpl-modal-dialog' : 'tpl-modal-info');
         const tpl = document.getElementById(tplId);
         const win = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
-        if (!tpl) win.className = 'modal-window';
+        if (!tpl) {
+            win.className = 'modal-window';
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'modal-title';
+            const bodyDiv = document.createElement('div');
+            bodyDiv.className = 'modal-body';
+            bodyDiv.setAttribute('data-role', 'body');
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'modal-actions';
+            actionsDiv.setAttribute('data-role', 'actions');
+            actionsDiv.style.display = 'none';
+            win.appendChild(titleDiv);
+            win.appendChild(bodyDiv);
+            win.appendChild(actionsDiv);
+        }
 
         // Заголовок
         const titleEl = win.querySelector('.modal-title');
         if (titleEl) {
             const title = (opts && typeof opts.title === 'string') ? opts.title : '';
             titleEl.textContent = title;
-            titleEl.style.display = title ? '' : 'none';
+            titleEl.style.display = title ? 'block' : 'none';
+            if (title) titleEl.setAttribute('data-slot', 'title');
         }
         // Тело
         const bodyEl = win.querySelector('[data-role="body"]') || win;
