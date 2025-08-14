@@ -159,6 +159,17 @@
     border-color: #8b7355 !important;
 }
 
+/* Выбранная вкладка */
+.btn.tab-selected {
+    background: linear-gradient(145deg, #4b3826, #5a422e, #4b3826) !important; /* тёмная медь */
+    border-color: #5a3f28 !important;
+    color: #d7a96b !important;
+}
+.btn.tab-selected:hover {
+    background: linear-gradient(145deg, #57412d, #6a4d35, #57412d) !important;
+    border-color: #69472f !important;
+}
+
 .file-input {
     display: none;
 }
@@ -301,13 +312,13 @@
 
 /* Модальные окна */
 .modal-window {
-	background: #111;
-	border: 3px solid #555; /* толще рамка */
-	border-radius: 8px;
-	padding: 16px;
-	box-shadow: 0 10px 40px rgba(0,0,0,0.7);
-	min-width: 280px;
-	max-width: 90vw;
+    background: #111;
+    border: 3px solid #555; /* толще рамка */
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.7);
+    min-width: 280px;
+    max-width: 90vw;
 }
 .modal-title { font-size: 1.1em; margin-bottom: 12px; color: #cd853f; display:none; text-align: center; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #654321; padding-bottom: 8px; }
 .modal-body { margin: 8px 0 12px 0; }
