@@ -9,7 +9,26 @@ let adventureState = {
 
 let adventureUserLoaded = false;
 
-function showAdventureSetup() {
+async function showAdventureSetup() {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('adventure-setup-screen', 'fragments/adventure-setup.html');
+            if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('adventure-setup-screen', { backLabel: 'Главная', back: window.backToIntroFromAdventure });
+            const input = document.getElementById('adventure-file');
+            const customBtn = document.getElementById('adventure-custom-file-btn');
+            if (input && customBtn && !input._bound) {
+                input.addEventListener('change', function() {
+                    if (input.files && input.files[0]) {
+                        customBtn.textContent = input.files[0].name;
+                        window.loadAdventureFile && window.loadAdventureFile(input.files[0]);
+                    } else {
+                        customBtn.textContent = '📁 ВЫБРАТЬ ФАЙЛ';
+                    }
+                });
+                input._bound = true;
+            }
+        }
+    } catch {}
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
     const scr = document.getElementById('adventure-setup-screen');
     if (scr) { scr.classList.add('active'); scr.style.display = 'flex'; }
@@ -126,7 +145,14 @@ function initAdventureState(cfg) {
     window.adventureState = adventureState;
 }
 
-function showAdventure() {
+async function showAdventure() {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('adventure-screen', 'fragments/adventure-main.html');
+            if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('adventure-screen', { backLabel: 'Главная', back: window.backToIntroFromAdventure });
+            // Шапка магазина уже задана в разметке фрагмента
+        }
+    } catch {}
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
     const scr = document.getElementById('adventure-screen');
     if (scr) { scr.classList.add('active'); scr.style.display = 'flex'; }
@@ -165,6 +191,7 @@ function renderPool() {
     }
     html += '</tbody></table>';
     container.innerHTML = html;
+    
 }
 
 function priceFor(typeId) {
@@ -209,7 +236,13 @@ function currentEncounter() {
     return enc[adventureState.currentEncounterIndex];
 }
 
-function showAdventureResult(message) {
+async function showAdventureResult(message) {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('adventure-result-screen', 'fragments/adventure-result.html');
+            if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('adventure-result-screen', { backLabel: 'Главная', back: window.showIntro });
+        }
+    } catch {}
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
     const scr = document.getElementById('adventure-result-screen');
     const msg = document.getElementById('adventure-result-message');
@@ -232,6 +265,7 @@ function renderEncounterPreview() {
     html += '</tbody></table>';
     html += `<div style="margin-top:8px;">Награда: ${enc.rewardGold} 💰</div>`;
     box.innerHTML = html;
+    
 }
 
 function updateAdventureStartButton() {
@@ -269,7 +303,7 @@ function pickSquadForBattle() {
     return result;
 }
 
-function startAdventureBattle() {
+async function startAdventureBattle() {
     const enc = currentEncounter();
     if (!enc) return;
     const attackers = pickSquadForBattle();
@@ -284,7 +318,7 @@ function startAdventureBattle() {
         unitTypes: window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : undefined
     };
     if (!cfg.unitTypes && window.loadMonstersConfig) {
-        window.loadMonstersConfig().then((types) => {
+        window.loadMonstersConfig().then(async (types) => {
             cfg.unitTypes = types;
             window.battleConfig = cfg;
             window.configLoaded = true;
@@ -295,11 +329,11 @@ function startAdventureBattle() {
             if (logDiv) logDiv.innerHTML = '';
             const btnHome = document.getElementById('battle-btn-home');
             if (btnHome) btnHome.style.display = 'none';
+            if (window.showBattle) await window.showBattle();
             window.initializeArmies();
             window.renderArmies();
-            window.showBattle();
             window.addToLog('🚩 Бой приключения начался!');
-        }).catch(() => {
+        }).catch(async () => {
             window.battleConfig = cfg;
             window.configLoaded = true;
             window.battleConfigSource = 'adventure';
@@ -309,9 +343,9 @@ function startAdventureBattle() {
             if (logDiv) logDiv.innerHTML = '';
             const btnHome = document.getElementById('battle-btn-home');
             if (btnHome) btnHome.style.display = 'none';
+            if (window.showBattle) await window.showBattle();
             window.initializeArmies();
             window.renderArmies();
-            window.showBattle();
             window.addToLog('🚩 Бой приключения начался!');
         });
         return;
@@ -326,9 +360,9 @@ function startAdventureBattle() {
     if (logDiv) logDiv.innerHTML = '';
     const btnHome = document.getElementById('battle-btn-home');
     if (btnHome) btnHome.style.display = 'none';
+    if (window.showBattle) await window.showBattle();
     window.initializeArmies();
     window.renderArmies();
-    window.showBattle();
     window.addToLog('🚩 Бой приключения начался!');
 }
 

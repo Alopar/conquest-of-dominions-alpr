@@ -94,15 +94,13 @@ function resetSettingsToDefault() {
 }
 
 // Показать экран настроек
-function showSettings() {
-    document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active');
-        s.style.display = 'none';
-    });
-    const settingsScreen = document.getElementById('settings-screen');
-    settingsScreen.classList.add('active');
-    settingsScreen.style.display = 'flex';
-
+async function showSettings() {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('settings-screen', 'fragments/settings.html');
+        }
+    } catch {}
+    if (typeof window.showScreen === 'function') window.showScreen('settings-screen');
     displaySettings();
 }
 

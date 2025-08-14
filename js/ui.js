@@ -173,17 +173,46 @@ function showIntro() {
     if (logDiv) logDiv.innerHTML = '';
 }
 
-function showBattle() {
+async function showBattle() {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('battle-screen', 'fragments/battle-screen.html');
+            if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('battle-screen', { backLabel: 'Главная' });
+        }
+    } catch {}
     showScreen('battle-screen');
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
 }
 
 // Экран "Схватка"
-function showFight() {
+async function showFight() {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('fight-screen', 'fragments/fight-screen.html');
+            if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('fight-screen', { backLabel: 'Главная', back: window.backToIntroFromFight });
+        }
+    } catch {}
     showScreen('fight-screen');
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
+    if (typeof window.syncFightUI === 'function') window.syncFightUI();
+
+    const fileInput = document.getElementById('config-file');
+    const customBtn = document.getElementById('custom-file-btn');
+    if (fileInput && customBtn && !fileInput._bound) {
+        try {
+            fileInput.addEventListener('change', function() {
+                if (fileInput.files && fileInput.files[0]) {
+                    customBtn.textContent = fileInput.files[0].name;
+                    if (window.loadConfigFile) window.loadConfigFile(fileInput.files[0]);
+                } else {
+                    customBtn.textContent = '📁 ВЫБРАТЬ ФАЙЛ';
+                }
+            });
+            fileInput._bound = true;
+        } catch {}
+    }
 }
 
 function backToIntroFromFight() {
@@ -193,7 +222,7 @@ function backToIntroFromFight() {
 }
 
 // Запуск боя
-function startBattle() {
+async function startBattle() {
     if (!window.configLoaded) {
         alert('Сначала загрузите конфигурацию!');
         return;
@@ -203,28 +232,24 @@ function startBattle() {
         const warn = 'Конфигурация боя не из режима Схватка. Перезагружаю стандартную.';
         try { console.warn(warn); } catch {}
         if (window.loadDefaultConfig) {
-            // Перегружаем стандартный конфиг синхронно через then
-            window.loadDefaultConfig().then(() => {
-                proceedStartBattle();
-            }).catch(() => {
-                proceedStartBattle();
-            });
+            try { await window.loadDefaultConfig(); } catch {}
+            await proceedStartBattle();
             return;
         }
     }
-    proceedStartBattle();
+    await proceedStartBattle();
 }
 
-function proceedStartBattle() {
+async function proceedStartBattle() {
     const logDiv = document.getElementById('battle-log');
     if (logDiv) {
         logDiv.innerHTML = '';
     }
     const btnHome = document.getElementById('battle-btn-home');
     if (btnHome) btnHome.style.display = '';
+    await showBattle();
     initializeArmies();
     renderArmies();
-    showBattle();
 
     window.addToLog('🚩 Бой начался!');
     window.addToLog(`Атакующие: ${window.gameState.attackers.length} юнитов`);
@@ -275,6 +300,12 @@ window.finishBattleToAdventure = finishBattleToAdventure;
 window.retryBattle = retryBattle;
 
 async function showRules() {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('rules-screen', 'fragments/rules.html');
+        }
+    } catch {}
+
     showScreen('rules-screen');
 
     const container = document.getElementById('rules-content');
@@ -285,7 +316,6 @@ async function showRules() {
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const md = await res.text();
-        // Простая конвертация Markdown -> HTML (заголовки и списки)
         const html = md
             .replace(/^###\s+(.*)$/gm, '<h3>$1</h3>')
             .replace(/^##\s+(.*)$/gm, '<h2>$1</h2>')

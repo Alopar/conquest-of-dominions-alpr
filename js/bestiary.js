@@ -8,30 +8,43 @@ window.downloadMonstersConfig = downloadMonstersConfig;
 let bestiaryMonsters = {};
 
 // Показать экран бестиария
-function showBestiary() {
-    // Скрыть все экраны
-    document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active');
-        s.style.display = 'none';
-    });
-    // Показать экран бестиария
-    const bestiaryScreen = document.getElementById('bestiary-screen');
-    bestiaryScreen.classList.add('active');
-    bestiaryScreen.style.display = 'flex';
+async function showBestiary() {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('bestiary-screen', 'fragments/bestiary.html');
+            if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('bestiary-screen', { backLabel: 'Главная', back: window.backToIntroFromBestiary });
+            try {
+                const table = document.querySelector('#bestiary-screen table');
+                if (window.UI.applyTableHead) window.UI.applyTableHead(table, { extraCol1: 'Тип', extraCol2: '❤️ HP', extraCol3: '💥 Урон', extraCol4: '🎯 Цели' });
+            } catch {}
+            try {
+                const btnRow = document.querySelector('#bestiary-screen .bestiary-actions');
+                if (btnRow) btnRow.innerHTML = '';
+                if (window.UI.mountFileInput && btnRow) window.UI.mountFileInput(btnRow, {
+                    id: 'monsters-file',
+                    accept: '.json',
+                    labelText: 'Файл конфигурации монстров:',
+                    showLabel: false,
+                    buttonText: '📁 ВЫБРАТЬ ФАЙЛ',
+                    onFile: function(file){ if (window.uploadMonstersConfigFile) window.uploadMonstersConfigFile({ files:[file] }); }
+                });
+                if (btnRow) {
+                    const dlBtn = document.createElement('button');
+                    dlBtn.className = 'btn secondary-btn';
+                    dlBtn.textContent = '💾 Скачать конфиг';
+                    dlBtn.addEventListener('click', function(){ if (window.downloadMonstersConfig) window.downloadMonstersConfig(); });
+                    btnRow.appendChild(dlBtn);
+                }
+            } catch {}
+        }
+    } catch {}
+    if (typeof window.showScreen === 'function') window.showScreen('bestiary-screen');
     loadAndRenderBestiary();
 }
 
 // Вернуться на главный экран
 function backToIntroFromBestiary() {
-    // Скрыть все экраны
-    document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active');
-        s.style.display = 'none';
-    });
-    // Показать стартовый экран
-    const introScreen = document.getElementById('intro-screen');
-    introScreen.classList.add('active');
-    introScreen.style.display = 'flex';
+    if (typeof window.showIntro === 'function') return window.showIntro();
 }
 
 // Загрузить monsters_config.json и отобразить

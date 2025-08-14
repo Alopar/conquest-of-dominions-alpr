@@ -20,5 +20,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     await initializeSettings();
     
     // Автоматически загружаем стандартную конфигурацию
-    loadDefaultConfig();
+    loadDefaultConfig().then(() => {
+        if (typeof window.syncFightUI === 'function') window.syncFightUI();
+    });
 });

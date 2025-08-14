@@ -251,18 +251,18 @@
 
 ## Общий чеклист (отмечать по мере выполнения)
 
-- [ ] Этап 0.1: Контейнеры слоёв в index.html
-- [ ] Этап 0.2: Карта z-index в CSS
-- [ ] Этап 1.1: uiToolkit.js подключён и работает
-- [ ] Этап 1.2: Базовые templates добавлены
-- [ ] Этап 2.1: Rules → fragments
-- [ ] Этап 2.2: Bestiary → fragments
-- [ ] Этап 2.3: Settings → fragments
-- [ ] Этап 2.4: Adventure setup/main/result → fragments
-- [ ] Этап 2.5: Fight setup/Battle → fragments
-- [ ] Этап 3.1: Меню‑бар через template
-- [ ] Этап 3.2: Шапки таблиц/карточки юнитов через template
-- [ ] Этап 3.3: Компонент загрузки файла внедрён в экраны
+- [x] Этап 0.1: Контейнеры слоёв в index.html
+- [x] Этап 0.2: Карта z-index в CSS
+- [x] Этап 1.1: uiToolkit.js подключён и работает
+- [x] Этап 1.2: Базовые templates добавлены
+- [x] Этап 2.1: Rules → fragments
+- [x] Этап 2.2: Bestiary → fragments
+- [x] Этап 2.3: Settings → fragments
+- [x] Этап 2.4: Adventure setup/main/result → fragments
+- [x] Этап 2.5: Fight setup/Battle → fragments
+- [x] Этап 3.1: Меню‑бар через template
+- [x] Этап 3.2: Шапки таблиц/карточки юнитов через template
+- [x] Этап 3.3: Компонент загрузки файла внедрён в экраны
 - [ ] Этап 4.1: Модальный менеджер
 - [ ] Этап 4.2: Замена confirm/alert
 - [ ] Этап 5.1: Toast‑уведомления

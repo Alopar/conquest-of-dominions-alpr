@@ -1,0 +1,31 @@
+<div id="adventure-setup-screen" class="screen" style="display: none !important;">
+	<div class="menu-bar">
+		<div class="menu-left">
+			<button class="btn" onclick="backToIntroFromAdventure()">Главная</button>
+		</div>
+	</div>
+	<div class="settings-container">
+		<div class="settings-content">
+			<h2>🗺️ Приключение</h2>
+				<div class="config-section">
+					<div class="config-info">
+						<h3 class="section-title">⚙️ Конфигурация приключения</h3>
+						<div id="adventure-file-status" class="file-status"></div>
+					</div>
+					<div class="config-actions">
+						<div class="action-group">
+							<label for="adventure-file" class="file-label">Загрузить конфигурацию приключения:</label>
+							<label for="adventure-file" class="custom-file-btn" id="adventure-custom-file-btn">📁 ВЫБРАТЬ ФАЙЛ</label>
+							<input type="file" id="adventure-file" accept=".json" class="file-input">
+						</div>
+						<div class="action-group">
+							<button class="btn secondary-btn btn-w-200" onclick="downloadSampleAdventureConfig()">📥 ОБРАЗЕЦ</button>
+						</div>
+					</div>
+				</div>
+			<div style="display: flex; gap: 20px; justify-content: center; margin-top: 10px;">
+				<button class="btn btn-w-350 fs-115em" id="adventure-begin-btn" onclick="beginAdventureFromSetup()" disabled>📯 Начать приключение! 📯</button>
+			</div>
+		</div>
+	</div>
+</div>

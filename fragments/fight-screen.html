@@ -1,0 +1,31 @@
+<div id="fight-screen" class="screen" style="display: none !important;">
+	<div class="menu-bar">
+		<div class="menu-left">
+			<button class="btn" onclick="backToIntroFromFight()">Главная</button>
+		</div>
+	</div>
+	<div class="settings-container">
+		<div class="settings-content">
+			<h2>⚔️ Схватка</h2>
+			<div class="config-section">
+				<div class="config-info">
+					<h3 class="section-title">⚙️ Конфигурация боя</h3>
+					<div id="file-status" class="file-status"></div>
+				</div>
+				<div class="config-actions">
+					<div class="action-group">
+						<label for="config-file" class="file-label">Загрузить свою конфигурацию:</label>
+						<label for="config-file" class="custom-file-btn" id="custom-file-btn">📁 ВЫБРАТЬ ФАЙЛ</label>
+						<input type="file" id="config-file" accept=".json" class="file-input">
+					</div>
+					<div class="action-group">
+						<button class="btn secondary-btn btn-w-200" onclick="downloadSampleConfig()">📥 ОБРАЗЕЦ</button>
+					</div>
+				</div>
+			</div>
+			<div style="display: flex; gap: 20px; justify-content: center; margin-top: 10px;">
+				<button class="btn btn-w-250 fs-115em" id="battle-btn" onclick="startBattle()" disabled>🚩 Начать бой! 🚩</button>
+			</div>
+		</div>
+	</div>
+</div>

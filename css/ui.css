@@ -134,7 +134,7 @@
     transition: all 0.2s ease;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 10px;
+    margin: 8px;
 }
 
 .custom-file-btn:hover {
