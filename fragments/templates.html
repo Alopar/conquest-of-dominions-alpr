@@ -33,19 +33,51 @@
 </template>
 
 <template id="tpl-config-panel">
-	<div class="config-section">
-		<div class="config-info">
-			<h3 class="section-title" data-slot="title">⚙️ Конфигурация</h3>
-			<div class="file-status" data-role="status"></div>
-		</div>
-		<div class="config-actions" data-role="actions">
-			<div data-role="file-slot"></div>
-			<div class="action-group" data-role="sample-slot">
-				<button class="btn secondary-btn btn-w-200" data-action="sample">📥 ОБРАЗЕЦ</button>
-			</div>
-		</div>
-		<!-- Кнопка действия вынесена на уровень экрана -->
-	</div>
+    <div class="config-section">
+        <div class="config-info">
+            <h3 class="section-title" data-slot="title">⚙️ Конфигурация</h3>
+            <div class="file-status" data-role="status"></div>
+        </div>
+        <div class="config-actions" data-role="actions">
+            <div data-role="file-slot"></div>
+            <div class="action-group" data-role="sample-slot">
+                <button class="btn secondary-btn btn-w-200" data-action="sample">📥 ОБРАЗЕЦ</button>
+            </div>
+        </div>
+        <!-- Кнопка действия вынесена на уровень экрана -->
+    </div>
+</template>
+
+<!-- Модальные окна -->
+<template id="tpl-modal-info">
+    <div class="modal-window">
+        <div class="modal-title" data-slot="title"></div>
+        <div class="modal-body" data-role="body"></div>
+        <div class="modal-actions" data-role="actions" style="display:none;"></div>
+    </div>
+</template>
+
+<template id="tpl-modal-confirm">
+    <div class="modal-window">
+        <div class="modal-title" data-slot="title"></div>
+        <div class="modal-body" data-role="body"></div>
+        <div class="modal-actions" data-role="actions" style="display:flex; justify-content:center; gap:12px;">
+            <button class="btn" data-action="ok">ОК</button>
+        </div>
+    </div>
+</template>
+
+<template id="tpl-modal-dialog">
+    <div class="modal-window">
+        <div class="modal-title" data-slot="title"></div>
+        <div class="modal-body" data-role="body"></div>
+        <div class="modal-actions" data-role="actions" style="display:flex; justify-content:center; gap:12px;">
+            <!-- Кнопка принятия слева -->
+            <button class="btn" data-action="yes">Да</button>
+            <!-- Кнопка отказа справа -->
+            <button class="btn secondary-btn" data-action="no">Нет</button>
+        </div>
+    </div>
 </template>
 
 

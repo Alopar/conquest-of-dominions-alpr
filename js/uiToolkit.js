@@ -184,22 +184,40 @@
         wrap.setAttribute('aria-modal', 'true');
         wrap.tabIndex = -1;
 
-        const win = document.createElement('div');
-        win.style.minWidth = '280px';
-        win.style.maxWidth = '90vw';
-        win.style.background = '#111';
-        win.style.border = '1px solid #444';
-        win.style.borderRadius = '8px';
-        win.style.padding = '16px';
-        win.style.boxShadow = '0 10px 40px rgba(0,0,0,0.7)';
+        // Выбираем шаблон
+        const type = (opts && opts.type) || 'info';
+        const tplId = type === 'confirm' ? 'tpl-modal-confirm' : (type === 'dialog' ? 'tpl-modal-dialog' : 'tpl-modal-info');
+        const tpl = document.getElementById(tplId);
+        const win = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        if (!tpl) win.className = 'modal-window';
 
+        // Заголовок
+        const titleEl = win.querySelector('.modal-title');
+        if (titleEl) {
+            const title = (opts && typeof opts.title === 'string') ? opts.title : '';
+            titleEl.textContent = title;
+            titleEl.style.display = title ? '' : 'none';
+        }
+        // Тело
+        const bodyEl = win.querySelector('[data-role="body"]') || win;
         if (typeof content === 'string') {
-            const msg = document.createElement('div');
-            msg.style.marginBottom = '16px';
-            msg.textContent = content;
-            win.appendChild(msg);
+            bodyEl.textContent = content;
         } else if (content instanceof HTMLElement) {
-            win.appendChild(content);
+            bodyEl.appendChild(content);
+        }
+
+        // Кнопки
+        const actionsEl = win.querySelector('[data-role="actions"]');
+        if (type === 'info') {
+            if (actionsEl) actionsEl.style.display = 'none';
+        } else if (type === 'confirm') {
+            const okBtn = win.querySelector('[data-action="ok"]');
+            if (okBtn) okBtn.addEventListener('click', function(){ close(true); });
+        } else if (type === 'dialog') {
+            const yesBtn = win.querySelector('[data-action="yes"]');
+            const noBtn = win.querySelector('[data-action="no"]');
+            if (yesBtn) yesBtn.addEventListener('click', function(){ close(true); });
+            if (noBtn) noBtn.addEventListener('click', function(){ close(false); });
         }
 
         wrap.appendChild(win);
@@ -207,17 +225,17 @@
         const prevActive = document.activeElement;
 
         function onKeydown(e) {
-            if (e.key === 'Escape' && (opts ? opts.closeOnEsc !== false : true)) {
+            if (e.key === 'Escape') {
                 e.preventDefault();
-                close();
-                return;
+                if (type === 'info') { close(); return; }
+                if (type === 'confirm' || type === 'dialog') { close(false); return; }
             }
             if (e.key === 'Enter') {
-                try {
-                    const preferred = win.querySelector('[data-default]');
-                    const candidate = preferred || win.querySelector('.btn:not(.secondary-btn)') || win.querySelector('button');
-                    if (candidate) { e.preventDefault(); candidate.click(); return; }
-                } catch {}
+                if (type === 'info') { e.preventDefault(); close(); return; }
+                if (type === 'confirm' || type === 'dialog') {
+                    const preferred = win.querySelector('[data-action="ok"],[data-action="yes"]');
+                    if (preferred) { e.preventDefault(); preferred.click(); return; }
+                }
             }
             if (e.key === 'Tab') {
                 const focusables = getFocusable(wrap);
@@ -235,8 +253,9 @@
         }
 
         function onClick(e) {
-            if (e.target === wrap && (opts ? opts.closeOnOutside !== false : true)) {
-                close();
+            if (e.target === wrap) {
+                if (type === 'info') close();
+                // confirm/dialog не закрываем кликом снаружи
             }
         }
 
@@ -250,6 +269,9 @@
                 try { prevActive.focus(); } catch {}
             }
             if (handle && typeof handle._resolve === 'function') handle._resolve(result);
+            if ((type === 'confirm' || type === 'dialog') && result && opts && typeof opts.onAccept === 'function') {
+                try { opts.onAccept(); } catch {}
+            }
         }
 
         wrap.addEventListener('keydown', onKeydown, true);
@@ -267,54 +289,18 @@
         return handle;
     }
 
-    function alertModal(message) {
-        return new Promise(function(resolve){
-            const content = document.createElement('div');
-            const text = document.createElement('div');
-            text.style.marginBottom = '16px';
-            text.textContent = message;
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.justifyContent = 'flex-end';
-            row.style.gap = '12px';
-            const ok = document.createElement('button');
-            ok.className = 'btn';
-            ok.textContent = 'ОК';
-            content.appendChild(text);
-            row.appendChild(ok);
-            content.appendChild(row);
-        const h = showModal(content, {});
-            ok.addEventListener('click', function(){ h.close(true); });
-            h.closed.then(function(){ resolve(); });
-        });
+    function alertModal(message, title) {
+        const body = document.createElement('div');
+        body.textContent = message;
+        const h = showModal(body, { type: 'info', title: title || '' });
+        return h.closed;
     }
 
-    function confirmModal(message) {
-        return new Promise(function(resolve){
-            const content = document.createElement('div');
-            const text = document.createElement('div');
-            text.style.marginBottom = '16px';
-            text.textContent = message;
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.justifyContent = 'flex-end';
-            row.style.gap = '12px';
-            const cancel = document.createElement('button');
-            cancel.className = 'btn secondary-btn';
-            cancel.textContent = 'Отмена';
-            const ok = document.createElement('button');
-            ok.className = 'btn';
-            ok.textContent = 'ОК';
-            ok.setAttribute('data-default', '1');
-            content.appendChild(text);
-            row.appendChild(cancel);
-            row.appendChild(ok);
-            content.appendChild(row);
-            const h = showModal(content, {});
-            cancel.addEventListener('click', function(){ h.close(false); });
-            ok.addEventListener('click', function(){ h.close(true); });
-            h.closed.then(function(res){ resolve(!!res); });
-        });
+    function confirmModal(message, title, onAccept) {
+        const body = document.createElement('div');
+        body.textContent = message;
+        const h = showModal(body, { type: 'confirm', title: title || '', onAccept });
+        return h.closed;
     }
 
     function closeTopModal() {

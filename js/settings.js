@@ -123,35 +123,27 @@ function saveSettings() {
 // Сбросить настройки
 function resetSettings() {
     try {
-        const doReset = (window.UI && typeof window.UI.confirm === 'function') ? null : confirm('Сбросить настройки к значениям по умолчанию?');
-        if (doReset === true) {
-            resetSettingsToDefault();
-            try {
-                if (window.UI && typeof window.UI.showToast === 'function') {
-                    window.UI.showToast('info', 'Настройки сброшены!', 2000);
-                } else if (window.UI && typeof window.UI.alert === 'function') {
-                    window.UI.alert('Настройки сброшены!');
-                } else {
-                    alert('Настройки сброшены!');
-                }
-            } catch { try { alert('Настройки сброшены!'); } catch {} }
-            return;
-        }
-        if (window.UI && typeof window.UI.confirm === 'function') {
-            window.UI.confirm('Сбросить настройки к значениям по умолчанию?').then(function(ok){
-                if (ok) {
+        if (window.UI && typeof window.UI.showModal === 'function') {
+            const body = document.createElement('div');
+            body.textContent = 'Сбросить настройки к значениям по умолчанию?';
+            window.UI.showModal(body, {
+                type: 'dialog',
+                title: 'Подтверждение',
+                onAccept: function(){
                     resetSettingsToDefault();
                     try {
-                        if (window.UI && typeof window.UI.showToast === 'function') {
-                            window.UI.showToast('info', 'Настройки сброшены!', 2000);
-                        } else if (window.UI && typeof window.UI.alert === 'function') {
-                            window.UI.alert('Настройки сброшены!');
-                        } else {
-                            alert('Настройки сброшены!');
-                        }
+                        if (window.UI && typeof window.UI.showToast === 'function') window.UI.showToast('info', 'Настройки сброшены!', 2000);
+                        else if (window.UI && typeof window.UI.alert === 'function') window.UI.alert('Настройки сброшены!');
+                        else alert('Настройки сброшены!');
                     } catch { try { alert('Настройки сброшены!'); } catch {} }
                 }
             });
+            return;
+        }
+        // Фолбэк на нативный confirm
+        if (confirm('Сбросить настройки к значениям по умолчанию?')) {
+            resetSettingsToDefault();
+            try { alert('Настройки сброшены!'); } catch {}
         }
     } catch {}
 }
