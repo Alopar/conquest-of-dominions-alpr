@@ -11,22 +11,11 @@ let adventureUserLoaded = false;
 
 async function showAdventureSetup() {
     try {
-        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            await window.Router.setScreen('adventure-setup');
+        } else if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
             await window.UI.ensureScreenLoaded('adventure-setup-screen', 'fragments/adventure-setup.html');
             if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('adventure-setup-screen', { backLabel: 'Главная', back: window.backToIntroFromAdventure });
-            const input = document.getElementById('adventure-file');
-            const customBtn = document.getElementById('adventure-custom-file-btn');
-            if (input && customBtn && !input._bound) {
-                input.addEventListener('change', function() {
-                    if (input.files && input.files[0]) {
-                        customBtn.textContent = input.files[0].name;
-                        window.loadAdventureFile && window.loadAdventureFile(input.files[0]);
-                    } else {
-                        customBtn.textContent = '📁 ВЫБРАТЬ ФАЙЛ';
-                    }
-                });
-                input._bound = true;
-            }
         }
     } catch {}
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
@@ -147,15 +136,21 @@ function initAdventureState(cfg) {
 
 async function showAdventure() {
     try {
-        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            await window.Router.setScreen('adventure');
+        } else if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
             await window.UI.ensureScreenLoaded('adventure-screen', 'fragments/adventure-main.html');
             if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('adventure-screen', { backLabel: 'Главная', back: window.backToIntroFromAdventure });
-            // Шапка магазина уже задана в разметке фрагмента
         }
     } catch {}
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
     const scr = document.getElementById('adventure-screen');
     if (scr) { scr.classList.add('active'); scr.style.display = 'flex'; }
+    ensureAdventureTabs();
+    if (!window.AppState || !window.AppState.subscreen) {
+        if (window.Router && window.Router.setSubscreen) window.Router.setSubscreen('map');
+        else window.AppState = Object.assign(window.AppState || {}, { subscreen: 'map' });
+    }
     renderAdventure();
 }
 
@@ -167,11 +162,88 @@ function renderAdventure() {
         const name = adventureState.config && adventureState.config.adventure ? adventureState.config.adventure.name : '';
         summary.textContent = `${name}${adventureState.lastResult ? ' — ' + adventureState.lastResult : ''}`;
     }
-    renderPool();
-    renderShop();
-    renderEncounterPreview();
-    renderBeginButtonOnMain();
-    updateAdventureStartButton();
+    ensureAdventureTabs();
+    renderAdventureSubscreen();
+}
+
+function ensureAdventureTabs() {
+    const screen = document.getElementById('adventure-screen');
+    if (!screen) return;
+    let tabs = screen.querySelector('#adventure-tabs');
+    if (tabs) { updateTabsActive(tabs); return; }
+    const content = screen.querySelector('.settings-content');
+    if (!content) return;
+    tabs = document.createElement('div');
+    tabs.id = 'adventure-tabs';
+    tabs.style.display = 'flex';
+    tabs.style.gap = '8px';
+    tabs.style.margin = '8px 0 12px 0';
+    tabs.setAttribute('role', 'tablist');
+    const makeBtn = function(key, label){
+        const b = document.createElement('button');
+        b.className = 'btn secondary-btn';
+        b.dataset.subscreen = key;
+        b.textContent = label;
+        b.setAttribute('role', 'tab');
+        b.setAttribute('aria-selected', 'false');
+        b.addEventListener('keydown', function(e){
+            if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                const all = Array.from(tabs.querySelectorAll('button[role="tab"]'));
+                const idx = all.indexOf(b);
+                const nextIdx = e.key === 'ArrowRight' ? (idx + 1) % all.length : (idx - 1 + all.length) % all.length;
+                const next = all[nextIdx];
+                if (next) { next.focus(); next.click(); }
+            }
+        });
+        b.addEventListener('click', function(){ if (window.Router && window.Router.setSubscreen) window.Router.setSubscreen(key); renderAdventureSubscreen(); updateTabsActive(tabs); });
+        return b;
+    };
+    tabs.appendChild(makeBtn('map', '🗺️ Карта'));
+    tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
+    tabs.appendChild(makeBtn('shop', '🏪 Магазин'));
+    tabs.appendChild(makeBtn('army', '🛡️ Армия'));
+    content.insertBefore(tabs, content.firstElementChild || null);
+    updateTabsActive(tabs);
+}
+
+function updateTabsActive(tabs) {
+    const current = (window.AppState && window.AppState.subscreen) || 'map';
+    tabs.querySelectorAll('button[data-subscreen]').forEach(function(btn){
+        const isActive = btn.dataset.subscreen === current;
+        btn.className = isActive ? 'btn' : 'btn secondary-btn';
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+}
+
+function renderAdventureSubscreen() {
+    const subscreen = (window.AppState && window.AppState.subscreen) || 'map';
+    const poolCont = document.getElementById('adventure-pool');
+    const poolSection = poolCont ? poolCont.closest('.settings-section') : null;
+    const shopBody = document.getElementById('adventure-shop-table');
+    const shopSection = shopBody ? shopBody.closest('.settings-section') : null;
+    const encBox = document.getElementById('adventure-encounter');
+    const encSection = encBox ? encBox.closest('.settings-section') : null;
+    const goldSection = document.querySelector('#adventure-screen .settings-section');
+
+    if (goldSection) goldSection.style.display = '';
+    if (poolSection) poolSection.style.display = 'none';
+    if (shopSection) shopSection.style.display = 'none';
+    if (encSection) encSection.style.display = 'none';
+
+    if (subscreen === 'army') {
+        if (poolSection) poolSection.style.display = '';
+        renderPool();
+    } else if (subscreen === 'shop') {
+        if (shopSection) shopSection.style.display = '';
+        renderShop();
+    } else if (subscreen === 'map') {
+        if (encSection) encSection.style.display = '';
+        renderEncounterPreview();
+        renderBeginButtonOnMain();
+        updateAdventureStartButton();
+    } else if (subscreen === 'tavern') {
+        if (poolSection) poolSection.style.display = '';
+    }
 }
 
 function renderPool() {
@@ -238,7 +310,9 @@ function currentEncounter() {
 
 async function showAdventureResult(message) {
     try {
-        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            await window.Router.setScreen('adventure-result');
+        } else if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
             await window.UI.ensureScreenLoaded('adventure-result-screen', 'fragments/adventure-result.html');
             if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('adventure-result-screen', { backLabel: 'Главная', back: window.showIntro });
         }

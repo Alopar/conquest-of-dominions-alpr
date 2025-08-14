@@ -23,4 +23,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     loadDefaultConfig().then(() => {
         if (typeof window.syncFightUI === 'function') window.syncFightUI();
     });
+
+    try {
+        window.addEventListener('keydown', function(e){
+            if (e.key === 'Escape') {
+                if (window.UI && typeof window.UI.closeTopModal === 'function') {
+                    window.UI.closeTopModal();
+                    e.preventDefault();
+                }
+            }
+        }, true);
+    } catch {}
 });

@@ -166,7 +166,13 @@ function addToLog(message) {
 
 // Переключение экранов
 function showIntro() {
-    showScreen('intro-screen');
+    try {
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            window.Router.setScreen('intro');
+        } else {
+            showScreen('intro-screen');
+        }
+    } catch { showScreen('intro-screen'); }
     // Сбрасываем источник конфига при возврате на главную, чтобы новый старт схватки подхватил свой конфиг
     try { window.battleConfigSource = undefined; } catch {}
     const logDiv = document.getElementById('battle-log');
@@ -175,12 +181,12 @@ function showIntro() {
 
 async function showBattle() {
     try {
-        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
-            await window.UI.ensureScreenLoaded('battle-screen', 'fragments/battle-screen.html');
-            if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('battle-screen', { backLabel: 'Главная' });
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            await window.Router.setScreen('battle');
+        } else {
+            showScreen('battle-screen');
         }
-    } catch {}
-    showScreen('battle-screen');
+    } catch { showScreen('battle-screen'); }
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
 }
@@ -188,12 +194,12 @@ async function showBattle() {
 // Экран "Схватка"
 async function showFight() {
     try {
-        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
-            await window.UI.ensureScreenLoaded('fight-screen', 'fragments/fight-screen.html');
-            if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('fight-screen', { backLabel: 'Главная', back: window.backToIntroFromFight });
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            await window.Router.setScreen('fight');
+        } else {
+            showScreen('fight-screen');
         }
-    } catch {}
-    showScreen('fight-screen');
+    } catch { showScreen('fight-screen'); }
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
     if (typeof window.syncFightUI === 'function') window.syncFightUI();
@@ -216,7 +222,13 @@ async function showFight() {
 }
 
 function backToIntroFromFight() {
-    showScreen('intro-screen');
+    try {
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            window.Router.setScreen('intro');
+        } else {
+            showScreen('intro-screen');
+        }
+    } catch { showScreen('intro-screen'); }
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
 }
@@ -224,7 +236,13 @@ function backToIntroFromFight() {
 // Запуск боя
 async function startBattle() {
     if (!window.configLoaded) {
-        alert('Сначала загрузите конфигурацию!');
+        try {
+            if (window.UI && typeof window.UI.alert === 'function') {
+                await window.UI.alert('Сначала загрузите конфигурацию!');
+            } else {
+                alert('Сначала загрузите конфигурацию!');
+            }
+        } catch { try { alert('Сначала загрузите конфигурацию!'); } catch {} }
         return;
     }
     // Обеспечиваем, что используется конфиг схватки, а не приключения
@@ -301,12 +319,12 @@ window.retryBattle = retryBattle;
 
 async function showRules() {
     try {
-        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
-            await window.UI.ensureScreenLoaded('rules-screen', 'fragments/rules.html');
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            await window.Router.setScreen('rules');
+        } else {
+            showScreen('rules-screen');
         }
-    } catch {}
-
-    showScreen('rules-screen');
+    } catch { showScreen('rules-screen'); }
 
     const container = document.getElementById('rules-content');
     if (!container) return;

@@ -96,7 +96,9 @@ function resetSettingsToDefault() {
 // Показать экран настроек
 async function showSettings() {
     try {
-        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            await window.Router.setScreen('settings');
+        } else if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
             await window.UI.ensureScreenLoaded('settings-screen', 'fragments/settings.html');
         }
     } catch {}
@@ -107,15 +109,51 @@ async function showSettings() {
 // Сохранить настройки
 function saveSettings() {
     saveSettingsFromScreen();
-    alert('Настройки сохранены!');
+    try {
+        if (window.UI && typeof window.UI.showToast === 'function') {
+            window.UI.showToast('success', 'Настройки сохранены!', 2000);
+        } else if (window.UI && typeof window.UI.alert === 'function') {
+            window.UI.alert('Настройки сохранены!');
+        } else {
+            alert('Настройки сохранены!');
+        }
+    } catch { try { alert('Настройки сохранены!'); } catch {} }
 }
 
 // Сбросить настройки
 function resetSettings() {
-    if (confirm('Сбросить настройки к значениям по умолчанию?')) {
-        resetSettingsToDefault();
-        alert('Настройки сброшены!');
-    }
+    try {
+        const doReset = (window.UI && typeof window.UI.confirm === 'function') ? null : confirm('Сбросить настройки к значениям по умолчанию?');
+        if (doReset === true) {
+            resetSettingsToDefault();
+            try {
+                if (window.UI && typeof window.UI.showToast === 'function') {
+                    window.UI.showToast('info', 'Настройки сброшены!', 2000);
+                } else if (window.UI && typeof window.UI.alert === 'function') {
+                    window.UI.alert('Настройки сброшены!');
+                } else {
+                    alert('Настройки сброшены!');
+                }
+            } catch { try { alert('Настройки сброшены!'); } catch {} }
+            return;
+        }
+        if (window.UI && typeof window.UI.confirm === 'function') {
+            window.UI.confirm('Сбросить настройки к значениям по умолчанию?').then(function(ok){
+                if (ok) {
+                    resetSettingsToDefault();
+                    try {
+                        if (window.UI && typeof window.UI.showToast === 'function') {
+                            window.UI.showToast('info', 'Настройки сброшены!', 2000);
+                        } else if (window.UI && typeof window.UI.alert === 'function') {
+                            window.UI.alert('Настройки сброшены!');
+                        } else {
+                            alert('Настройки сброшены!');
+                        }
+                    } catch { try { alert('Настройки сброшены!'); } catch {} }
+                }
+            });
+        }
+    } catch {}
 }
 
 // Получить текущие настройки для использования в игре
