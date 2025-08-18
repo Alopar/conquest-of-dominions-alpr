@@ -212,7 +212,6 @@ function ensureAdventureTabs() {
     };
     tabs.appendChild(makeBtn('map', '🗺️ Карта'));
     tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
-    tabs.appendChild(makeBtn('shop', '🏪 Магазин'));
     tabs.appendChild(makeBtn('army', '🛡️ Армия'));
     content.insertBefore(tabs, content.firstElementChild || null);
     updateTabsActive(tabs);
@@ -231,7 +230,7 @@ function updateTabsActive(tabs) {
 async function loadAdventureSubscreen(key) {
     const cont = document.getElementById('adventure-subcontainer');
     if (!cont) return;
-    const map = { map: 'fragments/adventure-sub-map.html', tavern: 'fragments/adventure-sub-tavern.html', shop: 'fragments/adventure-sub-shop.html', army: 'fragments/adventure-sub-army.html' };
+    const map = { map: 'fragments/adventure-sub-map.html', tavern: 'fragments/adventure-sub-tavern.html', army: 'fragments/adventure-sub-army.html' };
     const url = map[key] || map.map;
     try {
         const res = await fetch(url + '?_=' + Date.now(), { cache: 'no-store' });
@@ -246,14 +245,12 @@ async function renderAdventureSubscreen() {
     await loadAdventureSubscreen(subscreen);
     if (subscreen === 'army') {
         renderPool();
-    } else if (subscreen === 'shop') {
-        renderShop();
     } else if (subscreen === 'map') {
         renderEncounterPreview();
         renderBeginButtonOnMain();
         updateAdventureStartButton();
     } else if (subscreen === 'tavern') {
-        // Пока без логики
+        renderTavern();
     }
 }
 
@@ -287,8 +284,8 @@ function priceFor(typeId) {
     return typeof found.price === 'number' ? found.price : base;
 }
 
-function renderShop() {
-    const tbody = document.getElementById('adventure-shop-table');
+function renderTavern() {
+    const tbody = document.getElementById('adventure-tavern-table');
     if (!tbody) return;
     tbody.innerHTML = '';
     const monsters = window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : {};
@@ -299,7 +296,7 @@ function renderShop() {
         const price = priceFor(item.id);
         const canBuy = adventureState.gold >= price;
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="icon-cell">${m.view || '❓'}</td><td>${m.name || item.id}</td><td>${item.id}</td><td>${price} 💰</td><td><button class="btn" ${canBuy ? '' : 'disabled'} onclick="buyUnit('${item.id}')">Купить</button></td>`;
+        tr.innerHTML = `<td class="icon-cell">${m.view || '❓'}</td><td>${m.name || item.id}</td><td>${item.id}</td><td>${price} 💰</td><td><button class="btn" ${canBuy ? '' : 'disabled'} onclick="buyUnit('${item.id}')">Нанять</button></td>`;
         tbody.appendChild(tr);
     }
 }
