@@ -31,7 +31,7 @@ async function showAdventureSetup() {
                 statusId: 'adventure-file-status',
                 inputId: 'adventure-file',
                 onFile: function(file){ loadAdventureFile(file); },
-                onSample: function(){ downloadSampleAdventureConfig(); },
+                onSample: function(){},
                 primaryText: '📯 Начать приключение! 📯',
                 primaryId: 'adventure-begin-btn',
                 primaryDisabled: true,
@@ -69,6 +69,12 @@ async function loadAdventureFile(file) {
         try {
             const cfg = JSON.parse(e.target.result);
             window.validateAdventureConfig(cfg);
+            try {
+                if (window.StaticData && typeof window.StaticData.setUserConfig === 'function') {
+                    window.StaticData.setUserConfig('adventure', cfg);
+                    if (typeof window.StaticData.setUseUser === 'function') window.StaticData.setUseUser('adventure', true);
+                }
+            } catch {}
             initAdventureState(cfg);
             const statusDiv = document.getElementById('adventure-file-status') || (document.querySelector('#adventure-config-panel [data-role="status"]'));
             const d = cfg.adventure && cfg.adventure.description ? ` - ${cfg.adventure.description}` : '';
@@ -90,10 +96,7 @@ async function loadAdventureFile(file) {
 
 async function loadDefaultAdventure() {
     try {
-        const url = 'assets/configs/adventure_config.json?_=' + Date.now();
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const cfg = await response.json();
+        const cfg = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('adventure') : null;
         window.validateAdventureConfig(cfg);
         initAdventureState(cfg);
         const statusDiv = document.getElementById('adventure-file-status') || (document.querySelector('#adventure-config-panel [data-role="status"]'));
@@ -107,13 +110,7 @@ async function loadDefaultAdventure() {
     }
 }
 
-async function downloadSampleAdventureConfig() {
-    try {
-        await window.downloadFile('assets/configs/samples/adventure_config_sample.json', 'adventure_config_sample.json');
-    } catch (e) {
-        console.error('Не удалось скачать образец приключения:', e);
-    }
-}
+async function downloadSampleAdventureConfig() { try {} catch {} }
 
 function beginAdventureFromSetup() {
     try { localStorage.removeItem('adventureState'); } catch {}
@@ -394,41 +391,12 @@ async function startAdventureBattle() {
             attackers: { name: 'Отряд игрока', units: attackers },
             defenders: { name: enc.name, units: enc.defenders }
         },
-        unitTypes: window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : undefined
+        unitTypes: (window.StaticData && typeof window.StaticData.getConfig === 'function') ? (function(){
+            const m = window.StaticData.getConfig('monsters');
+            return (m && m.unitTypes) ? m.unitTypes : m;
+        })() : (window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : undefined)
     };
-    if (!cfg.unitTypes && window.loadMonstersConfig) {
-        window.loadMonstersConfig().then(async (types) => {
-            cfg.unitTypes = types;
-            window.battleConfig = cfg;
-            window.configLoaded = true;
-            window.battleConfigSource = 'adventure';
-            adventureState.inBattle = true;
-            persistAdventure();
-            const logDiv = document.getElementById('battle-log');
-            if (logDiv) logDiv.innerHTML = '';
-            const btnHome = document.getElementById('battle-btn-home');
-            if (btnHome) btnHome.style.display = 'none';
-            if (window.showBattle) await window.showBattle();
-            window.initializeArmies();
-            window.renderArmies();
-            window.addToLog('🚩 Бой приключения начался!');
-        }).catch(async () => {
-            window.battleConfig = cfg;
-            window.configLoaded = true;
-            window.battleConfigSource = 'adventure';
-            adventureState.inBattle = true;
-            persistAdventure();
-            const logDiv = document.getElementById('battle-log');
-            if (logDiv) logDiv.innerHTML = '';
-            const btnHome = document.getElementById('battle-btn-home');
-            if (btnHome) btnHome.style.display = 'none';
-            if (window.showBattle) await window.showBattle();
-            window.initializeArmies();
-            window.renderArmies();
-            window.addToLog('🚩 Бой приключения начался!');
-        });
-        return;
-    }
+    // Больше не ждём loadMonstersConfig — монстры берутся из StaticData
     window.battleConfig = cfg;
     window.configLoaded = true;
     window.battleConfigSource = 'adventure';

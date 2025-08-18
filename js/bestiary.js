@@ -90,6 +90,12 @@ function ensureBestiaryPanel() {
                     const config = JSON.parse(e.target.result);
                     if (typeof config !== 'object' || Array.isArray(config)) throw new Error();
                     bestiaryMonsters = config.unitTypes || config;
+                    try {
+                        if (window.StaticData && typeof window.StaticData.setUserConfig === 'function') {
+                            window.StaticData.setUserConfig('monsters', config);
+                            if (typeof window.StaticData.setUseUser === 'function') window.StaticData.setUseUser('monsters', true);
+                        }
+                    } catch {}
                     try { window._monstersRaw = config; } catch {}
                     try {
                         if (config._meta) {
@@ -104,10 +110,7 @@ function ensureBestiaryPanel() {
                             status.className = 'file-status success';
                         }
                     } catch {}
-                    try {
-                        if (window.setMonstersConfig) window.setMonstersConfig(config);
-                        else localStorage.setItem('monsters_config', JSON.stringify(config));
-                    } catch {}
+                    try { if (window.eventBus && window.eventBus.emit) window.eventBus.emit('configs:refreshed'); } catch {}
                     renderBestiaryTable();
                 } catch {
                     try {

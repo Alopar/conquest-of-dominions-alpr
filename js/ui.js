@@ -237,9 +237,7 @@ async function showFight() {
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
     try {
-        if (!window.configLoaded && typeof window.loadDefaultConfig === 'function') {
-            await window.loadDefaultConfig();
-        }
+        // Инициализация сетапа боя теперь централизована в app.js через StaticData
     } catch {}
     if (typeof window.syncFightUI === 'function') window.syncFightUI();
 
@@ -298,14 +296,10 @@ async function startBattle() {
         } catch { try { alert('Сначала загрузите конфигурацию!'); } catch {} }
         return;
     }
-    // Обеспечиваем, что используется конфиг схватки, а не приключения
-    if (window.battleConfigSource !== 'fight') {
-        const warn = 'Конфигурация боя не из режима Схватка. Перезагружаю стандартную.';
-        try { console.warn(warn); } catch {}
+    // Разрешаем сетап из StaticData ('static') или локальную загрузку ('fight')
+    if (window.battleConfigSource !== 'fight' && window.battleConfigSource !== 'static') {
         if (window.loadDefaultConfig) {
             try { await window.loadDefaultConfig(); } catch {}
-            await proceedStartBattle();
-            return;
         }
     }
     await proceedStartBattle();

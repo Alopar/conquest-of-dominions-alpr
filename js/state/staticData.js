@@ -4,8 +4,8 @@
     const CONFIG_DEFS = [
         { id: 'monsters', title: 'Монстры', assets: ['assets/configs/monsters_config.json'], validatorName: 'validateMonstersConfig' },
         { id: 'adventure', title: 'Приключение', assets: ['assets/configs/adventure_config.json'], validatorName: 'validateAdventureConfig' },
-        // Порядок: сначала старое имя, затем новое — чтобы избежать 404 до миграции
-        { id: 'battleSetup', title: 'Сетап боя', assets: ['assets/configs/battle_config.json', 'assets/configs/battle_setup.json'], validatorName: 'validateBattleConfig' }
+        // Порядок: сначала новое имя, затем старое — теперь основной файл переименован
+        { id: 'battleSetup', title: 'Сетап боя', assets: ['assets/configs/battle_setup.json', 'assets/configs/battle_config.json'], validatorName: 'validateBattleConfig' }
     ];
 
     const LS_PREFS_KEY = 'configPrefs';
