@@ -20,9 +20,9 @@ async function showBestiary() {
     if (typeof window.showScreen === 'function') window.showScreen('bestiary-screen');
     try { ensureBestiaryPanel(); } catch {}
     try {
-        if (!window.bestiaryMonsters || Object.keys(bestiaryMonsters || {}).length === 0) {
-            bestiaryMonsters = window.getMonstersConfigCached ? window.getMonstersConfigCached() : null;
-            if (!bestiaryMonsters && window.loadMonstersConfig) bestiaryMonsters = await window.loadMonstersConfig();
+        if (window.StaticData && typeof window.StaticData.getConfig === 'function') {
+            const cfg = window.StaticData.getConfig('monsters');
+            bestiaryMonsters = cfg && typeof cfg === 'object' ? (cfg.unitTypes || cfg) : {};
         }
     } catch {}
     loadAndRenderBestiary();
@@ -36,7 +36,8 @@ function backToIntroFromBestiary() {
 // Загрузить monsters_config.json и отобразить
 async function loadAndRenderBestiary() {
     try {
-        bestiaryMonsters = await window.loadMonstersConfig();
+        const cfg = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('monsters') : null;
+        bestiaryMonsters = cfg && typeof cfg === 'object' ? (cfg.unitTypes || cfg) : {};
         const status = document.querySelector('#bestiary-config-panel [data-role="status"]');
         if (status) {
             try {
