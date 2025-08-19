@@ -23,25 +23,9 @@ async function showAdventureSetup() {
     if (scr) { scr.classList.add('active'); scr.style.display = 'flex'; }
     try {
         const host = document.getElementById('adventure-config-panel');
-        if (host && window.UI && typeof window.UI.mountConfigPanel === 'function') {
-            host.innerHTML = '';
-            window.UI.mountConfigPanel(host, {
-                title: '⚙️ Конфигурация приключения',
-                fileLabelText: '',
-                statusId: 'adventure-file-status',
-                inputId: 'adventure-file',
-                onFile: function(file){ loadAdventureFile(file); },
-                onSample: function(){},
-                primaryText: '📯 Начать приключение! 📯',
-                primaryId: 'adventure-begin-btn',
-                primaryDisabled: true,
-                onPrimary: function(){ beginAdventureFromSetup(); },
-                getStatusText: function(){
-                    const s = document.getElementById('adventure-file-status');
-                    return s ? s.textContent : '';
-                }
-            });
-        }
+        if (host) { host.innerHTML = ''; host.style.display = 'none'; }
+        const beginBtn = document.getElementById('adventure-begin-btn');
+        if (beginBtn) beginBtn.disabled = false;
     } catch {}
     restoreAdventure();
     if (adventureState.config) {

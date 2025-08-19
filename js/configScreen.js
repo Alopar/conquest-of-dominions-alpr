@@ -55,16 +55,26 @@
         const host = document.getElementById('config-table-host');
         if (!host) return;
         try {
-            const list = (window.StaticData && typeof window.StaticData.getConfigList === 'function') ? window.StaticData.getConfigList() : [];
+            let list = (window.StaticData && typeof window.StaticData.getConfigList === 'function') ? window.StaticData.getConfigList() : [];
+            // На этом экране не управляем сетапом боя
+            list = list.filter(it => it && it.id !== 'battleSetup');
             const table = document.createElement('table');
             table.className = 'bestiary-table unit-info-table';
             table.innerHTML = `
+                <colgroup>
+                    <col>
+                    <col>
+                    <col style="width:100px; white-space:nowrap;">
+                    <col style="width:100px; white-space:nowrap;">
+                    <col style="width:220px; white-space:nowrap;">
+                    <col style="width:220px; white-space:nowrap;">
+                </colgroup>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Название</th>
-                        <th>Есть пользовательский</th>
-                        <th>Использовать пользовательский</th>
+                        <th>Загружен</th>
+                        <th>Использовать</th>
                         <th></th>
                         <th></th>
                     </tr>
@@ -81,13 +91,19 @@
                     const tr = document.createElement('tr');
                     const hasUser = !!it.hasUser;
                     const useUser = !!it.useUser;
+                    const cbId = `cfg-useUser-${it.id}`;
                     tr.innerHTML = `
-                        <td>${it.id}</td>
+                        <td style=\"white-space:nowrap;\">${it.id}</td>
                         <td>${it.title}</td>
-                        <td style="text-align:center;">${hasUser ? '✅' : '—'}</td>
-                        <td style="text-align:center;"><input type="checkbox" class="cfg-useUser" data-id="${it.id}" ${useUser ? 'checked' : ''} /></td>
-                        <td><button class="btn" data-action="loadBase" data-id="${it.id}">Загрузить</button></td>
-                        <td><button class="btn" data-action="download" data-id="${it.id}">Скачать</button></td>
+                        <td style=\"text-align:center; white-space:nowrap;\">${hasUser ? '✅' : '—'}</td>
+                        <td style=\"text-align:center; white-space:nowrap;\">
+                            <div class="custom-checkbox" style="justify-content:center;">
+                                <input type="checkbox" id="${cbId}" class="cfg-useUser" data-id="${it.id}" ${useUser ? 'checked' : ''} />
+                                <label for="${cbId}"></label>
+                            </div>
+                        </td>
+                        <td><button class="btn" data-action="upload" data-id="${it.id}">💾 Загрузить</button></td>
+                        <td><button class="btn" data-action="download" data-id="${it.id}">📥Скачать</button></td>
                     `;
                     tbody.appendChild(tr);
                 }
@@ -110,16 +126,34 @@
                 renderConfigTable();
             });
         });
-        root.querySelectorAll('button[data-action="loadBase"]').forEach(btn => {
-            btn.addEventListener('click', async function(){
+        root.querySelectorAll('button[data-action="upload"]').forEach(btn => {
+            btn.addEventListener('click', function(){
                 const id = this.getAttribute('data-id');
-                try {
-                    if (window.StaticData) window.StaticData.setUseUser(id, false);
-                    if (window.StaticData && typeof window.StaticData.refresh === 'function') await window.StaticData.refresh();
-                    if (window.eventBus && typeof window.eventBus.emit === 'function') window.eventBus.emit('configs:refreshed');
-                    try { if (window.UI && typeof window.UI.showToast === 'function') window.UI.showToast('success', 'Базовый конфиг применён'); } catch {}
-                } catch {}
-                renderConfigTable();
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json,application/json';
+                input.style.display = 'none';
+                document.body.appendChild(input);
+                input.addEventListener('change', async function(){
+                    const file = input.files && input.files[0];
+                    try {
+                        if (!file) return;
+                        const text = await file.text();
+                        const json = JSON.parse(text);
+                        if (window.StaticData && typeof window.StaticData.setUserConfig === 'function') {
+                            window.StaticData.setUserConfig(id, json);
+                            if (typeof window.StaticData.setUseUser === 'function') window.StaticData.setUseUser(id, true);
+                        }
+                        if (window.eventBus && typeof window.eventBus.emit === 'function') window.eventBus.emit('configs:refreshed');
+                        try { if (window.UI && typeof window.UI.showToast === 'function') window.UI.showToast('success', 'Пользовательский конфиг загружен'); } catch {}
+                        renderConfigTable();
+                    } catch (e) {
+                        try { if (window.UI && typeof window.UI.showToast === 'function') window.UI.showToast('error', 'Ошибка загрузки конфига'); else alert('Ошибка загрузки конфига'); } catch {}
+                    } finally {
+                        try { document.body.removeChild(input); } catch {}
+                    }
+                });
+                input.click();
             });
         });
         root.querySelectorAll('button[data-action="download"]').forEach(btn => {
