@@ -38,10 +38,17 @@
             if (btn) {
                 btn.onclick = async function(){
                     try {
+                        let accepted = true;
+                        if (window.UI && typeof window.UI.showModal === 'function') {
+                            const h = window.UI.showModal('Удалить все пользовательские конфигурации? Это действие необратимо.', { type: 'dialog', title: 'Подтверждение' });
+                            accepted = await h.closed;
+                        }
+                        if (!accepted) return;
+                        if (window.StaticData && typeof window.StaticData.clearAllUser === 'function') window.StaticData.clearAllUser();
                         if (window.StaticData && typeof window.StaticData.refresh === 'function') await window.StaticData.refresh();
                         if (window.eventBus && typeof window.eventBus.emit === 'function') window.eventBus.emit('configs:refreshed');
                         renderConfigTable();
-                        try { if (window.UI && typeof window.UI.showToast === 'function') window.UI.showToast('success', 'Конфигурации обновлены'); } catch {}
+                        try { if (window.UI && typeof window.UI.showToast === 'function') window.UI.showToast('success', 'Пользовательские конфигурации удалены'); } catch {}
                     } catch {}
                 };
             }

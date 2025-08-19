@@ -4,6 +4,7 @@
     const CONFIG_DEFS = [
         { id: 'monsters', title: 'Монстры', assets: ['assets/configs/monsters_config.json'], validatorName: 'validateMonstersConfig' },
         { id: 'adventure', title: 'Приключение', assets: ['assets/configs/adventure_config.json'], validatorName: 'validateAdventureConfig' },
+        { id: 'mercenaries', title: 'Наёмники', assets: ['assets/configs/mercenaries_config.json'], validatorName: 'validateMercenariesConfig' },
         // Порядок: сначала новое имя, затем старое — теперь основной файл переименован
         { id: 'battleSetup', title: 'Сетап боя', assets: ['assets/configs/battle_setup.json', 'assets/configs/battle_config.json'], validatorName: 'validateBattleConfig' }
     ];
@@ -113,13 +114,28 @@
         for (const def of CONFIG_DEFS){ loadUserConfig(def.id); }
     }
 
+    function clearAllUser(){
+        // Удаляем все пользовательские конфиги и сбрасываем флаги использования
+        for (const def of CONFIG_DEFS){
+            try { localStorage.removeItem(getUserKey(def.id)); } catch {}
+            userConfigs[def.id] = undefined;
+        }
+        // Сбрасываем предпочтения использования пользовательских конфигов
+        Object.keys(configPrefs || {}).forEach(function(id){
+            if (!configPrefs[id]) configPrefs[id] = { useUser: false };
+            configPrefs[id].useUser = false;
+        });
+        writePrefs();
+    }
+
     window.StaticData = {
         init,
         getConfigList,
         getConfig,
         setUserConfig,
         setUseUser,
-        refresh
+        refresh,
+        clearAllUser
     };
 })();
 

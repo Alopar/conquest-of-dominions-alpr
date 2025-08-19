@@ -258,6 +258,10 @@
 
 .unit-info-value { color: #cd853f; }
 
+.bestiary-table td .custom-checkbox {
+    justify-content: center;
+}
+
 .log-panel {
     width: 25vw;
     background-color: #1a1a1a;

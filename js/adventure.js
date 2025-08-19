@@ -107,7 +107,7 @@ function beginAdventureFromSetup() {
 }
 
 function validateAdventureConfig(cfg) {
-    if (!cfg || !cfg.adventure || !Array.isArray(cfg.startingArmy) || !cfg.shop || !Array.isArray(cfg.shop.mercenaries) || !Array.isArray(cfg.encounters)) {
+    if (!cfg || !cfg.adventure || !Array.isArray(cfg.startingArmy) || !Array.isArray(cfg.encounters)) {
         throw new Error('Неверная структура adventure_config');
     }
 }
@@ -258,9 +258,14 @@ function renderPool() {
 function priceFor(typeId) {
     const monsters = window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : {};
     const base = monsters[typeId] && typeof monsters[typeId].price === 'number' ? monsters[typeId].price : 10;
-    const shop = adventureState.config && adventureState.config.shop ? adventureState.config.shop : null;
-    if (!shop || !Array.isArray(shop.mercenaries)) return base;
-    const found = shop.mercenaries.find(m => m.id === typeId);
+    let list = null;
+    try {
+        const m = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('mercenaries') : null;
+        list = Array.isArray(m) ? m : (m && Array.isArray(m.mercenaries) ? m.mercenaries : null);
+    } catch {}
+    // Старый fallback на adventure.config.shop.mercenaries удалён
+    if (!list) return base;
+    const found = list.find(m => m.id === typeId);
     if (!found) return base;
     return typeof found.price === 'number' ? found.price : base;
 }
@@ -270,7 +275,12 @@ function renderTavern() {
     if (!tbody) return;
     tbody.innerHTML = '';
     const monsters = window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : {};
-    const list = (adventureState.config && adventureState.config.shop && Array.isArray(adventureState.config.shop.mercenaries)) ? adventureState.config.shop.mercenaries : [];
+    let list = [];
+    try {
+        const m = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('mercenaries') : null;
+        list = Array.isArray(m) ? m : (m && Array.isArray(m.mercenaries) ? m.mercenaries : []);
+    } catch { list = []; }
+    // Старый fallback на adventure.config.shop.mercenaries удалён
     if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Пусто</td></tr>'; return; }
     for (const item of list) {
         const m = monsters[item.id] || { id: item.id, name: item.id, view: '❓' };
