@@ -21,6 +21,13 @@ function validateEncountersConfig(cfg) {
         if (typeof e.shortName !== 'string' || typeof e.description !== 'string') throw new Error('Встреча должна содержать shortName и description');
         if (!Array.isArray(e.monsters)) throw new Error('Встреча должна содержать monsters');
         if (e.rewards && !Array.isArray(e.rewards)) throw new Error('rewards должен быть массивом');
+        if (Array.isArray(e.rewards)) {
+            e.rewards.forEach(function(r){
+                if (!r || (r.type !== 'currency' && r.type !== 'monster')) throw new Error('reward.type должен быть currency или monster');
+                if (typeof r.id !== 'string') throw new Error('reward.id должен быть строкой');
+                if (typeof r.amount !== 'number') throw new Error('reward.amount должен быть числом');
+            });
+        }
     });
 }
 
@@ -29,17 +36,7 @@ function validateCurrenciesConfig(cfg) {
     cfg.currencies.forEach(function(c){ if (!c || typeof c.id !== 'string' || typeof c.name !== 'string') throw new Error('Валюта должна содержать id и name'); });
 }
 
-function validateRewardsConfig(cfg) {
-    if (!cfg || !Array.isArray(cfg.rewards)) throw new Error('Неверная структура rewards_config');
-    cfg.rewards.forEach(function(r){
-        if (!r || typeof r.id !== 'string' || typeof r.type !== 'string') throw new Error('Награда должна содержать id и type');
-        if (r.type === 'currency') {
-            if (typeof r.currencyId !== 'string' || typeof r.amount !== 'number') throw new Error('Награда-валюта должна содержать currencyId и amount');
-        } else if (r.type === 'monster') {
-            if (typeof r.monsterId !== 'string' || typeof r.count !== 'number') throw new Error('Награда-монстр должна содержать monsterId и count');
-        }
-    });
-}
+// validateRewardsConfig удалён — награды теперь inline в encounters
 
 function validateMonstersConfig(cfg) {
     const src = (cfg && cfg.unitTypes) ? cfg.unitTypes : cfg;
@@ -61,7 +58,6 @@ window.validateMonstersConfig = validateMonstersConfig;
 window.validateMercenariesConfig = validateMercenariesConfig;
 window.validateEncountersConfig = validateEncountersConfig;
 window.validateCurrenciesConfig = validateCurrenciesConfig;
-window.validateRewardsConfig = validateRewardsConfig;
 function validateHeroClassesConfig(cfg) {
     const list = Array.isArray(cfg) ? cfg : (cfg && Array.isArray(cfg.classes) ? cfg.classes : null);
     if (!list) throw new Error('Неверная структура hero_classes');

@@ -351,11 +351,8 @@ function finishBattleToAdventure() {
         try {
             const last = window._lastEncounterData;
             if (!last) return [];
-            const defs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('rewards') : null;
-            const list = defs && Array.isArray(defs.rewards) ? defs.rewards : [];
-            const byId = {}; list.forEach(function(r){ byId[r.id] = r; });
-            const ids = Array.isArray(last.rewards) ? last.rewards : [];
-            return ids.map(function(id){ return byId[id]; }).filter(Boolean);
+            const list = Array.isArray(last.rewards) ? last.rewards : [];
+            return list.filter(function(r){ return r && (r.type === 'currency' || r.type === 'monster'); });
         } catch { return []; }
     }
 
@@ -373,7 +370,7 @@ function finishBattleToAdventure() {
             const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
             const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
             const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
-            const cd = curById[r.currencyId] || { name: r.currencyId, icon: '' };
+            const cd = curById[r.id] || { name: r.id, icon: '' };
             const iconEl = el.querySelector('.reward-icon') || el;
             const nameEl = el.querySelector('.reward-name');
             if (iconEl) iconEl.textContent = cd.icon || '💠';
@@ -383,11 +380,11 @@ function finishBattleToAdventure() {
             el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
             if (!tplItem) el.className = 'reward-item';
             const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
-            const m = monsters[r.monsterId] || { name: r.monsterId, view: '👤' };
+            const m = monsters[r.id] || { name: r.id, view: '👤' };
             const iconEl = el.querySelector('.reward-icon') || el;
             const nameEl = el.querySelector('.reward-name');
             if (iconEl) iconEl.textContent = m.view || '👤';
-            if (nameEl) nameEl.textContent = `${m.name || r.monsterId} x${r.count}`;
+            if (nameEl) nameEl.textContent = `${m.name || r.id} x${r.amount}`;
         } else {
             el = document.createElement('div'); el.className = 'reward-item'; el.textContent = r.name || r.id;
         }
@@ -403,18 +400,22 @@ function finishBattleToAdventure() {
                 if (r.type === 'currency') {
                     if (!window.adventureState.currencies) window.adventureState.currencies = {};
                     const add = Math.max(0, Number(r.amount || 0));
-                    window.adventureState.currencies[r.currencyId] = (window.adventureState.currencies[r.currencyId] || 0) + add;
+                    window.adventureState.currencies[r.id] = (window.adventureState.currencies[r.id] || 0) + add;
                     try {
                         const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
                         const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
                         const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
-                        const cd = curById[r.currencyId] || { name: r.currencyId, icon: '' };
+                        const cd = curById[r.id] || { name: r.id, icon: '' };
                         if (window.UI && window.UI.showToast) window.UI.showToast('success', `${cd.name}: +${add} ${cd.icon || ''}`);
                     } catch {}
                 } else if (r.type === 'monster') {
                     if (!window.adventureState.pool) window.adventureState.pool = {};
-                    window.adventureState.pool[r.monsterId] = (window.adventureState.pool[r.monsterId] || 0) + Math.max(0, Number(r.count || 0));
-                    try { if (window.UI && window.UI.showToast) window.UI.showToast('success', `Союзник: ${r.monsterId} x${r.count}`); } catch {}
+                    window.adventureState.pool[r.id] = (window.adventureState.pool[r.id] || 0) + Math.max(0, Number(r.amount || 0));
+                    try {
+                        const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
+                        const m = monsters[r.id] || { name: r.id };
+                        if (window.UI && window.UI.showToast) window.UI.showToast('success', `Союзник: ${m.name || r.id} x${r.amount}`);
+                    } catch {}
                 }
             });
             try { window.persistAdventure && window.persistAdventure(); } catch {}

@@ -483,26 +483,71 @@ async function onHeroClassClick(c) {
 async function onEncounterClick(encData, available) {
     const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
     const body = document.createElement('div');
-    body.innerHTML = `<div style="margin-bottom:8px; font-size:1.05em; color:#cd853f;">${encData.shortName || encData.id}</div><div style="margin-bottom:8px;">${encData.description || ''}</div>`;
-    const tbl = document.createElement('table');
-    tbl.className = 'bestiary-table unit-info-table';
-    tbl.innerHTML = '<thead><tr><th class="icon-cell">👤</th><th>Имя</th><th>ID</th><th>Кол-во</th></tr></thead><tbody></tbody>';
-    const tbody = tbl.querySelector('tbody');
-    for (const g of encData.monsters) {
-        const m = monsters[g.id] || { name: g.id, view: '❓' };
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="icon-cell">${m.view || '❓'}</td><td>${m.name || g.id}</td><td>${g.id}</td><td>${g.count}</td>`;
-        tbody.appendChild(tr);
+    const desc = document.createElement('div');
+    desc.style.marginBottom = '8px';
+    desc.textContent = encData.description || '';
+    body.appendChild(desc);
+    (function(){ const sep = document.createElement('div'); sep.style.height = '1px'; sep.style.background = '#444'; sep.style.opacity = '0.6'; sep.style.margin = '8px 0'; body.appendChild(sep); })();
+    // Возможные противники
+    const enemiesTitle = document.createElement('div'); enemiesTitle.style.margin = '6px 0'; enemiesTitle.style.color = '#cd853f'; enemiesTitle.style.textAlign = 'center'; enemiesTitle.textContent = 'Возможные противники'; body.appendChild(enemiesTitle);
+    const enemiesWrapTpl = document.getElementById('tpl-rewards-list');
+    const enemiesWrap = enemiesWrapTpl ? enemiesWrapTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+    const enemiesItems = enemiesWrap.querySelector('[data-role="items"]') || enemiesWrap;
+    const uniqEnemyIds = Array.from(new Set((encData.monsters || []).map(function(g){ return g && g.id; }).filter(Boolean)));
+    uniqEnemyIds.forEach(function(id){
+        const itemTpl = document.getElementById('tpl-reward-unit');
+        const el = itemTpl ? itemTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        if (!itemTpl) el.className = 'reward-item';
+        const m = monsters[id] || { name: id, view: '👤' };
+        const iconEl = el.querySelector('.reward-icon') || el;
+        const nameEl = el.querySelector('.reward-name');
+        if (iconEl) iconEl.textContent = m.view || '👤';
+        if (nameEl) nameEl.textContent = m.name || id;
+        enemiesItems.appendChild(el);
+    });
+    body.appendChild(enemiesWrap);
+    (function(){ const sep = document.createElement('div'); sep.style.height = '1px'; sep.style.background = '#444'; sep.style.opacity = '0.6'; sep.style.margin = '10px 0 8px 0'; body.appendChild(sep); })();
+    // Возможные награды
+    const rewards = Array.isArray(encData.rewards) ? encData.rewards : [];
+    if (rewards.length > 0) {
+        const rewardsTitle = document.createElement('div'); rewardsTitle.style.margin = '10px 0 6px 0'; rewardsTitle.style.color = '#cd853f'; rewardsTitle.style.textAlign = 'center'; rewardsTitle.textContent = 'Возможные награды'; body.appendChild(rewardsTitle);
+        const rewardsWrapTpl = document.getElementById('tpl-rewards-list');
+        const rewardsWrap = rewardsWrapTpl ? rewardsWrapTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        const rewardsItems = rewardsWrap.querySelector('[data-role="items"]') || rewardsWrap;
+        const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
+        const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
+        const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
+        rewards.forEach(function(r){
+            if (r && r.type === 'currency') {
+                const tplItem = document.getElementById('tpl-reward-currency');
+                const el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                if (!tplItem) el.className = 'reward-item';
+                const cd = curById[r.id] || { name: r.id, icon: '💠' };
+                const iconEl = el.querySelector('.reward-icon') || el; const nameEl = el.querySelector('.reward-name');
+                if (iconEl) iconEl.textContent = cd.icon || '💠';
+                if (nameEl) nameEl.textContent = cd.name || r.id;
+                rewardsItems.appendChild(el);
+            } else if (r && r.type === 'monster') {
+                const tplItem = document.getElementById('tpl-reward-unit');
+                const el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                if (!tplItem) el.className = 'reward-item';
+                const m = monsters[r.id] || { name: r.id, view: '👤' };
+                const iconEl = el.querySelector('.reward-icon') || el; const nameEl = el.querySelector('.reward-name');
+                if (iconEl) iconEl.textContent = m.view || '👤';
+                if (nameEl) nameEl.textContent = m.name || r.id;
+                rewardsItems.appendChild(el);
+            }
+        });
+        body.appendChild(rewardsWrap);
     }
-    body.appendChild(tbl);
     if (!available) {
-        try { if (window.UI && window.UI.showModal) window.UI.showModal(body, { type: 'info', title: 'Встреча' }); else alert('Встреча недоступна'); } catch {}
+        try { if (window.UI && window.UI.showModal) window.UI.showModal(body, { type: 'info', title: encData.shortName || encData.id }); else alert('Встреча недоступна'); } catch {}
         return;
     }
     let accepted = false;
     try {
         if (window.UI && typeof window.UI.showModal === 'function') {
-            const h = window.UI.showModal(body, { type: 'dialog', title: 'Начать встречу?' });
+            const h = window.UI.showModal(body, { type: 'dialog', title: encData.shortName || encData.id, yesText: 'Бой', noText: 'Отмена' });
             accepted = await h.closed;
         } else { accepted = confirm('Начать встречу?'); }
     } catch {}

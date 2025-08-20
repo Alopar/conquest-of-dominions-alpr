@@ -231,6 +231,8 @@
         } else if (type === 'dialog') {
             const yesBtn = win.querySelector('[data-action="yes"]');
             const noBtn = win.querySelector('[data-action="no"]');
+            if (yesBtn && opts && typeof opts.yesText === 'string') yesBtn.textContent = opts.yesText;
+            if (noBtn && opts && typeof opts.noText === 'string') noBtn.textContent = opts.noText;
             if (yesBtn) yesBtn.addEventListener('click', function(){ close(true); });
             if (noBtn) noBtn.addEventListener('click', function(){ close(false); });
         }
