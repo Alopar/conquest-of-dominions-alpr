@@ -282,44 +282,78 @@ function renderPool() {
 }
 
 function priceFor(typeId) {
-    const monsters = window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : {};
-    const base = monsters[typeId] && typeof monsters[typeId].price === 'number' ? monsters[typeId].price : 10;
     let list = null;
     try {
         const m = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('mercenaries') : null;
         list = Array.isArray(m) ? m : (m && Array.isArray(m.mercenaries) ? m.mercenaries : null);
     } catch {}
-    if (!list) return base;
+    if (!list) return [{ id: 'gold', amount: 10 }];
     const found = list.find(m => m.id === typeId);
-    if (!found) return base;
-    return typeof found.price === 'number' ? found.price : base;
+    const arr = (found && Array.isArray(found.price)) ? found.price : [{ id: 'gold', amount: 10 }];
+    return arr;
 }
 
 function renderTavern() {
-    const tbody = document.getElementById('adventure-tavern-table');
-    if (!tbody) return;
-    tbody.innerHTML = '';
+    const hostAvail = document.getElementById('tavern-available-list');
+    const hostArmy = document.getElementById('tavern-army-list');
+    if (hostAvail) hostAvail.innerHTML = '';
+    if (hostArmy) hostArmy.innerHTML = '';
     const monsters = window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : {};
     let list = [];
     try {
         const m = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('mercenaries') : null;
         list = Array.isArray(m) ? m : (m && Array.isArray(m.mercenaries) ? m.mercenaries : []);
     } catch { list = []; }
-    if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="5">Пусто</td></tr>'; return; }
-    for (const item of list) {
-        const m = monsters[item.id] || { id: item.id, name: item.id, view: '❓' };
-        const price = priceFor(item.id);
-        const canBuy = (adventureState.currencies.gold || 0) >= price;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="icon-cell">${m.view || '❓'}</td><td>${m.name || item.id}</td><td>${item.id}</td><td>${price} 💰</td><td><button class="btn" ${canBuy ? '' : 'disabled'} onclick="buyUnit('${item.id}')">Нанять</button></td>`;
-        tbody.appendChild(tr);
+    if (hostAvail) {
+        const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
+        const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
+        const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
+        for (const item of list) {
+            const m = monsters[item.id] || { id: item.id, name: item.id, view: '❓' };
+            const price = priceFor(item.id);
+            const canBuy = price.every(function(p){ return (adventureState.currencies[p.id] || 0) >= p.amount; });
+            const card = document.createElement('div');
+            card.style.display = 'flex'; card.style.flexDirection = 'column'; card.style.alignItems = 'center'; card.style.gap = '6px';
+            const tplItem = document.getElementById('tpl-reward-unit');
+            const el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
+            if (!tplItem) el.className = 'reward-item';
+            const iconEl = el.querySelector('.reward-icon') || el; const nameEl = el.querySelector('.reward-name');
+            if (iconEl) iconEl.textContent = m.view || '👤';
+            if (nameEl) nameEl.textContent = m.name || item.id;
+            el.classList.add('clickable');
+            el.addEventListener('click', function(){ showUnitInfoModal(item.id); });
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.disabled = !canBuy;
+            btn.textContent = price.map(function(p){ const cd = curById[p.id] || { icon: '', name: p.id }; return `${p.amount} ${cd.icon || ''}`; }).join(' ');
+            btn.addEventListener('click', function(){ buyUnit(item.id); });
+            card.appendChild(el);
+            card.appendChild(btn);
+            hostAvail.appendChild(card);
+        }
+    }
+    if (hostArmy) {
+        const ids = Object.keys(adventureState.pool).filter(function(k){ return adventureState.pool[k] > 0; });
+        for (const id of ids) {
+            const tplItem = document.getElementById('tpl-reward-unit');
+            const el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
+            if (!tplItem) el.className = 'reward-item';
+            const m = monsters[id] || { name: id, view: '👤' };
+            const iconEl = el.querySelector('.reward-icon') || el; const nameEl = el.querySelector('.reward-name');
+            if (iconEl) iconEl.textContent = m.view || '👤';
+            if (nameEl) nameEl.textContent = `${m.name || id} x${adventureState.pool[id]}`;
+            el.classList.add('clickable');
+            el.addEventListener('click', function(){ showUnitInfoModal(id); });
+            hostArmy.appendChild(el);
+        }
     }
 }
 
 function buyUnit(typeId) {
     const price = priceFor(typeId);
-    if ((adventureState.currencies.gold || 0) < price) return;
-    adventureState.currencies.gold = (adventureState.currencies.gold || 0) - price;
+    const canBuy = price.every(function(p){ return (adventureState.currencies[p.id] || 0) >= p.amount; });
+    if (!canBuy) return;
+    for (const p of price) { adventureState.currencies[p.id] = (adventureState.currencies[p.id] || 0) - p.amount; }
     adventureState.pool[typeId] = (adventureState.pool[typeId] || 0) + 1;
     persistAdventure();
     renderAdventure();
