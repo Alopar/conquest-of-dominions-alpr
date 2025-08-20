@@ -4,9 +4,6 @@
     "description": "От крысиных бегов до драконьих сокровищ",
     "startingGold": 20
   },
-  "startingArmy": [
-    {"id": "warrior", "count": 1}
-  ],
   "encounters": [
     { "name": "Амбар с крысами", "rewardGold": 5, "defenders": [ {"id": "rat", "count": 3} ] },
     { "name": "Двор фермы и проблема с курями", "rewardGold": 6, "defenders": [ {"id": "chicken", "count": 6} ] },

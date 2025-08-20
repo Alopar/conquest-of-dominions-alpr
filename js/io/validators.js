@@ -7,8 +7,8 @@ function validateBattleConfig(config) {
 
 function validateAdventureConfig(cfg) {
     if (!cfg || typeof cfg !== 'object') throw new Error('Неверная структура adventure_config');
-    if (!cfg.adventure || !Array.isArray(cfg.startingArmy) || !Array.isArray(cfg.encounters)) {
-        throw new Error('Отсутствуют adventure/startingArmy/encounters');
+    if (!cfg.adventure || !Array.isArray(cfg.encounters)) {
+        throw new Error('Отсутствуют adventure/encounters');
     }
 }
 
@@ -30,3 +30,13 @@ window.validateBattleConfig = validateBattleConfig;
 window.validateAdventureConfig = validateAdventureConfig;
 window.validateMonstersConfig = validateMonstersConfig;
 window.validateMercenariesConfig = validateMercenariesConfig;
+function validateHeroClassesConfig(cfg) {
+    const list = Array.isArray(cfg) ? cfg : (cfg && Array.isArray(cfg.classes) ? cfg.classes : null);
+    if (!list) throw new Error('Неверная структура hero_classes');
+    list.forEach(function(c){
+        if (!c || typeof c.id !== 'string' || typeof c.name !== 'string') throw new Error('Класс героя должен содержать id и name');
+        if (!Array.isArray(c.startingArmy)) throw new Error('Класс героя должен содержать startingArmy');
+        c.startingArmy.forEach(function(g){ if (!g || typeof g.id !== 'string' || typeof g.count !== 'number') throw new Error('Некорректная запись startingArmy'); });
+    });
+}
+window.validateHeroClassesConfig = validateHeroClassesConfig;
