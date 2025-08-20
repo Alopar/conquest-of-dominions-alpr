@@ -443,25 +443,41 @@ function renderHeroClassSelectionSetup() {
 
 async function onHeroClassClick(c) {
     const body = document.createElement('div');
-    body.innerHTML = `<div style="margin-bottom:8px; font-size:1.05em; color:#cd853f;">${c.icon || ''} ${c.name}</div><div style="margin-bottom:8px;">${c.description || ''}</div>`;
+    // Описание
+    const desc = document.createElement('div');
+    desc.style.marginBottom = '8px';
+    desc.style.textAlign = 'center';
+    desc.textContent = c.description || '';
+    body.appendChild(desc);
+    // Разделитель
+    (function(){ const sep = document.createElement('div'); sep.style.height = '1px'; sep.style.background = '#444'; sep.style.opacity = '0.6'; sep.style.margin = '8px 0'; body.appendChild(sep); })();
+    // Начальная армия
+    const armyTitle = document.createElement('div'); armyTitle.style.margin = '6px 0'; armyTitle.style.color = '#cd853f'; armyTitle.style.textAlign = 'center'; armyTitle.textContent = 'Начальная армия'; body.appendChild(armyTitle);
     if (Array.isArray(c.startingArmy) && c.startingArmy.length > 0) {
         const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
-        const tbl = document.createElement('table');
-        tbl.className = 'bestiary-table unit-info-table';
-        tbl.innerHTML = '<thead><tr><th class="icon-cell">👤</th><th>Имя</th><th>ID</th><th>Кол-во</th></tr></thead><tbody></tbody>';
-        const tbody = tbl.querySelector('tbody');
+        const listTpl = document.getElementById('tpl-rewards-list');
+        const wrap = listTpl ? listTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        const items = wrap.querySelector('[data-role="items"]') || wrap;
         for (const g of c.startingArmy) {
-            const m = monsters[g.id] || { name: g.id, view: '❓' };
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td class="icon-cell">${m.view || '❓'}</td><td>${m.name || g.id}</td><td>${g.id}</td><td>${g.count}</td>`;
-            tbody.appendChild(tr);
+            const tplItem = document.getElementById('tpl-reward-unit');
+            const el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
+            if (!tplItem) el.className = 'reward-item';
+            el.classList.add('clickable');
+            const m = monsters[g.id] || { name: g.id, view: '👤' };
+            const iconEl = el.querySelector('.reward-icon') || el;
+            const nameEl = el.querySelector('.reward-name');
+            if (iconEl) iconEl.textContent = m.view || '👤';
+            if (nameEl) nameEl.textContent = `${m.name || g.id} x${g.count}`;
+            el.addEventListener('click', function(e){ try { e.stopPropagation(); } catch {} showUnitInfoModal(g.id); });
+            items.appendChild(el);
         }
-        body.appendChild(tbl);
+        body.appendChild(wrap);
     }
     let accepted = false;
     try {
         if (window.UI && typeof window.UI.showModal === 'function') {
-            const h = window.UI.showModal(body, { type: 'dialog', title: 'Выбор класса' });
+            const title = `${c.icon || ''} ${c.name || c.id}`.trim();
+            const h = window.UI.showModal(body, { type: 'dialog', title, yesText: 'Выбрать', noText: 'Закрыть' });
             accepted = await h.closed;
         } else { accepted = confirm('Выбрать класс ' + (c.name || c.id) + '?'); }
     } catch {}
@@ -485,6 +501,7 @@ async function onEncounterClick(encData, available) {
     const body = document.createElement('div');
     const desc = document.createElement('div');
     desc.style.marginBottom = '8px';
+    desc.style.textAlign = 'center';
     desc.textContent = encData.description || '';
     body.appendChild(desc);
     (function(){ const sep = document.createElement('div'); sep.style.height = '1px'; sep.style.background = '#444'; sep.style.opacity = '0.6'; sep.style.margin = '8px 0'; body.appendChild(sep); })();
@@ -498,11 +515,13 @@ async function onEncounterClick(encData, available) {
         const itemTpl = document.getElementById('tpl-reward-unit');
         const el = itemTpl ? itemTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
         if (!itemTpl) el.className = 'reward-item';
+        el.classList.add('clickable');
         const m = monsters[id] || { name: id, view: '👤' };
         const iconEl = el.querySelector('.reward-icon') || el;
         const nameEl = el.querySelector('.reward-name');
         if (iconEl) iconEl.textContent = m.view || '👤';
         if (nameEl) nameEl.textContent = m.name || id;
+        el.addEventListener('click', function(e){ try { e.stopPropagation(); } catch {} showUnitInfoModal(id); });
         enemiesItems.appendChild(el);
     });
     body.appendChild(enemiesWrap);
@@ -531,10 +550,12 @@ async function onEncounterClick(encData, available) {
                 const tplItem = document.getElementById('tpl-reward-unit');
                 const el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
                 if (!tplItem) el.className = 'reward-item';
+                el.classList.add('clickable');
                 const m = monsters[r.id] || { name: r.id, view: '👤' };
                 const iconEl = el.querySelector('.reward-icon') || el; const nameEl = el.querySelector('.reward-name');
                 if (iconEl) iconEl.textContent = m.view || '👤';
                 if (nameEl) nameEl.textContent = m.name || r.id;
+                el.addEventListener('click', function(e){ try { e.stopPropagation(); } catch {} showUnitInfoModal(r.id); });
                 rewardsItems.appendChild(el);
             }
         });
@@ -562,6 +583,29 @@ function updateBeginAdventureButtonState() {
 }
 
 function renderBeginButtonOnMain() {}
+
+function showUnitInfoModal(unitTypeId) {
+    try {
+        const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
+        const t = monsters[unitTypeId] || { id: unitTypeId, name: unitTypeId, view: '👤', type: '', hp: 0, damage: 0, targets: 1 };
+        const body = document.createElement('div');
+        const tbl = document.createElement('table');
+        tbl.className = 'unit-info-table unit-modal-table';
+        tbl.innerHTML = '<thead></thead><tbody></tbody>';
+        const tr1 = document.createElement('tr');
+        const c11 = document.createElement('td'); c11.className = 'unit-info-value'; c11.colSpan = 2; c11.textContent = `${t.view || '👤'} ${t.name || unitTypeId}`;
+        const c12 = document.createElement('td'); c12.className = 'unit-info-value'; c12.textContent = `ТИП: ${String(t.type || '')}`;
+        tr1.appendChild(c11); tr1.appendChild(c12);
+        const tr2 = document.createElement('tr');
+        const c21 = document.createElement('td'); c21.className = 'unit-info-value'; c21.textContent = `НР: ${t.hp}❤️`;
+        const c22 = document.createElement('td'); c22.className = 'unit-info-value'; c22.textContent = `УРОН: ${t.damage}💥`;
+        const c23 = document.createElement('td'); c23.className = 'unit-info-value'; c23.textContent = `ЦЕЛИ: ${Number(t.targets || 1)}🎯`;
+        tr2.appendChild(c21); tr2.appendChild(c22); tr2.appendChild(c23);
+        const tbody = tbl.querySelector('tbody'); tbody.appendChild(tr1); tbody.appendChild(tr2);
+        body.appendChild(tbl);
+        if (window.UI && typeof window.UI.showModal === 'function') window.UI.showModal(body, { type: 'info', title: 'Описание существа' });
+    } catch {}
+}
 
 function pickSquadForBattle() {
     const settings = window.getCurrentSettings ? window.getCurrentSettings() : { maxUnitsPerArmy: 10 };
@@ -696,3 +740,4 @@ window.beginAdventureFromSetup = beginAdventureFromSetup;
 window.startEncounterBattle = startEncounterBattle;
 window.renderAdventure = renderAdventure;
 window.showAdventureResult = showAdventureResult;
+window.showUnitInfoModal = showUnitInfoModal;
