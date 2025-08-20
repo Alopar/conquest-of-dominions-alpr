@@ -490,5 +490,13 @@
         };
     }
 
-    window.UI = { ensureScreenLoaded, ensureMenuBar, mountTemplate, cloneTemplate, applyTableHead, mountFileInput, mountConfigPanel, showModal, confirm: confirmModal, alert: alertModal, showToast, attachTooltip, closeTopModal };
+    function clearTooltips() {
+        try {
+            let layer = document.getElementById('tooltip-layer');
+            if (!layer) return;
+            while (layer.firstChild) { layer.removeChild(layer.firstChild); }
+        } catch {}
+    }
+
+    window.UI = { ensureScreenLoaded, ensureMenuBar, mountTemplate, cloneTemplate, applyTableHead, mountFileInput, mountConfigPanel, showModal, confirm: confirmModal, alert: alertModal, showToast, attachTooltip, clearTooltips, closeTopModal };
 })();

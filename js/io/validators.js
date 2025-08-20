@@ -7,9 +7,21 @@ function validateBattleConfig(config) {
 
 function validateAdventureConfig(cfg) {
     if (!cfg || typeof cfg !== 'object') throw new Error('Неверная структура adventure_config');
-    if (!cfg.adventure || !Array.isArray(cfg.encounters)) {
-        throw new Error('Отсутствуют adventure/encounters');
+    if (!cfg.adventure || !Array.isArray(cfg.stages)) {
+        throw new Error('Отсутствуют adventure/stages');
     }
+    cfg.stages.forEach(function(st){
+        if (!st || typeof st.id !== 'string' || !Array.isArray(st.encounterIds)) throw new Error('Стадия должна содержать id и encounterIds');
+    });
+}
+
+function validateEncountersConfig(cfg) {
+    if (!cfg || !Array.isArray(cfg.encounters)) throw new Error('Неверная структура encounters_config');
+    cfg.encounters.forEach(function(e){
+        if (!e || typeof e.id !== 'string') throw new Error('Встреча должна содержать id');
+        if (typeof e.shortName !== 'string' || typeof e.description !== 'string') throw new Error('Встреча должна содержать shortName и description');
+        if (!Array.isArray(e.monsters)) throw new Error('Встреча должна содержать monsters');
+    });
 }
 
 function validateMonstersConfig(cfg) {
@@ -30,6 +42,7 @@ window.validateBattleConfig = validateBattleConfig;
 window.validateAdventureConfig = validateAdventureConfig;
 window.validateMonstersConfig = validateMonstersConfig;
 window.validateMercenariesConfig = validateMercenariesConfig;
+window.validateEncountersConfig = validateEncountersConfig;
 function validateHeroClassesConfig(cfg) {
     const list = Array.isArray(cfg) ? cfg : (cfg && Array.isArray(cfg.classes) ? cfg.classes : null);
     if (!list) throw new Error('Неверная структура hero_classes');

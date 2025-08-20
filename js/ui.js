@@ -4,6 +4,7 @@ function showScreen(id) {
         s.classList.remove('active');
         try { s.style.setProperty('display', 'none', 'important'); } catch { s.style.display = 'none'; }
     });
+    try { if (window.UI && typeof window.UI.clearTooltips === 'function') window.UI.clearTooltips(); } catch {}
     const el = document.getElementById(id);
     if (!el) return;
     el.classList.add('active');
@@ -338,9 +339,8 @@ function finishBattleToAdventure() {
     const hasAnyUnits = Object.values(window.adventureState.pool || {}).some(v => v > 0);
     const encLeft = (function(){
         try {
-            const idx = window.adventureState.currentEncounterIndex;
-            const encs = (window.adventureState.config && window.adventureState.config.encounters) || [];
-            return idx < encs.length;
+            const stages = (window.adventureState.config && Array.isArray(window.adventureState.config.stages)) ? window.adventureState.config.stages : [];
+            return window.adventureState.currentStageIndex < stages.length;
         } catch { return false; }
     })();
     if (!hasAnyUnits) {

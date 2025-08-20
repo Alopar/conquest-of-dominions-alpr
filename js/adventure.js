@@ -3,7 +3,8 @@ let adventureState = {
     gold: 0,
     pool: {},
     selectedClassId: null,
-    currentEncounterIndex: 0,
+    currentStageIndex: 0,
+    completedEncounterIds: [],
     inBattle: false,
     lastResult: ''
 };
@@ -110,7 +111,7 @@ function beginAdventureFromSetup() {
 }
 
 function validateAdventureConfig(cfg) {
-    if (!cfg || !cfg.adventure || !Array.isArray(cfg.encounters)) {
+    if (!cfg || !cfg.adventure || !Array.isArray(cfg.stages)) {
         throw new Error('Неверная структура adventure_config');
     }
 }
@@ -120,7 +121,8 @@ function initAdventureState(cfg) {
     adventureState.gold = Math.max(0, Number(cfg.adventure.startingGold || 0));
     adventureState.pool = {};
     adventureState.selectedClassId = adventureState.selectedClassId || null;
-    adventureState.currentEncounterIndex = 0;
+    adventureState.currentStageIndex = 0;
+    adventureState.completedEncounterIds = [];
     adventureState.inBattle = false;
     adventureState.lastResult = '';
     persistAdventure();
@@ -221,6 +223,7 @@ async function loadAdventureSubscreen(key) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const html = await res.text();
         cont.innerHTML = html;
+        try { if (window.UI && typeof window.UI.clearTooltips === 'function') window.UI.clearTooltips(); } catch {}
     } catch { cont.innerHTML = '<div class="settings-section">Не удалось загрузить раздел</div>'; }
 }
 
@@ -230,9 +233,7 @@ async function renderAdventureSubscreen() {
     if (subscreen === 'army') {
         renderPool();
     } else if (subscreen === 'map') {
-        renderEncounterPreview();
-        renderBeginButtonOnMain();
-        updateAdventureStartButton();
+        renderMapBoard();
     } else if (subscreen === 'tavern') {
         renderTavern();
     }
@@ -302,10 +303,30 @@ function buyUnit(typeId) {
     renderAdventure();
 }
 
-function currentEncounter() {
-    const enc = adventureState.config && Array.isArray(adventureState.config.encounters) ? adventureState.config.encounters : [];
-    if (adventureState.currentEncounterIndex >= enc.length) return null;
-    return enc[adventureState.currentEncounterIndex];
+function getEncountersIndex() {
+    const encCfg = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('encounters') : null;
+    const list = encCfg && Array.isArray(encCfg.encounters) ? encCfg.encounters : [];
+    const map = {};
+    for (const e of list) map[e.id] = e;
+    return map;
+}
+
+function getCurrentStage() {
+    const stages = (adventureState.config && Array.isArray(adventureState.config.stages)) ? adventureState.config.stages : [];
+    if (adventureState.currentStageIndex >= stages.length) return null;
+    return stages[adventureState.currentStageIndex];
+}
+
+function isEncounterDone(id) {
+    return adventureState.completedEncounterIds.includes(id);
+}
+
+function getAvailableEncountersForCurrentStage() {
+    const stage = getCurrentStage();
+    if (!stage) return [];
+    const ids = Array.isArray(stage.encounterIds) ? stage.encounterIds : [];
+    const all = getEncountersIndex();
+    return ids.map(id => all[id]).filter(Boolean);
 }
 
 async function showAdventureResult(message) {
@@ -324,22 +345,43 @@ async function showAdventureResult(message) {
     if (scr) { scr.classList.add('active'); scr.style.display = 'flex'; }
 }
 
-function renderEncounterPreview() {
-    const box = document.getElementById('adventure-encounter');
-    if (!box) return;
-    const enc = currentEncounter();
-    if (!enc) { box.innerHTML = '<div>Приключение завершено</div>'; return; }
-    let html = `<div style="margin-bottom:6px;">${enc.name}</div>`;
-    html += '<table class="bestiary-table unit-info-table"><thead><tr><th class="icon-cell">👤</th><th>Имя</th><th>ID</th><th>Кол-во</th></tr></thead><tbody>';
-    const monsters = window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : {};
-    for (const g of enc.defenders) {
-        const m = monsters[g.id] || { name: g.id, view: '❓' };
-        html += `<tr><td class="icon-cell">${m.view || '❓'}</td><td>${m.name || g.id}</td><td>${g.id}</td><td>${g.count}</td></tr>`;
-    }
-    html += '</tbody></table>';
-    html += `<div style="margin-top:8px;">Награда: ${enc.rewardGold} 💰</div>`;
-    box.innerHTML = html;
-
+function renderMapBoard() {
+    const board = document.getElementById('adventure-map-board');
+    if (!board) return;
+    const stages = (adventureState.config && Array.isArray(adventureState.config.stages)) ? adventureState.config.stages : [];
+    const encIdx = getEncountersIndex();
+    board.innerHTML = '';
+    stages.forEach(function(stage, sIdx){
+        const col = document.createElement('div');
+        col.className = 'encounter-column';
+        const title = document.createElement('div');
+        title.textContent = stage.name || stage.id;
+        title.style.color = '#cd853f';
+        title.style.marginBottom = '6px';
+        col.appendChild(title);
+        const ids = Array.isArray(stage.encounterIds) ? stage.encounterIds : [];
+        ids.forEach(function(id){
+            const data = encIdx[id];
+            if (!data) return;
+            const tpl = document.getElementById('tpl-encounter-item');
+            let el = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+            if (!tpl) el.className = 'encounter-item';
+            el.dataset.id = data.id;
+            const iconEl = el.querySelector('.encounter-icon') || el;
+            const nameEl = el.querySelector('.encounter-name');
+            if (iconEl) iconEl.textContent = '❗';
+            if (nameEl) nameEl.textContent = data.shortName || data.id;
+            try { if (window.UI && typeof window.UI.attachTooltip === 'function') window.UI.attachTooltip(el, function(){ return data.shortName || data.description || data.id; }); } catch {}
+            const isCurrentStage = sIdx === adventureState.currentStageIndex;
+            const done = isEncounterDone(data.id);
+            const available = isCurrentStage && !done;
+            if (done) el.classList.add('done');
+            if (!available && !done) el.classList.add('locked');
+            el.addEventListener('click', function(){ onEncounterClick(data, available); });
+            col.appendChild(el);
+        });
+        board.appendChild(col);
+    });
 }
 
 function renderHeroClassSelectionSetup() {
@@ -416,13 +458,34 @@ async function onHeroClassClick(c) {
     });
 }
 
-function updateAdventureStartButton() {
-    const btn = document.getElementById('adventure-start-btn');
-    if (!btn) return;
-    const hasUnits = Object.values(adventureState.pool).some(v => v > 0);
-    const hasClass = !!adventureState.selectedClassId;
-    const hasEncounter = !!currentEncounter();
-    btn.disabled = !(hasUnits && hasEncounter && hasClass && !adventureState.inBattle);
+async function onEncounterClick(encData, available) {
+    const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
+    const body = document.createElement('div');
+    body.innerHTML = `<div style="margin-bottom:8px; font-size:1.05em; color:#cd853f;">${encData.shortName || encData.id}</div><div style="margin-bottom:8px;">${encData.description || ''}</div>`;
+    const tbl = document.createElement('table');
+    tbl.className = 'bestiary-table unit-info-table';
+    tbl.innerHTML = '<thead><tr><th class="icon-cell">👤</th><th>Имя</th><th>ID</th><th>Кол-во</th></tr></thead><tbody></tbody>';
+    const tbody = tbl.querySelector('tbody');
+    for (const g of encData.monsters) {
+        const m = monsters[g.id] || { name: g.id, view: '❓' };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="icon-cell">${m.view || '❓'}</td><td>${m.name || g.id}</td><td>${g.id}</td><td>${g.count}</td>`;
+        tbody.appendChild(tr);
+    }
+    body.appendChild(tbl);
+    if (!available) {
+        try { if (window.UI && window.UI.showModal) window.UI.showModal(body, { type: 'info', title: 'Встреча' }); else alert('Встреча недоступна'); } catch {}
+        return;
+    }
+    let accepted = false;
+    try {
+        if (window.UI && typeof window.UI.showModal === 'function') {
+            const h = window.UI.showModal(body, { type: 'dialog', title: 'Начать встречу?' });
+            accepted = await h.closed;
+        } else { accepted = confirm('Начать встречу?'); }
+    } catch {}
+    if (!accepted) return;
+    startEncounterBattle(encData);
 }
 
 function updateBeginAdventureButtonState() {
@@ -431,9 +494,7 @@ function updateBeginAdventureButtonState() {
     btn.disabled = !adventureState.selectedClassId;
 }
 
-function renderBeginButtonOnMain() {
-    // Контейнер сводки удалён; функция оставлена пустой для совместимости вызовов
-}
+function renderBeginButtonOnMain() {}
 
 function pickSquadForBattle() {
     const settings = window.getCurrentSettings ? window.getCurrentSettings() : { maxUnitsPerArmy: 10 };
@@ -455,8 +516,8 @@ function pickSquadForBattle() {
     return result;
 }
 
-async function startAdventureBattle() {
-    const enc = currentEncounter();
+async function startEncounterBattle(encData) {
+    const enc = encData;
     if (!enc) return;
     if (!adventureState.selectedClassId) return;
     // Гарантируем, что стартовая армия применена перед первым боем
@@ -465,16 +526,17 @@ async function startAdventureBattle() {
     if (attackers.length === 0) return;
     for (const g of attackers) { adventureState.pool[g.id] -= g.count; if (adventureState.pool[g.id] < 0) adventureState.pool[g.id] = 0; }
     const cfg = {
-        battleConfig: { name: adventureState.config.adventure.name, description: enc.name, defendersStart: true },
+        battleConfig: { name: adventureState.config.adventure.name, description: enc.description || enc.shortName, defendersStart: true },
         armies: {
             attackers: { name: 'Отряд игрока', units: attackers },
-            defenders: { name: enc.name, units: enc.defenders }
+            defenders: { name: enc.shortName || enc.id, units: enc.monsters }
         },
         unitTypes: (window.StaticData && typeof window.StaticData.getConfig === 'function') ? (function(){
             const m = window.StaticData.getConfig('monsters');
             return (m && m.unitTypes) ? m.unitTypes : m;
         })() : (window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : undefined)
     };
+    window._lastEncounterData = enc;
     // Больше не ждём loadMonstersConfig — монстры берутся из StaticData
     window.battleConfig = cfg;
     window.configLoaded = true;
@@ -517,13 +579,20 @@ function ensureEndBattleHook() {
 ensureEndBattleHook();
 
 function finishAdventureBattle(winner) {
-    const enc = currentEncounter();
+    // Победителей возвращаем в пул
     const attackersAlive = (window.gameState.attackers || []).filter(u => u.alive);
     for (const u of attackersAlive) { adventureState.pool[u.typeId] = (adventureState.pool[u.typeId] || 0) + 1; }
-    if (winner === 'attackers' && enc) {
-        adventureState.gold += Math.max(0, Number(enc.rewardGold || 0));
-        adventureState.currentEncounterIndex += 1;
-        adventureState.lastResult = `Победа! +${enc.rewardGold} 💰`;
+    const last = window._lastEncounterData;
+    if (winner === 'attackers' && last) {
+        adventureState.gold += Math.max(0, Number(last.rewardGold || 0));
+        if (!isEncounterDone(last.id)) adventureState.completedEncounterIds.push(last.id);
+        const stage = getCurrentStage();
+        const allDone = stage && Array.isArray(stage.encounterIds) && stage.encounterIds.every(id => isEncounterDone(id));
+        const settings = window.getCurrentSettings ? window.getCurrentSettings() : {};
+        const mode = Number(settings?.adventureSettings?.stageProgressionMode || 1);
+        const passOnFirst = mode === 1;
+        if (passOnFirst || allDone) adventureState.currentStageIndex += 1;
+        adventureState.lastResult = `Победа! +${last.rewardGold} 💰`;
     } else {
         adventureState.lastResult = 'Поражение';
     }
@@ -558,6 +627,6 @@ window.loadAdventureFile = loadAdventureFile;
 window.loadDefaultAdventure = loadDefaultAdventure;
 window.downloadSampleAdventureConfig = downloadSampleAdventureConfig;
 window.beginAdventureFromSetup = beginAdventureFromSetup;
-window.startAdventureBattle = startAdventureBattle;
+window.startEncounterBattle = startEncounterBattle;
 window.renderAdventure = renderAdventure;
 window.showAdventureResult = showAdventureResult;
