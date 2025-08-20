@@ -96,6 +96,32 @@
     </div>
 </template>
 
+<template id="tpl-rewards-list">
+    <div class="rewards-list">
+        <div class="rewards-items" data-role="items" style="display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:12px;"></div>
+    </div>
+    <!-- Элемент списка создаётся динамически -->
+</template>
+
+<template id="tpl-reward-currency">
+    <div class="reward-item" data-id="">
+        <div class="reward-icon">💠</div>
+        <div class="reward-name">Награда</div>
+    </div>
+    <!-- Карточка валюты -->
+    <!-- .reward-item используется общая стилизация -->
+    <!-- Внутри: .reward-icon, .reward-name -->
+    
+</template>
+
+<template id="tpl-reward-unit">
+    <div class="reward-item" data-id="">
+        <div class="reward-icon">👤</div>
+        <div class="reward-name">Союзник</div>
+    </div>
+    <!-- Карточка юнита-союзника -->
+</template>
+
 <!-- Тело модалки описания юнита -->
 <template id="tpl-unit-modal-body">
     <table class="unit-info-table unit-modal-table">

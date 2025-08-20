@@ -1,6 +1,6 @@
 let adventureState = {
     config: null,
-    gold: 0,
+    currencies: {},
     pool: {},
     selectedClassId: null,
     currentStageIndex: 0,
@@ -118,7 +118,11 @@ function validateAdventureConfig(cfg) {
 
 function initAdventureState(cfg) {
     adventureState.config = cfg;
-    adventureState.gold = Math.max(0, Number(cfg.adventure.startingGold || 0));
+    adventureState.currencies = {};
+    try {
+        const arr = (cfg && cfg.adventure && Array.isArray(cfg.adventure.startingCurrencies)) ? cfg.adventure.startingCurrencies : [];
+        for (const c of arr) { if (c && c.id) adventureState.currencies[c.id] = Math.max(0, Number(c.amount || 0)); }
+    } catch {}
     adventureState.pool = {};
     adventureState.selectedClassId = adventureState.selectedClassId || null;
     adventureState.currentStageIndex = 0;
@@ -150,8 +154,26 @@ async function showAdventure() {
 }
 
 function renderAdventure() {
-    const goldEl = document.getElementById('adventure-gold');
-    if (goldEl) goldEl.textContent = String(adventureState.gold);
+    const curWrap = document.getElementById('adventure-currencies');
+    if (curWrap) {
+        curWrap.innerHTML = '';
+        const defs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
+        const list = defs && Array.isArray(defs.currencies) ? defs.currencies : [];
+        const byId = {}; list.forEach(function(c){ byId[c.id] = c; });
+        const ids = Object.keys(adventureState.currencies || {});
+        if (ids.length === 0) {
+            const d = document.createElement('div'); d.textContent = '—'; curWrap.appendChild(d);
+        } else {
+            ids.forEach(function(id){
+                const def = byId[id] || { name: id, icon: '' };
+                const v = adventureState.currencies[id] || 0;
+                const el = document.createElement('div');
+                el.style.fontSize = '1.05em';
+                el.textContent = `${def.name}: ${v} ${def.icon || ''}`;
+                curWrap.appendChild(el);
+            });
+        }
+    }
     const nameEl = document.getElementById('adventure-name');
     if (nameEl) {
         const n = adventureState.config && adventureState.config.adventure ? adventureState.config.adventure.name : 'Приключение';
@@ -287,7 +309,7 @@ function renderTavern() {
     for (const item of list) {
         const m = monsters[item.id] || { id: item.id, name: item.id, view: '❓' };
         const price = priceFor(item.id);
-        const canBuy = adventureState.gold >= price;
+        const canBuy = (adventureState.currencies.gold || 0) >= price;
         const tr = document.createElement('tr');
         tr.innerHTML = `<td class="icon-cell">${m.view || '❓'}</td><td>${m.name || item.id}</td><td>${item.id}</td><td>${price} 💰</td><td><button class="btn" ${canBuy ? '' : 'disabled'} onclick="buyUnit('${item.id}')">Нанять</button></td>`;
         tbody.appendChild(tr);
@@ -296,8 +318,8 @@ function renderTavern() {
 
 function buyUnit(typeId) {
     const price = priceFor(typeId);
-    if (adventureState.gold < price) return;
-    adventureState.gold -= price;
+    if ((adventureState.currencies.gold || 0) < price) return;
+    adventureState.currencies.gold = (adventureState.currencies.gold || 0) - price;
     adventureState.pool[typeId] = (adventureState.pool[typeId] || 0) + 1;
     persistAdventure();
     renderAdventure();
@@ -584,7 +606,6 @@ function finishAdventureBattle(winner) {
     for (const u of attackersAlive) { adventureState.pool[u.typeId] = (adventureState.pool[u.typeId] || 0) + 1; }
     const last = window._lastEncounterData;
     if (winner === 'attackers' && last) {
-        adventureState.gold += Math.max(0, Number(last.rewardGold || 0));
         if (!isEncounterDone(last.id)) adventureState.completedEncounterIds.push(last.id);
         const stage = getCurrentStage();
         const allDone = stage && Array.isArray(stage.encounterIds) && stage.encounterIds.every(id => isEncounterDone(id));
@@ -592,7 +613,7 @@ function finishAdventureBattle(winner) {
         const mode = Number(settings?.adventureSettings?.stageProgressionMode || 1);
         const passOnFirst = mode === 1;
         if (passOnFirst || allDone) adventureState.currentStageIndex += 1;
-        adventureState.lastResult = `Победа! +${last.rewardGold} 💰`;
+        adventureState.lastResult = `Победа!`;
     } else {
         adventureState.lastResult = 'Поражение';
     }

@@ -1,15 +1,15 @@
 {
   "encounters": [
-    { "id": "barn_rats", "shortName": "Амбар", "description": "Амбар с крысами", "rewardGold": 5, "monsters": [ {"id": "rat", "count": 3} ] },
-    { "id": "farm_chickens", "shortName": "Ферма", "description": "Двор фермы и проблема с курями", "rewardGold": 6, "monsters": [ {"id": "chicken", "count": 6} ] },
-    { "id": "swamp_frogs", "shortName": "Болото", "description": "Болото с лягушками", "rewardGold": 7, "monsters": [ {"id": "frog", "count": 8} ] },
-    { "id": "snake_nest", "shortName": "Змеи", "description": "Змеиное гнездо", "rewardGold": 8, "monsters": [ {"id": "giant_snake", "count": 4}, {"id": "frog", "count": 5} ] },
-    { "id": "goblin_scout", "shortName": "Разведка", "description": "Лагерь гоблиноидов: разведка", "rewardGold": 10, "monsters": [ {"id": "goblin", "count": 5} ] },
-    { "id": "goblin_raid", "shortName": "Рейд", "description": "Лагерь гоблиноидов: рейд", "rewardGold": 12, "monsters": [ {"id": "goblin", "count": 8}, {"id": "orc", "count": 3}, {"id": "troll", "count": 1} ] },
-    { "id": "caves_patrol", "shortName": "Пещеры", "description": "Пещеры: звериный дозор", "rewardGold": 18, "monsters": [ {"id": "wolf", "count": 10}, {"id": "bear", "count": 3} ] },
-    { "id": "crypt_bones", "shortName": "Склеп I", "description": "Склеп: стражи из костей", "rewardGold": 14, "monsters": [ {"id": "skeleton", "count": 5}, {"id": "spider", "count": 2} ] },
-    { "id": "crypt_vampire", "shortName": "Склеп II", "description": "Склеп: вампир-хозяин", "rewardGold": 16, "monsters": [ {"id": "skeleton", "count": 8}, {"id": "bat", "count": 10}, {"id": "vampire", "count": 1} ] },
-    { "id": "dragon_lair", "shortName": "Драконы", "description": "Логово драконов", "rewardGold": 30, "monsters": [ {"id": "dragon", "count": 5} ] }
+    { "id": "barn_rats", "shortName": "Амбар", "description": "Амбар с крысами", "rewards": ["r_barn_rats_gold", "r_bonus_ally_wolf"], "monsters": [ {"id": "rat", "count": 3} ] },
+    { "id": "farm_chickens", "shortName": "Ферма", "description": "Двор фермы и проблема с курями", "rewards": ["r_farm_chickens_gold"], "monsters": [ {"id": "chicken", "count": 6} ] },
+    { "id": "swamp_frogs", "shortName": "Болото", "description": "Болото с лягушками", "rewards": ["r_swamp_frogs_gold"], "monsters": [ {"id": "frog", "count": 8} ] },
+    { "id": "snake_nest", "shortName": "Змеи", "description": "Змеиное гнездо", "rewards": ["r_snake_nest_gold"], "monsters": [ {"id": "giant_snake", "count": 4}, {"id": "frog", "count": 5} ] },
+    { "id": "goblin_scout", "shortName": "Разведка", "description": "Лагерь гоблиноидов: разведка", "rewards": ["r_goblin_scout_gold"], "monsters": [ {"id": "goblin", "count": 5} ] },
+    { "id": "goblin_raid", "shortName": "Рейд", "description": "Лагерь гоблиноидов: рейд", "rewards": ["r_goblin_raid_gold"], "monsters": [ {"id": "goblin", "count": 8}, {"id": "orc", "count": 3}, {"id": "troll", "count": 1} ] },
+    { "id": "caves_patrol", "shortName": "Пещеры", "description": "Пещеры: звериный дозор", "rewards": ["r_caves_patrol_gold", "r_bonus_ally_wolf"], "monsters": [ {"id": "wolf", "count": 10}, {"id": "bear", "count": 3} ] },
+    { "id": "crypt_bones", "shortName": "Склеп I", "description": "Склеп: стражи из костей", "rewards": ["r_crypt_bones_gold"], "monsters": [ {"id": "skeleton", "count": 5}, {"id": "spider", "count": 2} ] },
+    { "id": "crypt_vampire", "shortName": "Склеп II", "description": "Склеп: вампир-хозяин", "rewards": ["r_crypt_vampire_gold"], "monsters": [ {"id": "skeleton", "count": 8}, {"id": "bat", "count": 10}, {"id": "vampire", "count": 1} ] },
+    { "id": "dragon_lair", "shortName": "Драконы", "description": "Логово драконов", "rewards": ["r_dragon_lair_gold"], "monsters": [ {"id": "dragon", "count": 5} ] }
   ]
 }
 

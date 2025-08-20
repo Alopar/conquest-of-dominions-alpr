@@ -2,7 +2,7 @@
   "adventure": {
     "name": "Путь героя",
     "description": "От крысиных бегов до драконьих сокровищ",
-    "startingGold": 20
+    "startingCurrencies": [ { "id": "gold", "amount": 20 }, { "id": "glory", "amount": 0 } ]
   },
   "stages": [
     { "id": "stage_1", "name": "Деревня", "encounterIds": ["barn_rats", "farm_chickens"] },

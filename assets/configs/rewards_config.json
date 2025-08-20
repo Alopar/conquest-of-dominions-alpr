@@ -1,0 +1,17 @@
+{
+  "rewards": [
+    { "id": "r_barn_rats_gold", "type": "currency", "name": "Награда за крыс", "currencyId": "gold", "amount": 5 },
+    { "id": "r_farm_chickens_gold", "type": "currency", "name": "Награда за кур", "currencyId": "gold", "amount": 6 },
+    { "id": "r_swamp_frogs_gold", "type": "currency", "name": "Награда за лягушек", "currencyId": "gold", "amount": 7 },
+    { "id": "r_snake_nest_gold", "type": "currency", "name": "Награда за змей", "currencyId": "gold", "amount": 8 },
+    { "id": "r_goblin_scout_gold", "type": "currency", "name": "Награда за разведку", "currencyId": "gold", "amount": 10 },
+    { "id": "r_goblin_raid_gold", "type": "currency", "name": "Награда за рейд", "currencyId": "gold", "amount": 12 },
+    { "id": "r_caves_patrol_gold", "type": "currency", "name": "Награда за дозор", "currencyId": "gold", "amount": 18 },
+    { "id": "r_crypt_bones_gold", "type": "currency", "name": "Награда за склеп I", "currencyId": "gold", "amount": 14 },
+    { "id": "r_crypt_vampire_gold", "type": "currency", "name": "Награда за склеп II", "currencyId": "gold", "amount": 16 },
+    { "id": "r_dragon_lair_gold", "type": "currency", "name": "Награда за драконов", "currencyId": "gold", "amount": 30 },
+    { "id": "r_bonus_ally_wolf", "type": "monster", "name": "Союзник: Волк", "monsterId": "wolf", "count": 1 }
+  ]
+}
+
+
