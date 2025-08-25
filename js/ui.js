@@ -514,6 +514,7 @@ function finishBattleToAdventure() {
                     if (!window.adventureState.currencies) window.adventureState.currencies = {};
                     const add = Math.max(0, Number(r.amount || 0));
                     window.adventureState.currencies[r.id] = (window.adventureState.currencies[r.id] || 0) + add;
+                    try { if (window.Achievements && typeof window.Achievements.onCurrencyEarned === 'function') window.Achievements.onCurrencyEarned(r.id, add); } catch {}
                     try {
                         const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
                         const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
@@ -602,3 +603,74 @@ async function showRules() {
 }
 
 window.showRules = showRules;
+
+// Экран «Достижения»
+async function showAchievements() {
+    try {
+        if (window.UI && typeof window.UI.ensureScreenLoaded === 'function') {
+            await window.UI.ensureScreenLoaded('achievements-screen', 'fragments/achievements.html');
+        }
+    } catch {}
+    try { showScreen('achievements-screen'); } catch {}
+    try { renderAchievementsGrid(); } catch {}
+}
+
+function renderAchievementsGrid(){
+    const host = document.getElementById('achievements-grid');
+    if (!host) return;
+    host.innerHTML = '';
+    let items = [];
+    try { items = (window.Achievements && typeof window.Achievements.getAll === 'function') ? window.Achievements.getAll() : []; } catch { items = []; }
+    items.forEach(function(a){
+        const tpl = document.getElementById('tpl-achievement-item');
+        const el = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        if (!tpl) el.className = 'achievement-card clickable';
+        if (a.achieved) el.classList.add('achieved');
+        const iconEl = el.querySelector('.achievement-icon') || el;
+        const nameEl = el.querySelector('.achievement-name');
+        const progEl = el.querySelector('.achievement-progress');
+        const statusEl = el.querySelector('.achievement-status');
+        if (iconEl) iconEl.textContent = a.icon || '🏆';
+        if (nameEl) nameEl.textContent = a.name;
+        if (progEl) progEl.textContent = (a.current || 0) + ' / ' + a.amount;
+        if (statusEl) statusEl.style.display = a.achieved ? '' : 'none';
+
+        try {
+            if (window.UI && typeof window.UI.attachTooltip === 'function') {
+                window.UI.attachTooltip(el, function(){
+                    const wrap = document.createElement('div');
+                    wrap.textContent = a.description;
+                    return wrap;
+                }, { delay: 400, hideDelay: 100 });
+            }
+        } catch {}
+
+        el.addEventListener('click', function(){
+            try {
+                if (!(window.UI && typeof window.UI.showModal === 'function')) return;
+                const body = document.createElement('div');
+                body.style.display = 'grid';
+                body.style.gridTemplateColumns = '1fr';
+                body.style.gap = '10px';
+                const row1 = document.createElement('div');
+                row1.textContent = a.description;
+                const row2 = document.createElement('div');
+                const what = (a.type === 'monster') ? 'Убийства: ' : 'Валюта: ';
+                row2.textContent = what + a.id_entity;
+                const row3 = document.createElement('div');
+                row3.textContent = 'Прогресс: ' + (a.current || 0) + ' / ' + a.amount;
+                const row4 = document.createElement('div');
+                row4.textContent = a.achieved ? 'Статус: Достигнуто' : 'Статус: Не достигнуто';
+                body.appendChild(row1);
+                body.appendChild(row2);
+                body.appendChild(row3);
+                body.appendChild(row4);
+                window.UI.showModal(body, { type: 'info', title: a.name });
+            } catch {}
+        });
+
+        host.appendChild(el);
+    });
+}
+
+window.showAchievements = showAchievements;
