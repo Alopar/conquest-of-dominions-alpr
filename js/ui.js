@@ -674,3 +674,23 @@ function renderAchievementsGrid(){
 }
 
 window.showAchievements = showAchievements;
+
+function resetAchievementsProgress(){
+    try {
+        let accepted = true;
+        if (window.UI && typeof window.UI.showModal === 'function') {
+            const h = window.UI.showModal('Сбросить прогресс всех достижений? Это действие необратимо.', { type: 'dialog', title: 'Подтверждение' });
+            h.closed.then(function(ok){
+                if (!ok) return;
+                try { if (window.Achievements && typeof window.Achievements.clearAll === 'function') window.Achievements.clearAll(); } catch {}
+                try { renderAchievementsGrid(); } catch {}
+                try { if (window.UI && typeof window.UI.showToast === 'function') window.UI.showToast('success', 'Прогресс достижений сброшен'); } catch {}
+            });
+            return;
+        }
+        if (!accepted) return;
+        if (window.Achievements && typeof window.Achievements.clearAll === 'function') window.Achievements.clearAll();
+        renderAchievementsGrid();
+    } catch {}
+}
+window.resetAchievementsProgress = resetAchievementsProgress;

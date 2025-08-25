@@ -99,7 +99,13 @@
         });
     }
 
-    window.Achievements = { init, getAll, getById, onUnitKilled, onCurrencyEarned };
+   function clearAll(){
+        try { localStorage.removeItem(LS_KEY); } catch {}
+        progressById = {};
+        normalizeState();
+    }
+
+    window.Achievements = { init, getAll, getById, onUnitKilled, onCurrencyEarned, clearAll };
 })();
 
 
