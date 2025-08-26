@@ -67,6 +67,28 @@ function validateHeroClassesConfig(cfg) {
         if (!c || typeof c.id !== 'string' || typeof c.name !== 'string') throw new Error('Класс героя должен содержать id и name');
         if (!Array.isArray(c.startingArmy)) throw new Error('Класс героя должен содержать startingArmy');
         c.startingArmy.forEach(function(g){ if (!g || typeof g.id !== 'string' || typeof g.count !== 'number') throw new Error('Некорректная запись startingArmy'); });
+        if (c.development) {
+            if (!c.development || !Array.isArray(c.development.levels)) throw new Error('development.levels должен быть массивом');
+            c.development.levels.forEach(function(l){
+                if (typeof l.level !== 'number') throw new Error('level должен быть числом');
+                if (!Array.isArray(l.price)) throw new Error('price уровня должен быть массивом валют');
+                l.price.forEach(function(p){ if (!p || typeof p.id !== 'string' || typeof p.amount !== 'number') throw new Error('price: элементы должны содержать id и amount'); });
+                if (l.autoUpgrades && !Array.isArray(l.autoUpgrades)) throw new Error('autoUpgrades должен быть массивом');
+                if (l.paidUpgrades && !Array.isArray(l.paidUpgrades)) throw new Error('paidUpgrades должен быть массивом');
+            });
+        }
     });
 }
 window.validateHeroClassesConfig = validateHeroClassesConfig;
+
+function validateHeroUpgradesConfig(cfg){
+    const list = Array.isArray(cfg) ? cfg : (cfg && Array.isArray(cfg.upgrades) ? cfg.upgrades : null);
+    if (!list) throw new Error('Неверная структура hero_upgrades');
+    list.forEach(function(u){
+        if (!u || typeof u.id !== 'string' || typeof u.name !== 'string') throw new Error('Улучшение должно содержать id и name');
+        if (typeof u.icon !== 'string' || typeof u.description !== 'string') throw new Error('Улучшение должно содержать icon и description');
+        if (u.price && !Array.isArray(u.price)) throw new Error('price должен быть массивом');
+        (u.price || []).forEach(function(p){ if (!p || typeof p.id !== 'string' || typeof p.amount !== 'number') throw new Error('price: элементы должны содержать id и amount'); });
+    });
+}
+window.validateHeroUpgradesConfig = validateHeroUpgradesConfig;

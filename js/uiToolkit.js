@@ -233,7 +233,12 @@
             const noBtn = win.querySelector('[data-action="no"]');
             if (yesBtn && opts && typeof opts.yesText === 'string') yesBtn.textContent = opts.yesText;
             if (noBtn && opts && typeof opts.noText === 'string') noBtn.textContent = opts.noText;
-            if (yesBtn) yesBtn.addEventListener('click', function(){ close(true); });
+            if (yesBtn) {
+                if (opts && typeof opts.yesDisabled === 'boolean') {
+                    try { yesBtn.disabled = !!opts.yesDisabled; } catch {}
+                }
+                yesBtn.addEventListener('click', function(){ if (yesBtn.disabled) return; close(true); });
+            }
             if (noBtn) noBtn.addEventListener('click', function(){ close(false); });
         }
 

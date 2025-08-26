@@ -8,7 +8,16 @@
       "startingArmy": [
         { "id": "knight", "count": 1 },
         { "id": "archer", "count": 2 }
-      ]
+      ],
+      "development": {
+        "levels": [
+          { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_i", "damage_i"] },
+          { "level": 2, "price": [ { "id": "glory", "amount": 2 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["accuracy_ii", "damage_ii"] },
+          { "level": 3, "price": [ { "id": "glory", "amount": 3 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["accuracy_i", "damage_i"] },
+          { "level": 4, "price": [ { "id": "glory", "amount": 4 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["accuracy_ii", "damage_ii"] },
+          { "level": 5, "price": [ { "id": "glory", "amount": 5 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["accuracy_ii", "damage_ii"] }
+        ]
+      }
     },
     {
       "id": "rogue",
@@ -17,7 +26,16 @@
       "icon": "🔪",
       "startingArmy": [
         { "id": "rogue", "count": 3 }
-      ]
+      ],
+      "development": {
+        "levels": [
+          { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1", "unlock_merc_1"], "paidUpgrades": ["accuracy_i", "damage_i"] },
+          { "level": 2, "price": [ { "id": "glory", "amount": 2 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_ii", "damage_ii"] },
+          { "level": 3, "price": [ { "id": "glory", "amount": 3 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["accuracy_i", "damage_i"] },
+          { "level": 4, "price": [ { "id": "glory", "amount": 4 } ], "autoUpgrades": ["army_plus_2", "unlock_merc_2"], "paidUpgrades": ["accuracy_ii", "damage_ii"] },
+          { "level": 5, "price": [ { "id": "glory", "amount": 5 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["accuracy_ii", "damage_ii"] }
+        ]
+      }
     },
     {
       "id": "mage",
@@ -28,7 +46,16 @@
         { "id": "mage", "count": 1 },
         { "id": "fireElemental", "count": 1 },
         { "id": "waterElemental", "count": 1 }
-      ]
+      ],
+      "development": {
+        "levels": [
+          { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_i", "damage_i"] },
+          { "level": 2, "price": [ { "id": "glory", "amount": 2 } ], "autoUpgrades": ["army_plus_1", "unlock_merc_1"], "paidUpgrades": ["accuracy_ii", "damage_ii"] },
+          { "level": 3, "price": [ { "id": "glory", "amount": 3 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["accuracy_i", "damage_i"] },
+          { "level": 4, "price": [ { "id": "glory", "amount": 4 } ], "autoUpgrades": ["army_plus_2", "unlock_merc_2"], "paidUpgrades": ["accuracy_ii", "damage_ii"] },
+          { "level": 5, "price": [ { "id": "glory", "amount": 5 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["accuracy_ii", "damage_ii"] }
+        ]
+      }
     },
     {
       "id": "ranger",
@@ -39,7 +66,16 @@
         { "id": "archer", "count": 1 },
         { "id": "wolf", "count": 3 }
       ],
-      "requiresAchievementId": "kill_10_wolf"
+      "requiresAchievementId": "kill_10_wolf",
+      "development": {
+        "levels": [
+          { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_i", "damage_i"] },
+          { "level": 2, "price": [ { "id": "glory", "amount": 2 } ], "autoUpgrades": ["army_plus_1", "unlock_merc_1"], "paidUpgrades": ["accuracy_ii", "damage_ii"] },
+          { "level": 3, "price": [ { "id": "glory", "amount": 3 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["accuracy_i", "damage_i"] },
+          { "level": 4, "price": [ { "id": "glory", "amount": 4 } ], "autoUpgrades": ["army_plus_2", "unlock_merc_2"], "paidUpgrades": ["accuracy_ii", "damage_ii"] },
+          { "level": 5, "price": [ { "id": "glory", "amount": 5 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["accuracy_ii", "damage_ii"] }
+        ]
+      }
     }
   ]
 }

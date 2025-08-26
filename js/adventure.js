@@ -221,6 +221,7 @@ function ensureAdventureTabs() {
     tabs.appendChild(makeBtn('map', '🗺️ Карта'));
     tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
     tabs.appendChild(makeBtn('army', '🛡️ Армия'));
+    tabs.appendChild(makeBtn('hero', '👤 Герой'));
     content.insertBefore(tabs, content.firstElementChild || null);
     updateTabsActive(tabs);
 }
@@ -238,7 +239,7 @@ function updateTabsActive(tabs) {
 async function loadAdventureSubscreen(key) {
     const cont = document.getElementById('adventure-subcontainer');
     if (!cont) return;
-    const map = { map: 'fragments/adventure-sub-map.html', tavern: 'fragments/adventure-sub-tavern.html', army: 'fragments/adventure-sub-army.html' };
+    const map = { map: 'fragments/adventure-sub-map.html', tavern: 'fragments/adventure-sub-tavern.html', army: 'fragments/adventure-sub-army.html', hero: 'fragments/adventure-sub-hero.html' };
     const url = map[key] || map.map;
     try {
         const res = await fetch(url + '?_=' + Date.now(), { cache: 'no-store' });
@@ -258,6 +259,8 @@ async function renderAdventureSubscreen() {
         renderMapBoard();
     } else if (subscreen === 'tavern') {
         renderTavern();
+    } else if (subscreen === 'hero') {
+        renderHeroDevelopment();
     }
 }
 
@@ -347,6 +350,123 @@ function renderTavern() {
             hostArmy.appendChild(el);
         }
     }
+}
+
+function renderHeroDevelopment() {
+    const rootHost = document.getElementById('hero-dev-root');
+    if (!rootHost) return;
+    rootHost.innerHTML = '';
+    const scrTpl = document.getElementById('tpl-hero-dev-screen');
+    const headerTpl = document.getElementById('tpl-hero-dev-header');
+    const rowTpl = document.getElementById('tpl-hero-dev-row');
+    const upTpl = document.getElementById('tpl-upgrade-item');
+    const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
+    const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
+    const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
+    const levels = (window.Development && window.Development.getLevelDefs && window.Development.getLevelDefs()) || [];
+    const purchasedLvl = (window.Development && window.Development.getCurrentLevel && window.Development.getCurrentLevel()) || 0;
+    const upgradesCfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('heroUpgrades') : null;
+    const upgradesList = upgradesCfg && Array.isArray(upgradesCfg.upgrades) ? upgradesCfg.upgrades : [];
+    const upById = {}; upgradesList.forEach(function(u){ upById[u.id] = u; });
+    const scr = scrTpl ? scrTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+    const headEl = headerTpl ? headerTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+    const listEl = scr.querySelector('#hero-dev-list') || document.createElement('div');
+    const cls = (window.Hero && window.Hero.getClassDef && window.Hero.getClassDef()) || null;
+    const title = cls ? `${cls.icon || ''} ${cls.name || cls.id}`.trim() : 'Без класса';
+    const tEl = headEl.querySelector('[data-role="title"]') || headEl;
+    const lEl = headEl.querySelector('[data-role="level"]');
+    if (tEl) tEl.textContent = title;
+    if (lEl) lEl.textContent = `Уровень: ${purchasedLvl}`;
+    const headerHost = scr.querySelector('#hero-dev-header') || scr;
+    headerHost.innerHTML = '';
+    headerHost.appendChild(headEl);
+    levels.sort(function(a,b){ return Number(a.level||0) - Number(b.level||0); });
+    levels.forEach(function(l){
+        const row = rowTpl ? rowTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        const freeWrap = row.querySelector('[data-role="free"]') || row;
+        const paidWrap = row.querySelector('[data-role="paid"]') || row;
+        const buyBtn = row.querySelector('[data-role="buyBtn"]');
+        const lvlTitle = row.querySelector('[data-role="levelTitle"]');
+        const freeIds = Array.isArray(l.autoUpgrades) ? l.autoUpgrades : [];
+        const paidIds = Array.isArray(l.paidUpgrades) ? l.paidUpgrades : [];
+        const isLevelOpen = Number(l.level) <= (purchasedLvl || 0);
+        const isCurrentLevel = Number(l.level) === (purchasedLvl || 0);
+        const isNextToBuy = Number(l.level) === (purchasedLvl + 1);
+        function makeItem(u, withPrice){
+            const el = upTpl ? upTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+            if (!upTpl) el.className = 'reward-item upgrade-item';
+            const ic = el.querySelector('[data-role="icon"]') || el;
+            const nm = el.querySelector('[data-role="name"]');
+            const pr = el.querySelector('[data-role="price"]');
+            if (ic) ic.textContent = u.icon || '💠';
+            if (nm) nm.textContent = u.name || u.id;
+            const owned = (window.Hero && window.Hero.hasUpgrade && window.Hero.hasUpgrade(u.id)) || (window.Development && Array.isArray(window.Development.purchasedPaidUpgradeIds) && window.Development.purchasedPaidUpgradeIds.includes(u.id));
+            const locked = !isLevelOpen; // недоступно, если уровень не открыт
+            if (locked) el.classList.add('locked');
+            if (owned) el.classList.add('owned');
+            const shouldShowPrice = withPrice && !locked && !owned;
+            if (shouldShowPrice && pr) {
+                const price = Array.isArray(u.price) ? u.price : [];
+                const priceText = price.map(function(p){ const cd = curById[p.id] || { name: p.id, icon: '' }; return `${p.amount} ${cd.icon || ''}`; }).join(' ');
+                pr.textContent = priceText;
+            }
+            el.classList.add('clickable');
+            el.addEventListener('click', function(){
+                if (locked || owned) { showUpgradeInfoModal(u.id, false); return; }
+                showUpgradeInfoModal(u.id, true);
+            });
+            return el;
+        }
+        freeIds.forEach(function(id){ const u = upById[id]; if (u) { const el = makeItem(u, false); freeWrap.appendChild(el); } });
+        paidIds.forEach(function(id){ const u = upById[id]; if (u) { const el = makeItem(u, true); paidWrap.appendChild(el); } });
+        if (lvlTitle) lvlTitle.textContent = `Уровень ${l.level}`;
+        if (buyBtn) {
+            const price = Array.isArray(l.price) ? l.price : [];
+            const can = (Number(l.level) === purchasedLvl + 1) && price.every(function(p){ return (adventureState.currencies[p.id] || 0) >= p.amount; });
+            // Скрываем кнопку для уже купленных уровней
+            if (Number(l.level) <= purchasedLvl) {
+                buyBtn.style.display = 'none';
+            } else {
+                buyBtn.disabled = !can;
+                const priceText = price.map(function(p){ const cd = curById[p.id] || { name: p.id, icon: '' }; return `${p.amount} ${cd.icon || ''}`; }).join(' ') || '—';
+                buyBtn.textContent = `Поднять ${priceText}`;
+                buyBtn.addEventListener('click', function(){
+                    if (window.Development && window.Development.purchaseLevel) {
+                        if (window.Development.purchaseLevel()) { renderAdventure(); }
+                    }
+                });
+            }
+        }
+        listEl.appendChild(row);
+    });
+    rootHost.appendChild(scr);
+}
+
+function showUpgradeInfoModal(upgradeId, isPaid) {
+    try {
+        const upCfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('heroUpgrades') : null;
+        const list = upCfg && Array.isArray(upCfg.upgrades) ? upCfg.upgrades : [];
+        const up = list.find(function(x){ return x && x.id === upgradeId; }) || { id: upgradeId, name: upgradeId, description: '' };
+        const bodyTpl = document.getElementById('tpl-upgrade-modal-body');
+        const body = bodyTpl ? bodyTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        const descEl = body.querySelector('[data-role="desc"]') || body;
+        descEl.textContent = up.description || '';
+        const price = Array.isArray(up.price) ? up.price : [];
+        if (isPaid && price.length > 0) {
+            const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
+            const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
+            const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
+            const pEl = body.querySelector('[data-role="priceLine"]');
+            if (pEl) pEl.textContent = price.map(function(pi){ const cd = curById[pi.id] || { name: pi.id, icon: '' }; return `${pi.amount} ${cd.icon || ''}`; }).join(' ');
+        }
+        const can = isPaid ? (window.Development && window.Development.canBuyUpgrade && window.Development.canBuyUpgrade(upgradeId)?.ok) : false;
+        if (window.UI && typeof window.UI.showModal === 'function') {
+            const h = window.UI.showModal(body, { type: isPaid ? 'dialog' : 'info', title: `${up.icon || ''} ${up.name || up.id}`.trim(), yesText: 'Купить', noText: 'Закрыть', yesDisabled: !can });
+            h.closed.then(function(ok){ if (ok && isPaid && window.Development && window.Development.buyUpgrade) { if (window.Development.buyUpgrade(upgradeId)) renderHeroDevelopment(); } });
+        } else {
+            alert(up.name || upgradeId);
+        }
+    } catch {}
 }
 
 function buyUnit(typeId) {
@@ -544,12 +664,12 @@ async function onHeroClassClick(c, isLocked) {
         } else { accepted = confirm('Выбрать класс ' + (c.name || c.id) + '?'); }
     } catch {}
     if (!accepted) return;
-    // Применяем класс: сбрасываем пул и наполняем стартовой армией
+    // Выбор класса через систему Героя
+    try { if (window.Hero && typeof window.Hero.setClassId === 'function') window.Hero.setClassId(c.id); } catch {}
     adventureState.selectedClassId = c.id;
     adventureState.pool = {};
-    for (const g of c.startingArmy) {
-        if (g && g.id && g.count > 0) adventureState.pool[g.id] = (adventureState.pool[g.id] || 0) + g.count;
-    }
+    const startArmy = (window.Hero && typeof window.Hero.getStartingArmy === 'function') ? window.Hero.getStartingArmy() : [];
+    for (const g of startArmy) { if (g && g.id && g.count > 0) adventureState.pool[g.id] = (adventureState.pool[g.id] || 0) + g.count; }
     persistAdventure();
     const btn = document.getElementById('adventure-begin-btn'); if (btn) btn.disabled = false;
     const listRoot = document.getElementById('hero-class-select');
@@ -724,15 +844,11 @@ async function startEncounterBattle(encData) {
 }
 
 function applySelectedClassStartingArmy() {
-    let classesCfg = null;
-    try { classesCfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('heroClasses') : null; } catch {}
-    const list = classesCfg && Array.isArray(classesCfg.classes) ? classesCfg.classes : (Array.isArray(classesCfg) ? classesCfg : []);
-    const selected = list.find(x => x.id === adventureState.selectedClassId);
-    if (!selected) return;
+    const classId = (window.Hero && typeof window.Hero.getClassId === 'function') ? window.Hero.getClassId() : adventureState.selectedClassId;
+    if (!classId) return;
+    const startArmy = (window.Hero && typeof window.Hero.getStartingArmy === 'function') ? window.Hero.getStartingArmy() : [];
     adventureState.pool = {};
-    for (const g of selected.startingArmy) {
-        if (g && g.id && g.count > 0) adventureState.pool[g.id] = (adventureState.pool[g.id] || 0) + g.count;
-    }
+    for (const g of startArmy) { if (g && g.id && g.count > 0) adventureState.pool[g.id] = (adventureState.pool[g.id] || 0) + g.count; }
     persistAdventure();
 }
 
