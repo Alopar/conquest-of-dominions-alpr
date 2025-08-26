@@ -413,7 +413,7 @@
         const hideDelay = (options && typeof options.hideDelay === 'number') ? options.hideDelay : 100;
 
         function ensureTip() {
-            if (tipEl) return tipEl;
+            if (tipEl && tipEl.isConnected && tipEl.parentElement === layer) return tipEl;
             tipEl = document.createElement('div');
             tipEl.style.position = 'fixed';
             tipEl.style.transform = 'translate(12px, 12px)';
@@ -458,6 +458,8 @@
             if (showTimer) return;
             showTimer = setTimeout(function(){
                 showTimer = null;
+                try { clearTooltips(); } catch {}
+                tipEl = null;
                 const tip = ensureTip();
                 setContent();
                 tip.style.display = 'block';
