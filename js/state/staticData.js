@@ -8,8 +8,8 @@
         { id: 'currencies', title: 'Валюты', assets: ['assets/configs/currencies_config.json'], validatorName: 'validateCurrenciesConfig' },
         { id: 'mercenaries', title: 'Наёмники', assets: ['assets/configs/mercenaries_config.json'], validatorName: 'validateMercenariesConfig' },
         { id: 'heroClasses', title: 'Классы героев', assets: ['assets/configs/hero_classes.json'], validatorName: 'validateHeroClassesConfig' },
-        // Порядок: сначала новое имя, затем старое — теперь основной файл переименован
-        { id: 'battleSetup', title: 'Сетап боя', assets: ['assets/configs/battle_setup.json', 'assets/configs/battle_config.json'], validatorName: 'validateBattleConfig' }
+        // Основной файл сетапа боя
+        { id: 'battleSetup', title: 'Сетап боя', assets: ['assets/configs/battle_setup.json'], validatorName: 'validateBattleConfig' }
     ];
 
     const LS_PREFS_KEY = 'configPrefs';

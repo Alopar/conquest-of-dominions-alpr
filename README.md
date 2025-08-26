@@ -10,7 +10,7 @@ conquest-of-dominions-alpr/
 ├── assets/                    # Ресурсы
 │   ├── images/               # Изображения (для будущего использования)
 │   ├── configs/              # Конфигурационные файлы
-│   │   ├── battle_config.json
+│   │   ├── battle_setup.json
 │   │   └── monsters_config.json
 │   └── data/                 # Игровые данные (для будущего использования)
 ├── css/                      # Стили
@@ -67,14 +67,14 @@ conquest-of-dominions-alpr/
 - `js/ui.js` - Пользовательский интерфейс и отображение
 
 ### Конфигурации
-- `assets/configs/battle_config.json` — Конфигурация конкретной битвы (армии, параметры)
+- `assets/configs/battle_setup.json` — Конфигурация конкретной битвы (армии, параметры)
 - `assets/configs/monsters_config.json` — Все типы юнитов/монстров (характеристики)
 
 ## ⚙️ Конфигурация
 
 Игра использует два отдельных JSON-файла для настройки:
 - **monsters_config.json** — типы юнитов (характеристики, урон, здоровье)
-- **battle_config.json** — армии и параметры боя (без unitTypes)
+- **battle_setup.json** — армии и параметры боя (без unitTypes)
 
 ### Пример конфигураций:
 
