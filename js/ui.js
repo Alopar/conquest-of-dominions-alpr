@@ -192,6 +192,7 @@ function renderArmies() {
     const attackersLine = document.getElementById('attackers-line');
     renderArmyLine(window.gameState.defenders, 'defenders', defendersLine);
     renderArmyLine(window.gameState.attackers, 'attackers', attackersLine);
+    try { updateBattleStats(); } catch {}
     if (window.applyPendingAnimations) window.applyPendingAnimations();
     updateButtonStates();
 }
@@ -262,6 +263,7 @@ function updateButtonStates() {
             if (typeof window.toggleAutoPlay === 'function') window.toggleAutoPlay();
         }
     } catch {}
+    try { updateBattleStats(); } catch {}
 }
 
 // Устаревшая панель информации о юните удалена
@@ -316,6 +318,17 @@ async function showBattle() {
     } catch { showScreen('battle-screen'); }
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
+}
+
+function updateBattleStats(){
+    const el = document.getElementById('battle-stats');
+    if (!el) return;
+    const aAll = window.gameState.attackers.length;
+    const dAll = window.gameState.defenders.length;
+    const aAlive = window.gameState.attackers.filter(function(u){ return u.alive; }).length;
+    const dAlive = window.gameState.defenders.filter(function(u){ return u.alive; }).length;
+    const turn = window.gameState.currentTurn || 1;
+    el.textContent = `⚔️ Атакующие ${aAlive}/${aAll} · 🛡️ Защитники ${dAlive}/${dAll} · ⏳ Ход ${turn}`;
 }
 
 // Экран "Схватка"
@@ -435,6 +448,7 @@ window.backToIntroFromFight = backToIntroFromFight;
 window.addToLog = addToLog;
 window.renderArmies = renderArmies;
 window.updateButtonStates = updateButtonStates;
+window.updateBattleStats = updateBattleStats;
 
 // Автовоспроизведение шагов/ходов
 (function(){

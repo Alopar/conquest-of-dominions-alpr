@@ -110,18 +110,7 @@ function initializeArmies() {
     let unitIdCounter = 0;
 
     // Обновляем названия армий
-    const attackersLabel = document.getElementById('attackers-label');
-    const defendersLabel = document.getElementById('defenders-label');
-
-    if (attackersLabel && window.battleConfig.armies.attackers.name) {
-        const description = window.battleConfig.armies.attackers.description ? ` - ${window.battleConfig.armies.attackers.description}` : '';
-        attackersLabel.textContent = `${window.battleConfig.armies.attackers.name}${description}`;
-    }
-
-    if (defendersLabel && window.battleConfig.armies.defenders.name) {
-        const description = window.battleConfig.armies.defenders.description ? ` - ${window.battleConfig.armies.defenders.description}` : '';
-        defendersLabel.textContent = `${window.battleConfig.armies.defenders.name}${description}`;
-    }
+    // Больше не показываем названия/описания армий на экране
 
     // Создание атакующих из конфигурации (без ограничения по количеству)
     for (const unitGroup of window.battleConfig.armies.attackers.units) {
@@ -321,10 +310,7 @@ function nextTurn() {
     window.gameState.currentTurn++;
 
     // Обновляем счетчик ходов
-    const turnCounter = document.getElementById('turn-counter');
-    if (turnCounter) {
-        turnCounter.textContent = `Ход: ${window.gameState.currentTurn}`;
-    }
+    try { if (window.updateBattleStats) window.updateBattleStats(); } catch {}
 
     window.addToLog(`🔄 Начинается ход ${window.gameState.currentTurn}`);
     renderArmies();
@@ -350,6 +336,7 @@ function endBattle(winner) {
 
     // Обновляем состояние кнопок
     updateButtonStates();
+    try { if (window.updateBattleStats) window.updateBattleStats(); } catch {}
 }
 
 function resetBattle() {
