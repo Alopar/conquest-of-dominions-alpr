@@ -77,49 +77,112 @@ function renderUnit(unit, army) {
             window.UI.showModal(body, { type: 'info', title: 'Описание существа' });
         } catch {}
     });
-	try {
-		if (window.UI && typeof window.UI.attachTooltip === 'function') {
-			window.UI.attachTooltip(unitDiv, function(){
-				const wrap = document.createElement('div');
-				wrap.style.display = 'flex';
-				wrap.style.alignItems = 'center';
-				const name = document.createElement('span');
-				name.textContent = String(unit.name || '');
-				const sep1 = document.createElement('span');
-				sep1.textContent = '|';
-				sep1.style.opacity = '0.6';
-				sep1.style.margin = '0 8px';
-				const hp = document.createElement('span');
-				hp.textContent = `${unit.hp}/${unit.maxHp} ❤️`;
-				const sep2 = document.createElement('span');
-				sep2.textContent = '|';
-				sep2.style.opacity = '0.6';
-				sep2.style.margin = '0 8px';
-				const status = document.createElement('span');
-				let statusText = '';
-				if (!unit.alive) statusText = '💀 Мертв';
-				else if (unit.hasAttackedThisTurn) statusText = '⚔️ Атаковал';
-				else statusText = '✅ Готов';
-				status.textContent = statusText;
-				wrap.appendChild(name);
-				wrap.appendChild(sep1);
-				wrap.appendChild(hp);
-				wrap.appendChild(sep2);
-				wrap.appendChild(status);
-				return wrap;
-			}, { delay: 500, hideDelay: 100 });
-		}
-	} catch {}
+    try {
+        if (window.UI && typeof window.UI.attachTooltip === 'function') {
+            window.UI.attachTooltip(unitDiv, function(){
+                const wrap = document.createElement('div');
+                wrap.style.display = 'flex';
+                wrap.style.alignItems = 'center';
+                const name = document.createElement('span');
+                name.textContent = String(unit.name || '');
+                const sep1 = document.createElement('span');
+                sep1.textContent = '|';
+                sep1.style.opacity = '0.6';
+                sep1.style.margin = '0 8px';
+                const hp = document.createElement('span');
+                hp.textContent = `${unit.hp}/${unit.maxHp} ❤️`;
+                const sep2 = document.createElement('span');
+                sep2.textContent = '|';
+                sep2.style.opacity = '0.6';
+                sep2.style.margin = '0 8px';
+                const status = document.createElement('span');
+                let statusText = '';
+                if (!unit.alive) statusText = '💀 Мертв';
+                else if (unit.hasAttackedThisTurn) statusText = '⚔️ Атаковал';
+                else statusText = '✅ Готов';
+                status.textContent = statusText;
+                wrap.appendChild(name);
+                wrap.appendChild(sep1);
+                wrap.appendChild(hp);
+                wrap.appendChild(sep2);
+                wrap.appendChild(status);
+                return wrap;
+            }, { delay: 500, hideDelay: 100 });
+        }
+    } catch {}
     return unitDiv;
 }
 
 // Рендер линии одной армии
 function renderArmyLine(units, army, lineEl) {
     lineEl.innerHTML = '';
+    const s = (typeof window.getCurrentSettings === 'function') ? window.getCurrentSettings() : null;
+    const perRow = Math.max(1, Number((s && s.unitsPerRow) || 10));
+    const remaining = units.slice();
+    const rows = [];
+
+    function strength(u){
+        const hp = Number(u.maxHp || u.hp || 0);
+        const dmg = (typeof u.damage === 'number') ? u.damage : 0;
+        return { hp, dmg };
+    }
+
+    function sortByStrengthDesc(a, b){
+        const sa = strength(a); const sb = strength(b);
+        if (sb.hp !== sa.hp) return sb.hp - sa.hp;
+        return sb.dmg - sa.dmg;
+    }
+
+    function takeNextRow(){
+        const melee = remaining.filter(function(u){ return (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'melee'; }).sort(sortByStrengthDesc);
+        const range = remaining.filter(function(u){ return (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'range'; }).sort(sortByStrengthDesc);
+        const support = remaining.filter(function(u){ return (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'support'; }).sort(sortByStrengthDesc);
+        const row = [];
+        function pull(from){
+            while (from.length > 0 && row.length < perRow) row.push(from.shift());
+        }
+        pull(melee); if (row.length < perRow) pull(range); if (row.length < perRow) pull(support);
+        // Переупорядочиваем внутри строки: самые сильные в центре, далее по убыванию симметрично
+        const rolePriorityOrder = row.slice();
+        // Уже удовлетворяет приоритетам ролей: melee -> range -> support, и отсортирован по силе в каждой группе
+        const n = rolePriorityOrder.length;
+        const positions = (function(){
+            const order = [];
+            let left = Math.floor((n - 1) / 2);
+            let right = left + 1;
+            if (n % 2 === 1) { order.push(left); left--; }
+            while (order.length < n) {
+                if (left >= 0) { order.push(left); left--; }
+                if (right < n) { order.push(right); right++; }
+            }
+            return order;
+        })();
+        const arranged = new Array(n);
+        for (let i = 0; i < n; i++) arranged[positions[i]] = rolePriorityOrder[i];
+        row.length = 0; Array.prototype.push.apply(row, arranged);
+        const used = new Set(row.map(function(u){ return u.id; }));
+        for (let i = remaining.length - 1; i >= 0; i--) { if (used.has(remaining[i].id)) remaining.splice(i, 1); }
+        return row;
+    }
+
+    while (remaining.length > 0) { rows.push(takeNextRow()); }
+
     const frag = document.createDocumentFragment();
-    units.forEach((unit) => {
-        frag.appendChild(renderUnit(unit, army));
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '20px';
+
+    const ordered = (army === 'defenders') ? rows.slice().reverse() : rows;
+    ordered.forEach(function(rowUnits){
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'center';
+        row.style.gap = '12px';
+        rowUnits.forEach(function(u){ row.appendChild(renderUnit(u, army)); });
+        container.appendChild(row);
     });
+    frag.appendChild(container);
     lineEl.appendChild(frag);
 }
 

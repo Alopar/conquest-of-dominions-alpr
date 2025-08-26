@@ -670,8 +670,6 @@ function showUnitInfoModal(unitTypeId) {
 }
 
 function pickSquadForBattle() {
-    const settings = window.getCurrentSettings ? window.getCurrentSettings() : { maxUnitsPerArmy: 10 };
-    const limit = settings.maxUnitsPerArmy || 10;
     const monsters = window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : {};
     const ids = Object.keys(adventureState.pool).filter(id => adventureState.pool[id] > 0);
     ids.sort((a,b) => {
@@ -680,11 +678,9 @@ function pickSquadForBattle() {
         return pb - pa;
     });
     const result = [];
-    let remaining = limit;
     for (const id of ids) {
-        if (remaining <= 0) break;
-        const take = Math.min(adventureState.pool[id], remaining);
-        if (take > 0) { result.push({ id, count: take }); remaining -= take; }
+        const take = adventureState.pool[id];
+        if (take > 0) { result.push({ id, count: take }); }
     }
     return result;
 }

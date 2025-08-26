@@ -108,8 +108,6 @@ function initializeArmies() {
     window.gameState.defenders = [];
 
     let unitIdCounter = 0;
-    const currentSettings = window.getCurrentSettings();
-    const maxUnits = currentSettings.maxUnitsPerArmy;
 
     // Обновляем названия армий
     const attackersLabel = document.getElementById('attackers-label');
@@ -125,25 +123,21 @@ function initializeArmies() {
         defendersLabel.textContent = `${window.battleConfig.armies.defenders.name}${description}`;
     }
 
-    // Создание атакующих из конфигурации
+    // Создание атакующих из конфигурации (без ограничения по количеству)
     for (const unitGroup of window.battleConfig.armies.attackers.units) {
-        for (let i = 0; i < unitGroup.count && window.gameState.attackers.length < maxUnits; i++) {
+        for (let i = 0; i < unitGroup.count; i++) {
             const unit = createUnit(unitGroup.id, `attacker_${unitIdCounter++}`);
-            if (unit) {
-                window.gameState.attackers.push(unit);
-            }
+            if (unit) window.gameState.attackers.push(unit);
         }
     }
     // Формирование построения атакующих
     window.gameState.attackers = arrangeUnitsIntoFormation(window.gameState.attackers);
 
-    // Создание защитников из конфигурации
+    // Создание защитников из конфигурации (без ограничения по количеству)
     for (const unitGroup of window.battleConfig.armies.defenders.units) {
-        for (let i = 0; i < unitGroup.count && window.gameState.defenders.length < maxUnits; i++) {
+        for (let i = 0; i < unitGroup.count; i++) {
             const unit = createUnit(unitGroup.id, `defender_${unitIdCounter++}`);
-            if (unit) {
-                window.gameState.defenders.push(unit);
-            }
+            if (unit) window.gameState.defenders.push(unit);
         }
     }
     // Формирование построения защитников
