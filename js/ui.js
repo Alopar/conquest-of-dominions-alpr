@@ -634,7 +634,7 @@ function finishBattleToAdventure() {
                         const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
                         const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
                         const cd = curById[r.id] || { name: r.id, icon: '' };
-                        if (window.UI && window.UI.showToast) window.UI.showToast('success', `${cd.name}: +${add} ${cd.icon || ''}`);
+                        if (window.UI && window.UI.showToast) window.UI.showToast('copper', `${cd.name}: +${add} ${cd.icon || ''}`);
                     } catch {}
                 } else if (r.type === 'monster') {
                     if (!window.adventureState.pool) window.adventureState.pool = {};
@@ -642,7 +642,7 @@ function finishBattleToAdventure() {
                     try {
                         const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
                         const m = monsters[r.id] || { name: r.id };
-                        if (window.UI && window.UI.showToast) window.UI.showToast('success', `Союзник: ${m.name || r.id} x${r.amount}`);
+                        if (window.UI && window.UI.showToast) window.UI.showToast('copper', `Союзник: ${m.name || r.id} x${r.amount}`);
                     } catch {}
                 }
             });

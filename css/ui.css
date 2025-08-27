@@ -388,3 +388,6 @@
 .upgrade-item.locked .upgrade-price { display:none; }
 .upgrade-item.owned { border:2px solid #d4af37; box-shadow: 0 4px 14px rgba(212,175,55,0.25), inset 0 1px 2px rgba(255,255,255,0.08); }
 .upgrade-item.owned .upgrade-price { display:none; }
+/* Бесплатные (авто) улучшения — серебряный стиль */
+.upgrade-item.owned-free { border:2px solid #c0c0c0; box-shadow: 0 4px 14px rgba(192,192,192,0.25), inset 0 1px 2px rgba(255,255,255,0.10); }
+.upgrade-item.owned-free .upgrade-price { display:none; }

@@ -403,7 +403,10 @@ function renderHeroDevelopment() {
             const owned = (window.Hero && window.Hero.hasUpgrade && window.Hero.hasUpgrade(u.id)) || (window.Development && Array.isArray(window.Development.purchasedPaidUpgradeIds) && window.Development.purchasedPaidUpgradeIds.includes(u.id));
             const locked = !isLevelOpen; // недоступно, если уровень не открыт
             if (locked) el.classList.add('locked');
-            if (owned) el.classList.add('owned');
+            if (owned) {
+                el.classList.add('owned');
+                if (!withPrice) el.classList.add('owned-free');
+            }
             const shouldShowPrice = withPrice && !locked && !owned;
             if (shouldShowPrice && pr) {
                 const price = Array.isArray(u.price) ? u.price : [];

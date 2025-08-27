@@ -61,7 +61,15 @@
         price.forEach(function(p){ window.adventureState.currencies[p.id] = (window.adventureState.currencies[p.id] || 0) - p.amount; });
         const def = getLevelDefs().find(function(l){ return Number(l.level) === nextLevel; });
         const auto = def && Array.isArray(def.autoUpgrades) ? def.autoUpgrades : [];
-        try { if (window.Hero && typeof window.Hero.addOwnedUpgrades === 'function') window.Hero.addOwnedUpgrades(auto); } catch {}
+        try {
+            if (window.Hero && typeof window.Hero.addOwnedUpgrades === 'function') window.Hero.addOwnedUpgrades(auto);
+            if (Array.isArray(auto) && auto.length > 0 && window.UI && typeof window.UI.showToast === 'function') {
+                auto.forEach(function(id){
+                    const up = getUpgradeById(id) || { id, icon: '', name: id };
+                    window.UI.showToast('silver', `Улучшение ${up.icon || ''} "${up.name || id}" получено!`);
+                });
+            }
+        } catch {}
         state.currentLevel = nextLevel;
         save();
         try { if (typeof window.persistAdventure === 'function') window.persistAdventure(); } catch {}
@@ -90,7 +98,13 @@
         if (!check.ok) return false;
         (check.price || []).forEach(function(p){ window.adventureState.currencies[p.id] = (window.adventureState.currencies[p.id] || 0) - p.amount; });
         state.purchasedPaidUpgradeIds.push(upgradeId);
-        try { if (window.Hero && typeof window.Hero.addOwnedUpgrades === 'function') window.Hero.addOwnedUpgrades([upgradeId]); } catch {}
+        try {
+            if (window.Hero && typeof window.Hero.addOwnedUpgrades === 'function') window.Hero.addOwnedUpgrades([upgradeId]);
+            if (window.UI && typeof window.UI.showToast === 'function') {
+                const up = getUpgradeById(upgradeId) || { id: upgradeId, icon: '', name: upgradeId };
+                window.UI.showToast('gold', `Улучшение ${up.icon || ''} "${up.name || upgradeId}" получено!`);
+            }
+        } catch {}
         save();
         try { if (typeof window.persistAdventure === 'function') window.persistAdventure(); } catch {}
         return true;
