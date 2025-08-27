@@ -69,6 +69,15 @@
                     window.UI.showToast('silver', `Улучшение ${up.icon || ''} "${up.name || id}" получено!`);
                 });
             }
+            // Выдать связанные с автоулучшениями перки
+            try {
+                const perks = [];
+                (auto || []).forEach(function(uid){
+                    const u = getUpgradeById(uid);
+                    if (u && Array.isArray(u.grantsPerks)) perks.push.apply(perks, u.grantsPerks);
+                });
+                if (perks.length > 0 && window.Perks && typeof window.Perks.addMany === 'function') window.Perks.addMany(perks);
+            } catch {}
         } catch {}
         state.currentLevel = nextLevel;
         save();
@@ -104,6 +113,12 @@
                 const up = getUpgradeById(upgradeId) || { id: upgradeId, icon: '', name: upgradeId };
                 window.UI.showToast('gold', `Улучшение ${up.icon || ''} "${up.name || upgradeId}" получено!`);
             }
+            // Выдать перки за покупаемое улучшение
+            try {
+                const def = getUpgradeById(upgradeId);
+                const perks = def && Array.isArray(def.grantsPerks) ? def.grantsPerks : [];
+                if (perks.length > 0 && window.Perks && typeof window.Perks.addMany === 'function') window.Perks.addMany(perks);
+            } catch {}
         } catch {}
         save();
         try { if (typeof window.persistAdventure === 'function') window.persistAdventure(); } catch {}

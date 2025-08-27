@@ -89,6 +89,25 @@ function validateHeroUpgradesConfig(cfg){
         if (typeof u.icon !== 'string' || typeof u.description !== 'string') throw new Error('Улучшение должно содержать icon и description');
         if (u.price && !Array.isArray(u.price)) throw new Error('price должен быть массивом');
         (u.price || []).forEach(function(p){ if (!p || typeof p.id !== 'string' || typeof p.amount !== 'number') throw new Error('price: элементы должны содержать id и amount'); });
+        if (u.grantsPerks && !Array.isArray(u.grantsPerks)) throw new Error('grantsPerks должен быть массивом строк');
     });
 }
 window.validateHeroUpgradesConfig = validateHeroUpgradesConfig;
+
+function validatePerksConfig(cfg){
+    const list = Array.isArray(cfg) ? cfg : (cfg && Array.isArray(cfg.perks) ? cfg.perks : null);
+    if (!list) throw new Error('Неверная структура perks_config');
+    list.forEach(function(p){
+        if (!p || typeof p.id !== 'string' || typeof p.name !== 'string') throw new Error('Перк должен содержать id и name');
+        if (typeof p.icon !== 'string' || typeof p.description !== 'string') throw new Error('Перк должен содержать icon и description');
+        if (p.hidden != null && typeof p.hidden !== 'boolean') throw new Error('hidden должен быть boolean');
+        if (!Array.isArray(p.effects)) throw new Error('effects должен быть массивом');
+        p.effects.forEach(function(e){
+            if (!e || typeof e.type !== 'string') throw new Error('effect.type обязателен');
+            if (e.type === 'stat' || e.type === 'multiplier') {
+                if (typeof e.path !== 'string' || typeof e.value !== 'number') throw new Error('stat/multiplier требуют path и value');
+            }
+        });
+    });
+}
+window.validatePerksConfig = validatePerksConfig;

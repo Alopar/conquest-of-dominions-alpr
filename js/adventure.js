@@ -131,6 +131,12 @@ function initAdventureState(cfg) {
     adventureState.lastResult = '';
     persistAdventure();
     window.adventureState = adventureState;
+    try { if (window.Perks && typeof window.Perks.clear === 'function') window.Perks.clear(); } catch {}
+    try {
+        const def = (window.Hero && typeof window.Hero.getClassDef === 'function') ? window.Hero.getClassDef() : null;
+        const innate = def && Array.isArray(def.innatePerks) ? def.innatePerks : [];
+        if (innate.length > 0 && window.Perks && typeof window.Perks.addMany === 'function') window.Perks.addMany(innate);
+    } catch {}
 }
 
 async function showAdventure() {
@@ -221,7 +227,8 @@ function ensureAdventureTabs() {
     tabs.appendChild(makeBtn('map', '🗺️ Карта'));
     tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
     tabs.appendChild(makeBtn('army', '🛡️ Армия'));
-    tabs.appendChild(makeBtn('hero', '🥇 Развитие'));
+    tabs.appendChild(makeBtn('hero', '💪 Улучшения'));
+    tabs.appendChild(makeBtn('perks', '🥇 Перки'));
     content.insertBefore(tabs, content.firstElementChild || null);
     updateTabsActive(tabs);
 }
@@ -239,7 +246,7 @@ function updateTabsActive(tabs) {
 async function loadAdventureSubscreen(key) {
     const cont = document.getElementById('adventure-subcontainer');
     if (!cont) return;
-    const map = { map: 'fragments/adventure-sub-map.html', tavern: 'fragments/adventure-sub-tavern.html', army: 'fragments/adventure-sub-army.html', hero: 'fragments/adventure-sub-hero.html' };
+    const map = { map: 'fragments/adventure-sub-map.html', tavern: 'fragments/adventure-sub-tavern.html', army: 'fragments/adventure-sub-army.html', hero: 'fragments/adventure-sub-hero.html', perks: 'fragments/adventure-sub-perks.html' };
     const url = map[key] || map.map;
     try {
         const res = await fetch(url + '?_=' + Date.now(), { cache: 'no-store' });
@@ -261,6 +268,35 @@ async function renderAdventureSubscreen() {
         renderTavern();
     } else if (subscreen === 'hero') {
         renderHeroDevelopment();
+    } else if (subscreen === 'perks') {
+        try {
+            const host = document.getElementById('perks-grid');
+            if (host) {
+                host.innerHTML = '';
+                let items = [];
+                try { items = (window.Perks && typeof window.Perks.getPublicOwned === 'function') ? window.Perks.getPublicOwned() : []; } catch { items = []; }
+                items.forEach(function(p){
+                    const tpl = document.getElementById('tpl-perk-item');
+                    const el = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                    if (!tpl) { el.className = 'achievement-card clickable'; }
+                    const iconEl = el.querySelector('.achievement-icon') || el;
+                    const nameEl = el.querySelector('.achievement-name');
+                    if (iconEl) iconEl.textContent = p.icon || '🥈';
+                    if (nameEl) nameEl.textContent = p.name || p.id;
+                    el.addEventListener('click', function(){
+                        try {
+                            if (!(window.UI && typeof window.UI.showModal === 'function')) return;
+                            const bodyTpl = document.getElementById('tpl-perk-modal-body');
+                            const body = bodyTpl ? bodyTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                            const descEl = body.querySelector('[data-role="desc"]') || body;
+                            if (descEl) descEl.textContent = p.description || '';
+                            window.UI.showModal(body, { type: 'info', title: `${p.icon || ''} ${p.name || p.id}`.trim() });
+                        } catch {}
+                    });
+                    host.appendChild(el);
+                });
+            }
+        } catch {}
     }
 }
 

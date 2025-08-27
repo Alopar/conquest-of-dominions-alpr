@@ -12,7 +12,20 @@
     { "id": "accuracy_3", "icon": "🎯", "name": "Меткость III", "description": "Повышает шанс попадания на +3", "price": [ { "id": "glory", "amount": 3 } ] },
     { "id": "damage_1", "icon": "💥", "name": "Урон I", "description": "Повышает урон на +1", "price": [ { "id": "glory", "amount": 1 } ] },
     { "id": "damage_2", "icon": "💥", "name": "Урон II", "description": "Повышает урон на +2", "price": [ { "id": "glory", "amount": 2 } ] },
-    { "id": "damage_3", "icon": "💥", "name": "Урон III", "description": "Повышает урон на +3", "price": [ { "id": "glory", "amount": 3 } ] }
+    { "id": "damage_3", "icon": "💥", "name": "Урон III", "description": "Повышает урон на +3", "price": [ { "id": "glory", "amount": 3 } ] },
+
+    { "id": "perk_hp_melee", "icon": "❤️", "name": "Выносливость мели", "description": "+5 HP для мели", "price": [ { "id": "glory", "amount": 1 } ], "grantsPerks": ["hp_melee_plus_5"] },
+    { "id": "perk_hp_range", "icon": "❤️", "name": "Выносливость стрелков", "description": "+3 HP для рендж", "price": [ { "id": "glory", "amount": 1 } ], "grantsPerks": ["hp_range_plus_3"] },
+    { "id": "perk_hp_support", "icon": "❤️", "name": "Выносливость поддержки", "description": "+2 HP для саппорт", "price": [ { "id": "glory", "amount": 1 } ], "grantsPerks": ["hp_support_plus_2"] },
+
+    { "id": "perk_dmg_melee", "icon": "💥", "name": "Сила мели", "description": "+1 урон мели", "price": [ { "id": "glory", "amount": 1 } ], "grantsPerks": ["dmg_melee_plus_1"] },
+    { "id": "perk_dmg_range", "icon": "💥", "name": "Сила стрелков", "description": "+1 урон рендж", "price": [ { "id": "glory", "amount": 1 } ], "grantsPerks": ["dmg_range_plus_1"] },
+    { "id": "perk_dmg_support", "icon": "💥", "name": "Сила поддержки", "description": "+1 урон саппорт", "price": [ { "id": "glory", "amount": 1 } ], "grantsPerks": ["dmg_support_plus_1"] },
+
+    { "id": "perk_support_targets", "icon": "🎯", "name": "Широкая поддержка", "description": "+1 цель для саппорт", "price": [ { "id": "glory", "amount": 2 } ], "grantsPerks": ["support_targets_plus_1"] },
+
+    { "id": "perk_gold_bonus", "icon": "💰", "name": "Золотое чутьё", "description": "+20% золота", "price": [ { "id": "glory", "amount": 2 } ], "grantsPerks": ["gold_bonus_20"] },
+    { "id": "perk_glory_bonus", "icon": "🏅", "name": "Слава героя", "description": "+10% славы", "price": [ { "id": "glory", "amount": 1 } ], "grantsPerks": ["glory_bonus_10"] }
   ]
 }
 

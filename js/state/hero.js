@@ -31,6 +31,11 @@
         state.purchasedLevel = 0;
         save();
         try { if (window.Development && typeof window.Development.initForClass === 'function') window.Development.initForClass(id); } catch {}
+        try {
+            const def = getClassDef();
+            const innate = def && Array.isArray(def.innatePerks) ? def.innatePerks : [];
+            if (innate.length > 0 && window.Perks && typeof window.Perks.addMany === 'function') window.Perks.addMany(innate);
+        } catch {}
     }
 
     function getClassId(){ return state.classId; }
