@@ -202,6 +202,7 @@ function updateButtonStates() {
     const stepBtn = document.getElementById('step-btn');
     const nextTurnBtn = document.getElementById('next-turn-btn');
     const autoBtn = document.getElementById('auto-play-btn');
+    const autoSpeedBtn = document.getElementById('auto-speed-btn');
     const finishBtn = document.getElementById('battle-finish-btn');
     const retryBtn = document.getElementById('battle-retry-btn');
 
@@ -217,6 +218,7 @@ function updateButtonStates() {
             autoBtn.style.display = 'none';
             try { if (window._autoPlayActive) window._stopAutoPlay && window._stopAutoPlay(); } catch {}
         }
+        if (autoSpeedBtn) autoSpeedBtn.style.display = 'none';
         const isAdventureBattle = (typeof window.battleConfigSource !== 'undefined' && window.battleConfigSource === 'adventure');
         if (finishBtn) finishBtn.style.display = isAdventureBattle ? '' : 'none';
         if (retryBtn) retryBtn.style.display = isAdventureBattle ? 'none' : '';
@@ -233,10 +235,16 @@ function updateButtonStates() {
             autoBtn.style.display = '';
             autoBtn.textContent = (window._autoPlayActive ? '🟦 Пауза' : '🎦 Продолжить');
         }
+        if (autoSpeedBtn) {
+            autoSpeedBtn.style.display = '';
+            const sp = Math.max(1, Number(window._autoPlaySpeed || 1));
+            autoSpeedBtn.textContent = '⏩ x' + sp;
+        }
     } else {
         if (stepBtn) stepBtn.style.display = '';
         if (nextTurnBtn) nextTurnBtn.style.display = '';
         if (autoBtn) autoBtn.style.display = 'none';
+        if (autoSpeedBtn) autoSpeedBtn.style.display = 'none';
     }
 
     let totalCanAttack = 0;
@@ -425,6 +433,12 @@ async function proceedStartBattle() {
     window.addToLog('🚩 Бой начался!');
     window.addToLog(`Атакующие: ${window.gameState.attackers.length} юнитов`);
     window.addToLog(`Защитники: ${window.gameState.defenders.length} юнитов`);
+    try { window._autoPlaySpeed = 1; } catch {}
+    try {
+        const spBtn = document.getElementById('auto-speed-btn');
+        if (spBtn) spBtn.textContent = '⏩ x1';
+    } catch {}
+    try { if (typeof window._rescheduleAutoPlayTick === 'function') window._rescheduleAutoPlayTick(); } catch {}
     try {
         try { if (window._stopAutoPlay) window._stopAutoPlay(); } catch {}
         let autoEnabled = false;
@@ -450,10 +464,28 @@ window.renderArmies = renderArmies;
 window.updateButtonStates = updateButtonStates;
 window.updateBattleStats = updateBattleStats;
 
+window.cycleAutoSpeed = function(){
+    try {
+        const options = [1, 2, 5, 10];
+        const current = Math.max(1, Number(window._autoPlaySpeed || 1));
+        const idx = options.indexOf(current);
+        const next = options[(idx >= 0 ? (idx + 1) % options.length : 0)];
+        window._autoPlaySpeed = next;
+        const spBtn = document.getElementById('auto-speed-btn');
+        if (spBtn) spBtn.textContent = '⏩ x' + next;
+        if (typeof window._rescheduleAutoPlayTick === 'function') window._rescheduleAutoPlayTick();
+    } catch {}
+};
+
 // Автовоспроизведение шагов/ходов
 (function(){
     const STEP_DELAY_MS = 1000;
     let timerId = null;
+
+    function getStepDelay(){
+        const sp = Math.max(1, Number(window._autoPlaySpeed || 1));
+        return Math.max(0, Math.round(STEP_DELAY_MS / sp));
+    }
 
     function canDoAnyStep(){
         try {
@@ -478,7 +510,7 @@ window.updateBattleStats = updateBattleStats;
             }
         } catch {}
         if (!window.gameState.battleEnded && window._autoPlayActive) {
-            timerId = setTimeout(tick, STEP_DELAY_MS);
+            timerId = setTimeout(tick, getStepDelay());
         } else {
             stop('system');
             updateButtonStates();
@@ -492,7 +524,7 @@ window.updateBattleStats = updateBattleStats;
         const btn = document.getElementById('auto-play-btn');
         if (btn) btn.textContent = '🟦 Пауза';
         clearTimeout(timerId);
-        timerId = setTimeout(tick, STEP_DELAY_MS);
+        timerId = setTimeout(tick, getStepDelay());
     }
 
     function stop(reason){
@@ -513,6 +545,11 @@ window.updateBattleStats = updateBattleStats;
         updateButtonStates();
     };
     window._stopAutoPlay = function(){ stop('system'); };
+    window._rescheduleAutoPlayTick = function(){
+        if (!window._autoPlayActive) return;
+        clearTimeout(timerId);
+        timerId = setTimeout(tick, getStepDelay());
+    };
 })();
 window.proceedStartBattle = proceedStartBattle;
 window.showIntro = showIntro;

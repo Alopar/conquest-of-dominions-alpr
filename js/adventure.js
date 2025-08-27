@@ -221,7 +221,7 @@ function ensureAdventureTabs() {
     tabs.appendChild(makeBtn('map', '🗺️ Карта'));
     tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
     tabs.appendChild(makeBtn('army', '🛡️ Армия'));
-    tabs.appendChild(makeBtn('hero', '👤 Герой'));
+    tabs.appendChild(makeBtn('hero', '🥇 Развитие'));
     content.insertBefore(tabs, content.firstElementChild || null);
     updateTabsActive(tabs);
 }
@@ -840,6 +840,23 @@ async function startEncounterBattle(encData) {
     if (window.showBattle) await window.showBattle();
     window.initializeArmies();
     window.renderArmies();
+    try { window._autoPlaySpeed = 1; } catch {}
+    try {
+        const spBtn = document.getElementById('auto-speed-btn');
+        if (spBtn) spBtn.textContent = '⏩ x1';
+    } catch {}
+    try { if (typeof window._rescheduleAutoPlayTick === 'function') window._rescheduleAutoPlayTick(); } catch {}
+    try {
+        try { if (window._stopAutoPlay) window._stopAutoPlay(); } catch {}
+        let autoEnabled = false;
+        try {
+            const s = (window.GameSettings && typeof window.GameSettings.get === 'function') ? window.GameSettings.get() : (typeof window.getCurrentSettings === 'function' ? window.getCurrentSettings() : null);
+            autoEnabled = !!(s && s.battleSettings && s.battleSettings.autoPlay);
+        } catch {}
+        if (autoEnabled && typeof window.toggleAutoPlay === 'function' && !window._autoPlayActive) {
+            window.toggleAutoPlay();
+        }
+    } catch {}
     window.addToLog('🚩 Бой приключения начался!');
 }
 

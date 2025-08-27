@@ -341,6 +341,7 @@ function endBattle(winner) {
 
 function resetBattle() {
     try { if (window._stopAutoPlay) window._stopAutoPlay(); } catch {}
+    try { window._autoPlaySpeed = 1; } catch {}
     initializeArmies();
     renderArmies();
 
@@ -352,6 +353,13 @@ function resetBattle() {
         if (autoEnabled && typeof window.toggleAutoPlay === 'function' && !window._autoPlayActive) {
             window.toggleAutoPlay();
         }
+    } catch {}
+
+    try {
+        const spBtn = document.getElementById('auto-speed-btn');
+        if (spBtn) spBtn.textContent = '⏩ x1';
+        if (typeof window._rescheduleAutoPlayTick === 'function') window._rescheduleAutoPlayTick();
+        if (typeof window.updateButtonStates === 'function') window.updateButtonStates();
     } catch {}
 
     // Обновляем счетчик ходов
