@@ -324,6 +324,7 @@ async function showBattle() {
             showScreen('battle-screen');
         }
     } catch { showScreen('battle-screen'); }
+    try { if (window.Modifiers && typeof window.Modifiers.resetAndRecompute === 'function') window.Modifiers.resetAndRecompute(); } catch {}
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
 }

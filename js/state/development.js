@@ -82,6 +82,7 @@
         state.currentLevel = nextLevel;
         save();
         try { if (typeof window.persistAdventure === 'function') window.persistAdventure(); } catch {}
+        try { if (window.Modifiers && typeof window.Modifiers.recompute === 'function') window.Modifiers.recompute(); } catch {}
         return true;
     }
 
@@ -122,6 +123,7 @@
         } catch {}
         save();
         try { if (typeof window.persistAdventure === 'function') window.persistAdventure(); } catch {}
+        try { if (window.Modifiers && typeof window.Modifiers.recompute === 'function') window.Modifiers.recompute(); } catch {}
         return true;
     }
 

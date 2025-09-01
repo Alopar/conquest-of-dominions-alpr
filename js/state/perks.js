@@ -27,10 +27,11 @@
         set.add(perkId);
         state.ownedPerkIds = Array.from(set);
         save();
+        try { if (window.Modifiers && typeof window.Modifiers.recompute === 'function') window.Modifiers.recompute(); } catch {}
         return true;
     }
 
-    function addMany(ids){ (ids || []).forEach(function(id){ add(id); }); }
+    function addMany(ids){ (ids || []).forEach(function(id){ add(id); }); try { if (window.Modifiers && typeof window.Modifiers.recompute === 'function') window.Modifiers.recompute(); } catch {} return true; }
 
     function has(perkId){ return (state.ownedPerkIds || []).includes(perkId); }
 
@@ -41,7 +42,7 @@
 
     function getPublicOwned(){ return getOwned().filter(function(p){ return !p.hidden; }); }
 
-    function clear(){ state.ownedPerkIds = []; save(); }
+    function clear(){ state.ownedPerkIds = []; save(); try { if (window.Modifiers && typeof window.Modifiers.recompute === 'function') window.Modifiers.recompute(); } catch {} }
 
     // Агрегация модификаторов (локально для модуля Перки)
     function aggregateModifiers(){

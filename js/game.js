@@ -26,12 +26,16 @@ function createUnit(typeId, unitId) {
         return null;
     }
     const type = window.battleConfig.unitTypes[typeId];
+    const role = (function(){ const v = (type && type.type ? String(type.type).toLowerCase() : 'melee'); return (v==='range'||v==='support')?v:'melee'; })();
+    const baseHp = type.hp;
+    const bonusHp = (window.Modifiers && typeof window.Modifiers.getHpBonus === 'function') ? window.Modifiers.getHpBonus(unitId && String(unitId).startsWith('defender_') ? 'defenders' : 'attackers', role) : 0;
+    const effectiveHp = Math.max(1, Number(baseHp) + Number(bonusHp || 0));
     return {
         id: unitId,
         typeId: typeId,
         name: type.name,
-        hp: type.hp,
-        maxHp: type.hp,
+        hp: effectiveHp,
+        maxHp: effectiveHp,
         damage: type.damage,
         targets: Math.max(1, Number(type.targets || 1)),
         view: type.view,

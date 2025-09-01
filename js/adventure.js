@@ -1,3 +1,25 @@
+function renderModsDebug() {
+    const host = document.getElementById('mods-debug-table');
+    if (!host) return;
+    host.innerHTML = '';
+    const snap = (window.Modifiers && typeof window.Modifiers.getSnapshot === 'function') ? window.Modifiers.getSnapshot() : { activeEffects: [] };
+    const effects = Array.isArray(snap.activeEffects) ? snap.activeEffects : [];
+    const tbl = document.createElement('table');
+    tbl.className = 'bestiary-table unit-info-table';
+    const thead = document.createElement('thead');
+    thead.innerHTML = '<tr><th>Type</th><th>Path</th><th>Value</th></tr>';
+    const tbody = document.createElement('tbody');
+    effects.filter(function(e){ return e && e.side === 'attackers' && e.value !== 0; }).forEach(function(e){
+        const tr = document.createElement('tr');
+        const td1 = document.createElement('td'); td1.textContent = e.type || '';
+        const td2 = document.createElement('td'); td2.textContent = e.path || '';
+        const td3 = document.createElement('td'); td3.textContent = String(e.value || 0);
+        tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3);
+        tbody.appendChild(tr);
+    });
+    tbl.appendChild(thead); tbl.appendChild(tbody);
+    host.appendChild(tbl);
+}
 let adventureState = {
     config: null,
     currencies: {},
@@ -148,6 +170,7 @@ async function showAdventure() {
             if (window.UI.ensureMenuBar) window.UI.ensureMenuBar('adventure-screen', { backLabel: 'Главная', back: window.backToIntroFromAdventure });
         }
     } catch {}
+    try { if (window.Modifiers && typeof window.Modifiers.resetAndRecompute === 'function') window.Modifiers.resetAndRecompute(); } catch {}
     document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
     const scr = document.getElementById('adventure-screen');
     if (scr) { scr.classList.add('active'); scr.style.display = 'flex'; }
@@ -226,9 +249,10 @@ function ensureAdventureTabs() {
     };
     tabs.appendChild(makeBtn('map', '🗺️ Карта'));
     tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
-    tabs.appendChild(makeBtn('army', '🛡️ Армия'));
+    // tabs.appendChild(makeBtn('army', '🛡️ Армия'));
     tabs.appendChild(makeBtn('hero', '💪 Улучшения'));
     tabs.appendChild(makeBtn('perks', '🥇 Перки'));
+    tabs.appendChild(makeBtn('mods', '🔧 Модификаторы'));
     content.insertBefore(tabs, content.firstElementChild || null);
     updateTabsActive(tabs);
 }
@@ -246,7 +270,7 @@ function updateTabsActive(tabs) {
 async function loadAdventureSubscreen(key) {
     const cont = document.getElementById('adventure-subcontainer');
     if (!cont) return;
-    const map = { map: 'fragments/adventure-sub-map.html', tavern: 'fragments/adventure-sub-tavern.html', army: 'fragments/adventure-sub-army.html', hero: 'fragments/adventure-sub-hero.html', perks: 'fragments/adventure-sub-perks.html' };
+    const map = { map: 'fragments/adventure-sub-map.html', tavern: 'fragments/adventure-sub-tavern.html', army: 'fragments/adventure-sub-army.html', hero: 'fragments/adventure-sub-hero.html', perks: 'fragments/adventure-sub-perks.html', mods: 'fragments/adventure-sub-mods.html' };
     const url = map[key] || map.map;
     try {
         const res = await fetch(url + '?_=' + Date.now(), { cache: 'no-store' });
@@ -297,6 +321,9 @@ async function renderAdventureSubscreen() {
                 });
             }
         } catch {}
+    } else if (subscreen === 'mods') {
+        try { if (window.Modifiers && typeof window.Modifiers.recompute === 'function') window.Modifiers.recompute(); } catch {}
+        renderModsDebug();
     }
 }
 
@@ -818,7 +845,12 @@ function showUnitInfoModal(unitTypeId) {
         const c12 = document.createElement('td'); c12.className = 'unit-info-value'; c12.textContent = `ТИП: ${String(t.type || '')}`;
         tr1.appendChild(c11); tr1.appendChild(c12);
         const tr2 = document.createElement('tr');
-        const c21 = document.createElement('td'); c21.className = 'unit-info-value'; c21.textContent = `НР: ${t.hp}❤️`;
+        const c21 = document.createElement('td'); c21.className = 'unit-info-value';
+        const role = (function(){ const v = (t && t.type ? String(t.type).toLowerCase() : 'melee'); return (v==='range'||v==='support')?v:'melee'; })();
+        const hpBonus = (window.Modifiers && window.Modifiers.getHpBonus) ? window.Modifiers.getHpBonus('attackers', role) : 0;
+        const hpExtra = Number(hpBonus || 0);
+        const hpText = hpExtra > 0 ? `НР: ${t.hp} (+${hpExtra}) ❤️` : `НР: ${t.hp} ❤️`;
+        c21.textContent = hpText;
         const c22 = document.createElement('td'); c22.className = 'unit-info-value'; c22.textContent = `УРОН: ${t.damage}💥`;
         const c23 = document.createElement('td'); c23.className = 'unit-info-value'; c23.textContent = `ЦЕЛИ: ${Number(t.targets || 1)}🎯`;
         tr2.appendChild(c21); tr2.appendChild(c22); tr2.appendChild(c23);
