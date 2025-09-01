@@ -44,6 +44,13 @@ function createUnit(typeId, unitId) {
             }
         }
     } catch {}
+    // Цели: увеличиваем на общий бонус (для всех ролей), минимум 1
+    let effTargets = Math.max(1, Number(type.targets || 1));
+    try {
+        const side = (unitId && String(unitId).startsWith('defender_')) ? 'defenders' : 'attackers';
+        const tBonus = (window.Modifiers && window.Modifiers.getTargetsBonus) ? Number(window.Modifiers.getTargetsBonus(side, role) || 0) : 0;
+        effTargets = Math.max(1, effTargets + tBonus);
+    } catch {}
     return {
         id: unitId,
         typeId: typeId,
@@ -51,7 +58,7 @@ function createUnit(typeId, unitId) {
         hp: effectiveHp,
         maxHp: effectiveHp,
         damage: effDamage,
-        targets: Math.max(1, Number(type.targets || 1)),
+        targets: effTargets,
         view: type.view,
         hasAttackedThisTurn: false,
         alive: true

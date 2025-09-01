@@ -15,7 +15,7 @@
       "effects": [ { "type": "stat", "path": "combat.damage.support", "value": 1 } ] },
 
     { "id": "support_targets_plus_1", "icon": "🎯", "name": "Больше целей поддержки", "description": "Саппорт-юниты поражают +1 цель", "hidden": false,
-      "effects": [ { "type": "stat", "path": "combat.support.targets", "value": 1 } ] },
+      "effects": [ { "type": "stat", "path": "combat.targets.support", "value": 1 } ] },
 
     { "id": "gold_bonus_20", "icon": "💰", "name": "Золотое чутьё", "description": "+20% золота за награды", "hidden": false,
       "effects": [ { "type": "multiplier", "path": "rewards.currency.gold", "value": 1.2 } ] },

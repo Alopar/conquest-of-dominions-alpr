@@ -865,7 +865,10 @@ function showUnitInfoModal(unitTypeId) {
         } else {
             c22.textContent = `УРОН: ${t.damage}💥`;
         }
-        const c23 = document.createElement('td'); c23.className = 'unit-info-value'; c23.textContent = `ЦЕЛИ: ${Number(t.targets || 1)}🎯`;
+        const c23 = document.createElement('td'); c23.className = 'unit-info-value';
+        const targetsBonus = (window.Modifiers && window.Modifiers.getTargetsBonus) ? Number(window.Modifiers.getTargetsBonus('attackers', role) || 0) : 0;
+        const baseTargets = Number(t.targets || 1);
+        c23.textContent = targetsBonus > 0 ? `ЦЕЛИ: ${baseTargets} (+${targetsBonus}) 🎯` : `ЦЕЛИ: ${baseTargets} 🎯`;
         tr2.appendChild(c21); tr2.appendChild(c22); tr2.appendChild(c23);
         const tbody = tbl.querySelector('tbody'); tbody.appendChild(tr1); tbody.appendChild(tr2);
         body.appendChild(tbl);
