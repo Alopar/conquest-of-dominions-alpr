@@ -3,8 +3,8 @@
 
     let ownedPerkIds = [];
     let aggregates = {
-        attackers: { hp: { melee: 0, range: 0, support: 0 } },
-        defenders: { hp: { melee: 0, range: 0, support: 0 } }
+        attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 } },
+        defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 } }
     };
     let activeEffects = [];
 
@@ -41,8 +41,8 @@
 
     function recompute(){
         const next = {
-            attackers: { hp: { melee: 0, range: 0, support: 0 } },
-            defenders: { hp: { melee: 0, range: 0, support: 0 } }
+            attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 } },
+            defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 } }
         };
         const effects = [];
         // Берём фактически выданные перки из системы перков (если доступна)
@@ -57,12 +57,17 @@
         (owned || []).forEach(function(perk){
             (Array.isArray(perk.effects) ? perk.effects : []).forEach(function(eff){
                 if (!eff || eff.type !== 'stat' || typeof eff.path !== 'string') return;
-                if (!eff.path.startsWith('combat.hp.')) return;
-                const role = String(eff.path.split('.')[2] || '').toLowerCase();
+                const path = eff.path;
+                const role = String(path.split('.')[2] || '').toLowerCase();
                 if (role !== 'melee' && role !== 'range' && role !== 'support') return;
                 const v = Number(eff.value || 0);
-                next.attackers.hp[role] = (next.attackers.hp[role] || 0) + v;
-                if (v !== 0) effects.push({ type: 'stat', path: `combat.hp.${role}`, value: v, side: 'attackers' });
+                if (path.startsWith('combat.hp.')) {
+                    next.attackers.hp[role] = (next.attackers.hp[role] || 0) + v;
+                    if (v !== 0) effects.push({ type: 'stat', path: `combat.hp.${role}`, value: v, side: 'attackers' });
+                } else if (path.startsWith('combat.damage.')) {
+                    next.attackers.damage[role] = (next.attackers.damage[role] || 0) + v;
+                    if (v !== 0) effects.push({ type: 'stat', path: `combat.damage.${role}`, value: v, side: 'attackers' });
+                }
             });
         });
         aggregates = next;
@@ -73,7 +78,7 @@
     }
 
     function reset(){
-        aggregates = { attackers: { hp: { melee: 0, range: 0, support: 0 } }, defenders: { hp: { melee: 0, range: 0, support: 0 } } };
+        aggregates = { attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 } }, defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 } } };
         activeEffects = [];
     }
 
@@ -83,6 +88,12 @@
         const s = (side === 'defenders') ? 'defenders' : 'attackers';
         const r = (role === 'range' || role === 'support') ? role : 'melee';
         try { return Number(aggregates[s].hp[r] || 0); } catch { return 0; }
+    }
+
+    function getDamageBonus(side, role){
+        const s = (side === 'defenders') ? 'defenders' : 'attackers';
+        const r = (role === 'range' || role === 'support') ? role : 'melee';
+        try { return Number(aggregates[s].damage[r] || 0); } catch { return 0; }
     }
 
     function getSnapshot(){
@@ -98,6 +109,7 @@
         reset,
         resetAndRecompute,
         getHpBonus,
+        getDamageBonus,
         getSnapshot
     };
 })();

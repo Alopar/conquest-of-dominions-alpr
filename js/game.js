@@ -30,13 +30,27 @@ function createUnit(typeId, unitId) {
     const baseHp = type.hp;
     const bonusHp = (window.Modifiers && typeof window.Modifiers.getHpBonus === 'function') ? window.Modifiers.getHpBonus(unitId && String(unitId).startsWith('defender_') ? 'defenders' : 'attackers', role) : 0;
     const effectiveHp = Math.max(1, Number(baseHp) + Number(bonusHp || 0));
+    // Применяем бонус к урону добавлением граней (для любых ролей)
+    let effDamage = String(type.damage || '1d1');
+    try {
+        const side = (unitId && String(unitId).startsWith('defender_')) ? 'defenders' : 'attackers';
+        const dmgBonus = (window.Modifiers && window.Modifiers.getDamageBonus) ? Number(window.Modifiers.getDamageBonus(side, role) || 0) : 0;
+        if (dmgBonus > 0) {
+            const match = effDamage.match(/(\d+)d(\d+)/);
+            if (match) {
+                const count = parseInt(match[1]);
+                const sides = parseInt(match[2]);
+                effDamage = `${count}d${Math.max(1, sides + dmgBonus)}`;
+            }
+        }
+    } catch {}
     return {
         id: unitId,
         typeId: typeId,
         name: type.name,
         hp: effectiveHp,
         maxHp: effectiveHp,
-        damage: type.damage,
+        damage: effDamage,
         targets: Math.max(1, Number(type.targets || 1)),
         view: type.view,
         hasAttackedThisTurn: false,

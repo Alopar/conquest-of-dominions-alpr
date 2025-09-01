@@ -851,7 +851,20 @@ function showUnitInfoModal(unitTypeId) {
         const hpExtra = Number(hpBonus || 0);
         const hpText = hpExtra > 0 ? `НР: ${t.hp} (+${hpExtra}) ❤️` : `НР: ${t.hp} ❤️`;
         c21.textContent = hpText;
-        const c22 = document.createElement('td'); c22.className = 'unit-info-value'; c22.textContent = `УРОН: ${t.damage}💥`;
+        const c22 = document.createElement('td'); c22.className = 'unit-info-value';
+        const dmgBonus = (window.Modifiers && window.Modifiers.getDamageBonus) ? window.Modifiers.getDamageBonus('attackers', role) : 0;
+        if (Number(dmgBonus||0) > 0) {
+            const match = (t.damage || '').match(/(\d+)d(\d+)/);
+            if (match) {
+                const baseSides = parseInt(match[2]);
+                const effSides = baseSides + Number(dmgBonus||0);
+                c22.textContent = `УРОН: ${t.damage} (+${dmgBonus})💥`;
+            } else {
+                c22.textContent = `УРОН: ${t.damage}💥`;
+            }
+        } else {
+            c22.textContent = `УРОН: ${t.damage}💥`;
+        }
         const c23 = document.createElement('td'); c23.className = 'unit-info-value'; c23.textContent = `ЦЕЛИ: ${Number(t.targets || 1)}🎯`;
         tr2.appendChild(c21); tr2.appendChild(c22); tr2.appendChild(c23);
         const tbody = tbl.querySelector('tbody'); tbody.appendChild(tr1); tbody.appendChild(tr2);
