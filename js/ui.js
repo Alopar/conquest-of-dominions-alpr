@@ -601,8 +601,11 @@ function finishBattleToAdventure() {
             const cd = curById[r.id] || { name: r.id, icon: '' };
             const iconEl = el.querySelector('.reward-icon') || el;
             const nameEl = el.querySelector('.reward-name');
+            let mult = 1;
+            try { if (window.Modifiers && typeof window.Modifiers.getRewardMultiplier === 'function') mult = Number(window.Modifiers.getRewardMultiplier(r.id) || 1); } catch {}
+            const shown = Math.max(0, Math.floor(Number(r.amount || 0) * (mult > 0 ? mult : 1)));
             if (iconEl) iconEl.textContent = cd.icon || '💠';
-            if (nameEl) nameEl.textContent = `${cd.name} +${r.amount}`;
+            if (nameEl) nameEl.textContent = `${cd.name} +${shown}`;
         } else if (r.type === 'monster') {
             const tplItem = document.getElementById('tpl-reward-unit');
             el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
@@ -627,7 +630,9 @@ function finishBattleToAdventure() {
             rs.forEach(function(r){
                 if (r.type === 'currency') {
                     if (!window.adventureState.currencies) window.adventureState.currencies = {};
-                    const add = Math.max(0, Number(r.amount || 0));
+                    let mult = 1;
+                    try { if (window.Modifiers && typeof window.Modifiers.getRewardMultiplier === 'function') mult = Number(window.Modifiers.getRewardMultiplier(r.id) || 1); } catch {}
+                    const add = Math.max(0, Math.floor(Number(r.amount || 0) * (mult > 0 ? mult : 1)));
                     window.adventureState.currencies[r.id] = (window.adventureState.currencies[r.id] || 0) + add;
                     try { if (window.Achievements && typeof window.Achievements.onCurrencyEarned === 'function') window.Achievements.onCurrencyEarned(r.id, add); } catch {}
                     try {

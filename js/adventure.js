@@ -9,7 +9,7 @@ function renderModsDebug() {
     const thead = document.createElement('thead');
     thead.innerHTML = '<tr><th>Type</th><th>Path</th><th>Value</th></tr>';
     const tbody = document.createElement('tbody');
-    effects.filter(function(e){ return e && e.side === 'attackers' && e.value !== 0; }).forEach(function(e){
+    effects.filter(function(e){ return e && (e.side === 'attackers' || e.side === 'adventure') && e.value !== 0; }).forEach(function(e){
         const tr = document.createElement('tr');
         const td1 = document.createElement('td'); td1.textContent = e.type || '';
         const td2 = document.createElement('td'); td2.textContent = e.path || '';

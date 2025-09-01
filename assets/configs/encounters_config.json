@@ -64,7 +64,7 @@
         {
           "type": "currency",
           "id": "gold",
-          "amount": 7
+          "amount": 20
         },
         {
           "type": "currency",

@@ -3,8 +3,19 @@
 
     let ownedPerkIds = [];
     let aggregates = {
-        attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
-        defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } }
+        attackers: {
+            hp: { melee: 0, range: 0, support: 0 },
+            damage: { melee: 0, range: 0, support: 0 },
+            targets: { melee: 0, range: 0, support: 0 }
+        },
+        defenders: {
+            hp: { melee: 0, range: 0, support: 0 },
+            damage: { melee: 0, range: 0, support: 0 },
+            targets: { melee: 0, range: 0, support: 0 }
+        },
+        adventure: {
+            rewards: { currency: {} }
+        }
     };
     let activeEffects = [];
 
@@ -42,7 +53,8 @@
     function recompute(){
         const next = {
             attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
-            defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } }
+            defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
+            adventure: { rewards: { currency: {} } }
         };
         const effects = [];
         // Берём фактически выданные перки из системы перков (если доступна)
@@ -56,27 +68,35 @@
         }
         (owned || []).forEach(function(perk){
             (Array.isArray(perk.effects) ? perk.effects : []).forEach(function(eff){
-                if (!eff || eff.type !== 'stat' || typeof eff.path !== 'string') return;
+                if (!eff || typeof eff.path !== 'string') return;
                 const path = eff.path;
                 const role = String(path.split('.')[2] || '').toLowerCase();
-                if (role !== 'melee' && role !== 'range' && role !== 'support') return;
                 const v = Number(eff.value || 0);
-                if (path.startsWith('combat.hp.')) {
+                if (eff.type === 'stat' && path.startsWith('combat.hp.')) {
+                    if (role !== 'melee' && role !== 'range' && role !== 'support') return;
                     next.attackers.hp[role] = (next.attackers.hp[role] || 0) + v;
                     if (v !== 0) effects.push({ type: 'stat', path: `combat.hp.${role}`, value: v, side: 'attackers' });
-                } else if (path.startsWith('combat.damage.')) {
+                } else if (eff.type === 'stat' && path.startsWith('combat.damage.')) {
+                    if (role !== 'melee' && role !== 'range' && role !== 'support') return;
                     next.attackers.damage[role] = (next.attackers.damage[role] || 0) + v;
                     if (v !== 0) effects.push({ type: 'stat', path: `combat.damage.${role}`, value: v, side: 'attackers' });
-                } else if (path.startsWith('combat.targets.')) {
+                } else if (eff.type === 'stat' && path.startsWith('combat.targets.')) {
                     const r2 = String(path.split('.')[2] || '').toLowerCase();
                     if (r2 === 'melee' || r2 === 'range' || r2 === 'support') {
                         next.attackers.targets[r2] = (next.attackers.targets[r2] || 0) + v;
                         if (v !== 0) effects.push({ type: 'stat', path: `combat.targets.${r2}`, value: v, side: 'attackers' });
                     }
-                } else if (path === 'combat.support.targets') {
+                } else if (eff.type === 'stat' && path === 'combat.support.targets') {
                     // Поддержка старого пути: влияет только на support
                     next.attackers.targets.support = (next.attackers.targets.support || 0) + v;
                     if (v !== 0) effects.push({ type: 'stat', path: 'combat.targets.support', value: v, side: 'attackers' });
+                } else if (eff.type === 'multiplier' && path.indexOf('rewards.currency.') === 0) {
+                    const cid = path.substring('rewards.currency.'.length);
+                    if (cid) {
+                        const cur = typeof next.adventure.rewards.currency[cid] === 'number' ? next.adventure.rewards.currency[cid] : 1;
+                        next.adventure.rewards.currency[cid] = cur * (Number(eff.value) || 1);
+                        effects.push({ type: 'multiplier', path: `rewards.currency.${cid}`, value: Number(eff.value) || 1, side: 'adventure' });
+                    }
                 }
             });
         });
@@ -88,7 +108,11 @@
     }
 
     function reset(){
-        aggregates = { attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } }, defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } } };
+        aggregates = {
+            attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
+            defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
+            adventure: { rewards: { currency: {} } }
+        };
         activeEffects = [];
     }
 
@@ -116,6 +140,13 @@
         return JSON.parse(JSON.stringify({ ownedPerkIds, aggregates, activeEffects }));
     }
 
+    function getRewardMultiplier(currencyId){
+        try {
+            const m = aggregates.adventure.rewards.currency[String(currencyId)] || 1;
+            return (typeof m === 'number' && m > 0) ? m : 1;
+        } catch { return 1; }
+    }
+
     load();
 
     window.Modifiers = {
@@ -127,6 +158,7 @@
         getHpBonus,
         getDamageBonus,
         getTargetsBonus,
+        getRewardMultiplier,
         getSnapshot
     };
 })();
