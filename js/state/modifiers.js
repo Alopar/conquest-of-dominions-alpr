@@ -14,7 +14,8 @@
             targets: { melee: 0, range: 0, support: 0 }
         },
         adventure: {
-            rewards: { currency: {} }
+            rewards: { currency: {} },
+            army: { size: 0 }
         }
     };
     let activeEffects = [];
@@ -54,7 +55,7 @@
         const next = {
             attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
             defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
-            adventure: { rewards: { currency: {} } }
+            adventure: { rewards: { currency: {} }, army: { size: 0 } }
         };
         const effects = [];
         // Берём фактически выданные перки из системы перков (если доступна)
@@ -97,6 +98,10 @@
                         next.adventure.rewards.currency[cid] = cur * (Number(eff.value) || 1);
                         effects.push({ type: 'multiplier', path: `rewards.currency.${cid}`, value: Number(eff.value) || 1, side: 'adventure' });
                     }
+                } else if (eff.type === 'stat' && path === 'adventure.army.size') {
+                    const v2 = Number(eff.value || 0);
+                    next.adventure.army.size = (next.adventure.army.size || 0) + v2;
+                    if (v2 !== 0) effects.push({ type: 'stat', path: 'adventure.army.size', value: v2, side: 'adventure' });
                 }
             });
         });
@@ -111,7 +116,7 @@
         aggregates = {
             attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
             defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
-            adventure: { rewards: { currency: {} } }
+            adventure: { rewards: { currency: {} }, army: { size: 0 } }
         };
         activeEffects = [];
     }
@@ -147,6 +152,10 @@
         } catch { return 1; }
     }
 
+    function getArmySizeBonus(){
+        try { return Number(aggregates.adventure.army.size || 0); } catch { return 0; }
+    }
+
     load();
 
     window.Modifiers = {
@@ -159,6 +168,7 @@
         getDamageBonus,
         getTargetsBonus,
         getRewardMultiplier,
+        getArmySizeBonus,
         getSnapshot
     };
 })();

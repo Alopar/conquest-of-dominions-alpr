@@ -645,6 +645,7 @@ function finishBattleToAdventure() {
                 } else if (r.type === 'monster') {
                     if (!window.adventureState.pool) window.adventureState.pool = {};
                     window.adventureState.pool[r.id] = (window.adventureState.pool[r.id] || 0) + Math.max(0, Number(r.amount || 0));
+                    try { if (window.Hero && typeof window.Hero.setArmyCurrent === 'function') window.Hero.setArmyCurrent(((window.Hero.getArmyCurrent && window.Hero.getArmyCurrent()) || 0) + Math.max(0, Number(r.amount || 0))); } catch {}
                     try {
                         const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
                         const m = monsters[r.id] || { name: r.id };

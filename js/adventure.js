@@ -186,6 +186,25 @@ function renderAdventure() {
     const curWrap = document.getElementById('adventure-currencies');
     if (curWrap) {
         curWrap.innerHTML = '';
+        try {
+            const hostTop = document.getElementById('adventure-topbar');
+            if (hostTop) {
+                let armyEl = document.getElementById('adventure-army-size');
+                if (!armyEl) {
+                    armyEl = document.createElement('div');
+                    armyEl.id = 'adventure-army-size';
+                    armyEl.style.display = 'flex';
+                    armyEl.style.alignItems = 'center';
+                    armyEl.style.gap = '6px';
+                    armyEl.style.marginLeft = 'auto';
+                    hostTop.insertBefore(armyEl, curWrap);
+                }
+                const icon = '⚔️';
+                const max = (window.Hero && window.Hero.getArmyMax) ? window.Hero.getArmyMax() : 0;
+                const current = (window.Hero && window.Hero.getArmyCurrent) ? window.Hero.getArmyCurrent() : 0;
+                armyEl.textContent = `Армия: ${current}/${max} ${icon}`;
+            }
+        } catch {}
         const defs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
         const list = defs && Array.isArray(defs.currencies) ? defs.currencies : [];
         const byId = {}; list.forEach(function(c){ byId[c.id] = c; });
@@ -539,8 +558,17 @@ function buyUnit(typeId) {
     const price = priceFor(typeId);
     const canBuy = price.every(function(p){ return (adventureState.currencies[p.id] || 0) >= p.amount; });
     if (!canBuy) return;
+    try {
+        const max = (window.Hero && window.Hero.getArmyMax) ? window.Hero.getArmyMax() : 0;
+        const current = (window.Hero && window.Hero.getArmyCurrent) ? window.Hero.getArmyCurrent() : 0;
+        if (max > 0 && current >= max) {
+            if (window.UI && typeof window.UI.showToast === 'function') window.UI.showToast('error', 'Армия полна — купить нового юнита нельзя');
+            return;
+        }
+    } catch {}
     for (const p of price) { adventureState.currencies[p.id] = (adventureState.currencies[p.id] || 0) - p.amount; }
     adventureState.pool[typeId] = (adventureState.pool[typeId] || 0) + 1;
+    try { if (window.Hero && typeof window.Hero.setArmyCurrent === 'function') window.Hero.setArmyCurrent(((window.Hero.getArmyCurrent && window.Hero.getArmyCurrent()) || 0) + 1); } catch {}
     persistAdventure();
     renderAdventure();
 }
@@ -917,6 +945,7 @@ async function startEncounterBattle(encData) {
     window.battleConfig = cfg;
     window.configLoaded = true;
     window.battleConfigSource = 'adventure';
+    try { window._lastAttackersSentCount = attackers.reduce(function(a,g){ return a + Math.max(0, Number(g.count || 0)); }, 0); } catch {}
     adventureState.inBattle = true;
     persistAdventure();
     window.adventureState = adventureState;
@@ -952,7 +981,9 @@ function applySelectedClassStartingArmy() {
     if (!classId) return;
     const startArmy = (window.Hero && typeof window.Hero.getStartingArmy === 'function') ? window.Hero.getStartingArmy() : [];
     adventureState.pool = {};
-    for (const g of startArmy) { if (g && g.id && g.count > 0) adventureState.pool[g.id] = (adventureState.pool[g.id] || 0) + g.count; }
+    let total = 0;
+    for (const g of startArmy) { if (g && g.id && g.count > 0) { adventureState.pool[g.id] = (adventureState.pool[g.id] || 0) + g.count; total += g.count; } }
+    try { if (window.Hero && typeof window.Hero.setArmyCurrent === 'function') window.Hero.setArmyCurrent(total); } catch {}
     persistAdventure();
 }
 
@@ -971,6 +1002,12 @@ function finishAdventureBattle(winner) {
     // Победителей возвращаем в пул
     const attackersAlive = (window.gameState.attackers || []).filter(u => u.alive);
     for (const u of attackersAlive) { adventureState.pool[u.typeId] = (adventureState.pool[u.typeId] || 0) + 1; }
+    try {
+        const sent = Number(window._lastAttackersSentCount || 0);
+        const returned = attackersAlive.length || 0;
+        const lost = Math.max(0, sent - returned);
+        if (lost > 0 && window.Hero && typeof window.Hero.setArmyCurrent === 'function') window.Hero.setArmyCurrent(Math.max(0, ((window.Hero.getArmyCurrent && window.Hero.getArmyCurrent()) || 0) - lost));
+    } catch {}
     const last = window._lastEncounterData;
     if (winner === 'attackers' && last) {
         if (!isEncounterDone(last.id)) adventureState.completedEncounterIds.push(last.id);

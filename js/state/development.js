@@ -83,6 +83,7 @@
         save();
         try { if (typeof window.persistAdventure === 'function') window.persistAdventure(); } catch {}
         try { if (window.Modifiers && typeof window.Modifiers.recompute === 'function') window.Modifiers.recompute(); } catch {}
+        try { if (typeof window.renderAdventure === 'function') window.renderAdventure(); } catch {}
         return true;
     }
 
@@ -124,6 +125,7 @@
         save();
         try { if (typeof window.persistAdventure === 'function') window.persistAdventure(); } catch {}
         try { if (window.Modifiers && typeof window.Modifiers.recompute === 'function') window.Modifiers.recompute(); } catch {}
+        try { if (typeof window.renderAdventure === 'function') window.renderAdventure(); } catch {}
         return true;
     }
 
