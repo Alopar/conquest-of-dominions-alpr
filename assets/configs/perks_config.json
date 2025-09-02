@@ -1,5 +1,11 @@
 {
   "perks": [
+    { "id": "merc_tier_1", "icon": "📜", "name": "Доступ к наёмникам I", "description": "Открывает наёмников I тира", "hidden": true,
+      "effects": [ { "type": "access", "path": "merc.tier", "value": 1 } ] },
+    { "id": "merc_tier_2", "icon": "📜", "name": "Доступ к наёмникам II", "description": "Открывает наёмников II тира", "hidden": false,
+      "effects": [ { "type": "access", "path": "merc.tier", "value": 2 } ] },
+    { "id": "merc_tier_3", "icon": "📜", "name": "Доступ к наёмникам III", "description": "Открывает наёмников III тира", "hidden": false,
+      "effects": [ { "type": "access", "path": "merc.tier", "value": 3 } ] },
     { "id": "army_size_plus_5", "icon": "⚔️", "name": "Расширение армии I", "description": "+5 к лимиту армии", "hidden": false,
       "effects": [ { "type": "stat", "path": "adventure.army.size", "value": 5 } ] },
     { "id": "army_size_plus_10", "icon": "⚔️", "name": "Расширение армии II", "description": "+10 к лимиту армии", "hidden": false,

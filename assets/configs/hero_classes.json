@@ -10,6 +10,7 @@
         { "id": "knight", "count": 1 },
         { "id": "archer", "count": 2 }
       ],
+      "innatePerks": ["merc_tier_1"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1", "unlock_merc_2", "perk_gold_bonus"], "paidUpgrades": ["perk_support_targets", "damage_1", "perk_hp_melee", "perk_dmg_melee"] },
@@ -29,7 +30,7 @@
       "startingArmy": [
         { "id": "rogue", "count": 3 }
       ],
-      "innatePerks": ["gold_bonus_20", "glory_bonus_10"],
+      "innatePerks": ["gold_bonus_20", "glory_bonus_10", "merc_tier_1"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_1", "damage_1", "perk_hp_melee", "perk_dmg_melee"] },
@@ -51,6 +52,7 @@
         { "id": "fireElemental", "count": 1 },
         { "id": "waterElemental", "count": 1 }
       ],
+      "innatePerks": ["merc_tier_1"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_1", "damage_1"] },
@@ -72,6 +74,7 @@
         { "id": "wolf", "count": 3 }
       ],
       "requiresAchievementId": "kill_10_wolf",
+      "innatePerks": ["merc_tier_1"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_1", "damage_1", "perk_hp_melee", "perk_dmg_melee"] },

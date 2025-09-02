@@ -15,7 +15,8 @@
         },
         adventure: {
             rewards: { currency: {} },
-            army: { size: 0 }
+            army: { size: 0 },
+            access: { mercTiers: {} }
         }
     };
     let activeEffects = [];
@@ -55,7 +56,7 @@
         const next = {
             attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
             defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
-            adventure: { rewards: { currency: {} }, army: { size: 0 } }
+            adventure: { rewards: { currency: {} }, army: { size: 0 }, access: { mercTiers: {} } }
         };
         const effects = [];
         // Берём фактически выданные перки из системы перков (если доступна)
@@ -102,6 +103,12 @@
                     const v2 = Number(eff.value || 0);
                     next.adventure.army.size = (next.adventure.army.size || 0) + v2;
                     if (v2 !== 0) effects.push({ type: 'stat', path: 'adventure.army.size', value: v2, side: 'adventure' });
+                } else if (eff.type === 'access' && path === 'merc.tier') {
+                    const t = Number(eff.value || 0);
+                    if (t > 0) {
+                        next.adventure.access.mercTiers[t] = true;
+                        effects.push({ type: 'access', path: 'merc.tier', value: t, side: 'adventure' });
+                    }
                 }
             });
         });
@@ -116,7 +123,7 @@
         aggregates = {
             attackers: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
             defenders: { hp: { melee: 0, range: 0, support: 0 }, damage: { melee: 0, range: 0, support: 0 }, targets: { melee: 0, range: 0, support: 0 } },
-            adventure: { rewards: { currency: {} }, army: { size: 0 } }
+            adventure: { rewards: { currency: {} }, army: { size: 0 }, access: { mercTiers: {} } }
         };
         activeEffects = [];
     }
@@ -156,6 +163,10 @@
         try { return Number(aggregates.adventure.army.size || 0); } catch { return 0; }
     }
 
+    function hasMercTier(tier){
+        try { return !!aggregates.adventure.access.mercTiers[Number(tier||0)]; } catch { return false; }
+    }
+
     load();
 
     window.Modifiers = {
@@ -169,6 +180,7 @@
         getTargetsBonus,
         getRewardMultiplier,
         getArmySizeBonus,
+        hasMercTier,
         getSnapshot
     };
 })();

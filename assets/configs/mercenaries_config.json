@@ -1,11 +1,11 @@
 {
   "mercenaries": [
-    { "id": "rogue", "tier": 1, "price": [ { "id": "gold", "amount": 8 } ] },
-    { "id": "warrior", "tier": 1, "price": [ { "id": "gold", "amount": 12 } ] },
-    { "id": "archer", "tier": 1, "price": [ { "id": "gold", "amount": 10 } ] },
-    { "id": "mage", "tier": 2, "price": [ { "id": "gold", "amount": 18 }, { "id": "glory", "amount": 1 } ] },
-    { "id": "knight", "tier": 2, "price": [ { "id": "gold", "amount": 20 }, { "id": "glory", "amount": 1 } ] },
-    { "id": "wizard", "tier": 3, "price": [ { "id": "gold", "amount": 35 }, { "id": "glory", "amount": 2 } ] }
+    { "id": "rogue", "tier": 1, "classes": ["rogue","mage"], "price": [ { "id": "gold", "amount": 8 } ] },
+    { "id": "warrior", "tier": 1, "classes": ["warrior","ranger", "mage"], "price": [ { "id": "gold", "amount": 12 } ] },
+    { "id": "archer", "tier": 1, "classes": ["ranger","warrior"], "price": [ { "id": "gold", "amount": 10 } ] },
+    { "id": "mage", "tier": 2, "classes": ["mage"], "price": [ { "id": "gold", "amount": 18 }, { "id": "glory", "amount": 1 } ] },
+    { "id": "knight", "tier": 2, "classes": ["warrior"], "price": [ { "id": "gold", "amount": 20 }, { "id": "glory", "amount": 1 } ] },
+    { "id": "wizard", "tier": 3, "classes": ["mage", "warrior"], "price": [ { "id": "gold", "amount": 35 }, { "id": "glory", "amount": 2 } ] }
   ]
 }
 

@@ -51,6 +51,7 @@ function validateMercenariesConfig(cfg) {
         if (!Array.isArray(it.price)) throw new Error('Цена наёмника должна быть массивом валют');
         it.price.forEach(function(p){ if (!p || typeof p.id !== 'string' || typeof p.amount !== 'number') throw new Error('Элемент price должен содержать id и amount'); });
         if (it.tier != null && typeof it.tier !== 'number') throw new Error('tier должен быть числом');
+        if (it.classes != null && !Array.isArray(it.classes)) throw new Error('classes должен быть массивом строк');
     }
 }
 

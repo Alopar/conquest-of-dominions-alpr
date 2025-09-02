@@ -393,7 +393,17 @@ function renderTavern() {
         const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
         const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
         const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
-        for (const item of list) {
+        // Фильтр по тиру и классу
+        const clsId = (window.Hero && window.Hero.getClassId && window.Hero.getClassId()) || null;
+        const visible = list.filter(function(item){
+            const t = Number(item.tier || 0);
+            let tierOk = true;
+            try { if (window.Modifiers && typeof window.Modifiers.hasMercTier === 'function') { tierOk = t <= 0 ? true : window.Modifiers.hasMercTier(t); } } catch {}
+            let classOk = true;
+            if (Array.isArray(item.classes) && item.classes.length > 0 && clsId) classOk = item.classes.includes(clsId);
+            return tierOk && classOk;
+        });
+        for (const item of visible) {
             const m = monsters[item.id] || { id: item.id, name: item.id, view: '❓' };
             const price = priceFor(item.id);
             const canBuy = price.every(function(p){ return (adventureState.currencies[p.id] || 0) >= p.amount; });
