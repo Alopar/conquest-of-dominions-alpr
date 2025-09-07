@@ -13,11 +13,11 @@
       "innatePerks": ["merc_tier_1"],
       "development": {
         "levels": [
-          { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1", "unlock_merc_2", "perk_gold_bonus"], "paidUpgrades": ["perk_support_targets", "damage_1", "perk_hp_melee", "perk_dmg_melee"] },
-          { "level": 2, "price": [ { "id": "glory", "amount": 2 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["accuracy_2", "perk_hp_range", "perk_dmg_range"] },
-          { "level": 3, "price": [ { "id": "glory", "amount": 3 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["damage_2", "perk_support_targets", "perk_hp_support", "perk_dmg_support"] },
-          { "level": 4, "price": [ { "id": "glory", "amount": 4 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["accuracy_3", "perk_gold_bonus"] },
-          { "level": 5, "price": [ { "id": "glory", "amount": 5 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["damage_3", "perk_glory_bonus"] }
+          { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
+          { "level": 2, "price": [ { "id": "glory", "amount": 300 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["perk_hp_range","perk_dmg_melee"] },
+          { "level": 3, "price": [ { "id": "glory", "amount": 500 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["perk_hp_support","perk_dmg_support"] },
+          { "level": 4, "price": [ { "id": "glory", "amount": 700 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["perk_support_targets"] },
+          { "level": 5, "price": [ { "id": "glory", "amount": 900 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["perk_glory_bonus"] }
         ]
       }
     },
@@ -30,14 +30,14 @@
       "startingArmy": [
         { "id": "rogue", "count": 3 }
       ],
-      "innatePerks": ["gold_bonus_20", "glory_bonus_10", "merc_tier_1"],
+      "innatePerks": ["merc_tier_1", "gold_bonus_20"],
       "development": {
         "levels": [
-          { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_1", "damage_1", "perk_hp_melee", "perk_dmg_melee"] },
-          { "level": 2, "price": [ { "id": "glory", "amount": 2 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["accuracy_2", "perk_hp_range", "perk_dmg_range"] },
-          { "level": 3, "price": [ { "id": "glory", "amount": 3 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["damage_2", "perk_support_targets", "perk_hp_support", "perk_dmg_support"] },
-          { "level": 4, "price": [ { "id": "glory", "amount": 4 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["accuracy_3", "perk_gold_bonus"] },
-          { "level": 5, "price": [ { "id": "glory", "amount": 5 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["damage_3", "perk_glory_bonus"] }
+          { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
+          { "level": 2, "price": [ { "id": "glory", "amount": 300 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["perk_hp_range","perk_dmg_melee"] },
+          { "level": 3, "price": [ { "id": "glory", "amount": 500 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["perk_hp_support","perk_dmg_support"] },
+          { "level": 4, "price": [ { "id": "glory", "amount": 700 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["perk_support_targets"] },
+          { "level": 5, "price": [ { "id": "glory", "amount": 900 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["perk_glory_bonus"] }
         ]
       }
     },
@@ -55,11 +55,11 @@
       "innatePerks": ["merc_tier_1"],
       "development": {
         "levels": [
-          { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_1", "damage_1"] },
-          { "level": 2, "price": [ { "id": "glory", "amount": 2 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["accuracy_2"] },
-          { "level": 3, "price": [ { "id": "glory", "amount": 3 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["damage_2"] },
-          { "level": 4, "price": [ { "id": "glory", "amount": 4 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["accuracy_3"] },
-          { "level": 5, "price": [ { "id": "glory", "amount": 5 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["damage_3"] }
+          { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
+          { "level": 2, "price": [ { "id": "glory", "amount": 300 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["perk_hp_range","perk_dmg_melee"] },
+          { "level": 3, "price": [ { "id": "glory", "amount": 500 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["perk_hp_support","perk_dmg_support"] },
+          { "level": 4, "price": [ { "id": "glory", "amount": 700 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["perk_support_targets"] },
+          { "level": 5, "price": [ { "id": "glory", "amount": 900 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["perk_glory_bonus"] }
         ]
       }
     },
@@ -77,11 +77,11 @@
       "innatePerks": ["merc_tier_1"],
       "development": {
         "levels": [
-          { "level": 1, "price": [ { "id": "glory", "amount": 1 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["accuracy_1", "damage_1", "perk_hp_melee", "perk_dmg_melee"] },
-          { "level": 2, "price": [ { "id": "glory", "amount": 2 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["accuracy_2", "perk_hp_range", "perk_dmg_range"] },
-          { "level": 3, "price": [ { "id": "glory", "amount": 3 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["damage_2", "perk_support_targets", "perk_hp_support", "perk_dmg_support"] },
-          { "level": 4, "price": [ { "id": "glory", "amount": 4 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["accuracy_3", "perk_gold_bonus"] },
-          { "level": 5, "price": [ { "id": "glory", "amount": 5 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["damage_3", "perk_glory_bonus"] }
+          { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
+          { "level": 2, "price": [ { "id": "glory", "amount": 300 } ], "autoUpgrades": ["unlock_merc_1"], "paidUpgrades": ["perk_hp_range","perk_dmg_melee"] },
+          { "level": 3, "price": [ { "id": "glory", "amount": 500 } ], "autoUpgrades": ["army_plus_2"], "paidUpgrades": ["perk_hp_support","perk_dmg_support"] },
+          { "level": 4, "price": [ { "id": "glory", "amount": 700 } ], "autoUpgrades": ["unlock_merc_2"], "paidUpgrades": ["perk_support_targets"] },
+          { "level": 5, "price": [ { "id": "glory", "amount": 900 } ], "autoUpgrades": ["army_plus_3"], "paidUpgrades": ["perk_glory_bonus"] }
         ]
       }
     }

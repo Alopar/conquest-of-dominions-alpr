@@ -5,7 +5,7 @@ let gameSettings = {
     meleeHitThreshold: 5,
     rangeHitThreshold: 11,
     adventureSettings: {
-        stageProgressionMode: 1
+        stageProgressionMode: 2
     },
     battleSettings: {
         showDetailedLog: true,
@@ -86,7 +86,7 @@ function resetSettingsToDefault() {
         meleeHitThreshold: 5,
         rangeHitThreshold: 11,
         adventureSettings: {
-            stageProgressionMode: 1
+            stageProgressionMode: 2
         },
         battleSettings: {
             showDetailedLog: true,
