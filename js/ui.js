@@ -302,7 +302,23 @@ function addToLog(message) {
 }
 
 // Переключение экранов
-function showIntro() {
+async function showIntro() {
+    try {
+        const current = (window.AppState && window.AppState.screen) || null;
+        const needsConfirm = current === 'adventure' || current === 'battle';
+        if (needsConfirm) {
+            let proceed = true;
+            try {
+                if (window.UI && typeof window.UI.showModal === 'function') {
+                    const h = window.UI.showModal('Игровой прогресс будет потерян. Выйти на главную?', { type: 'dialog', title: 'Подтверждение', yesText: 'Да', noText: 'Отмена' });
+                    proceed = await h.closed;
+                } else {
+                    proceed = confirm('Игровой прогресс будет потерян. Выйти на главную?');
+                }
+            } catch {}
+            if (!proceed) return;
+        }
+    } catch {}
     try {
         if (window.Router && typeof window.Router.setScreen === 'function') {
             window.Router.setScreen('intro');
@@ -310,7 +326,6 @@ function showIntro() {
             showScreen('intro-screen');
         }
     } catch { showScreen('intro-screen'); }
-    // Сбрасываем источник конфига при возврате на главную, чтобы новый старт схватки подхватил свой конфиг
     try { window.battleConfigSource = undefined; } catch {}
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';

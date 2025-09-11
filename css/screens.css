@@ -66,6 +66,20 @@
     max-height: none;
     overflow: auto;
 }
+
+/* Экран конфигурации — как бестиарий: тянется по высоте, затем прокрутка */
+#config-screen {
+    height: 100vh;
+    background-color: #0d0d0d;
+    display: flex;
+    flex-direction: column;
+}
+
+#config-screen .settings-container { align-items: stretch; }
+#config-screen .settings-content { height: calc(100vh - 140px); display: flex; flex-direction: column; }
+
+/* Контейнер таблицы заполняет остаток места между заголовком и нижней кнопкой */
+#config-screen .bestiary-table-wrapper { flex: 1; min-height: 0; overflow: auto; }
 /* Стили экранов - стартовый экран, экран боя, компоновка */
 
 /* Стартовый экран */

@@ -65,10 +65,24 @@ async function showAdventureSetup() {
     }
 }
 
-function backToIntroFromAdventure() {
-    document.querySelectorAll('.screen').forEach(s => { s.classList.remove('active'); s.style.display = 'none'; });
-    const intro = document.getElementById('intro-screen');
-    if (intro) { intro.classList.add('active'); intro.style.display = 'flex'; }
+async function backToIntroFromAdventure() {
+    let proceed = true;
+    try {
+        if (window.UI && typeof window.UI.showModal === 'function') {
+            const h = window.UI.showModal('Игровой прогресс будет потерян. Выйти на главную?', { type: 'dialog', title: 'Подтверждение', yesText: 'Да', noText: 'Отмена' });
+            proceed = await h.closed;
+        } else {
+            proceed = confirm('Игровой прогресс будет потерян. Выйти на главную?');
+        }
+    } catch {}
+    if (!proceed) return;
+    try {
+        if (window.Router && typeof window.Router.setScreen === 'function') {
+            window.Router.setScreen('intro');
+        } else {
+            showScreen('intro-screen');
+        }
+    } catch { showScreen('intro-screen'); }
 }
 
 async function loadAdventureFile(file) {
