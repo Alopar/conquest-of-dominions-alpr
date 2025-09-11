@@ -147,7 +147,7 @@ function beginAdventureFromSetup() {
         try {
             const seed = Date.now();
             const map = (window.AdventureGraph && window.AdventureGraph.generateAdventureMap) ? window.AdventureGraph.generateAdventureMap({ mapGen: (window.StaticData && window.StaticData.getConfig && window.StaticData.getConfig('adventure')?.mapGen) || (adventureState.config && adventureState.config.mapGen) }, seed) : null;
-            adventureState.map = map; adventureState.currentNodeId = map && map.startId; adventureState.resolvedNodeIds = [];
+            adventureState.map = map; adventureState.currentNodeId = map && map.startId; adventureState.resolvedNodeIds = map && map.startId ? [map.startId] : [];
         } catch {}
         applySelectedClassStartingArmy();
         showAdventure();
@@ -674,16 +674,44 @@ function renderMapBoard() {
     function nodePos(n){ return { x: padX + n.x * colW, y: padY + n.y * colH }; }
     // навешиваем обработчики клика на узлы из сгенерированного SVG
     if (svg) {
+        const mapState = { map: adventureState.map, currentNodeId: adventureState.currentNodeId, resolvedNodeIds: adventureState.resolvedNodeIds };
         svg.querySelectorAll('g[data-id]').forEach(function(g){
             const id = g.getAttribute('data-id');
+            const available = window.AdventureGraph.isNodeAvailable(mapState, id);
+            const visited = Array.isArray(adventureState.resolvedNodeIds) && adventureState.resolvedNodeIds.includes(id);
+            g.classList.toggle('available', available);
+            g.classList.toggle('locked', !available && !visited);
+            g.classList.toggle('visited', visited);
             g.addEventListener('click', function(){ onGraphNodeClick(id); });
+            if (available) {
+                g.addEventListener('mouseenter', function(){
+                    svg.querySelectorAll('.adv-edge').forEach(function(line){ if (line.getAttribute('data-to') === id && line.getAttribute('data-from') === adventureState.currentNodeId) line.classList.add('hover'); });
+                });
+                g.addEventListener('mouseleave', function(){
+                    svg.querySelectorAll('.adv-edge.hover').forEach(function(line){ line.classList.remove('hover'); });
+                });
+            }
+        });
+        // отметить рёбра по состоянию доступности/посещенности
+        svg.querySelectorAll('.adv-edge').forEach(function(line){
+            const to = line.getAttribute('data-to'); const from = line.getAttribute('data-from');
+            const toVisited = adventureState.resolvedNodeIds && adventureState.resolvedNodeIds.includes(to);
+            const fromVisited = adventureState.resolvedNodeIds && adventureState.resolvedNodeIds.includes(from);
+            const available = window.AdventureGraph.isNodeAvailable(mapState, to);
+            line.classList.remove('locked','available','visited');
+            if (toVisited && fromVisited) line.classList.add('visited');
+            else if (available && from === adventureState.currentNodeId) line.classList.add('available');
+            else line.classList.add('locked');
         });
     }
     // Маркер игрока (SVG)
-    const player = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    const player = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     player.setAttribute('id', 'adv-player');
-    player.setAttribute('text-anchor', 'middle'); player.setAttribute('dominant-baseline', 'middle');
-    player.style.fontSize = '20px'; player.textContent = '🧭';
+    const pBg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    pBg.setAttribute('r', '14'); pBg.setAttribute('fill', '#cd853f'); pBg.setAttribute('stroke', '#654321'); pBg.setAttribute('stroke-width', '2');
+    const pIcon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    pIcon.setAttribute('text-anchor', 'middle'); pIcon.setAttribute('dominant-baseline', 'middle'); pIcon.style.fontSize = '14px'; pIcon.textContent = '🚩';
+    player.appendChild(pBg); player.appendChild(pIcon);
     const cn = map.nodes[adventureState.currentNodeId];
     if (cn) { const p = nodePos(cn); player.setAttribute('transform', `translate(${p.x},${p.y})`); }
     svg.appendChild(player);
@@ -727,13 +755,15 @@ function getGraphNodePos(nodeId){
     return { x: padX + n.x * colW, y: padY + n.y * colH };
 }
 
+const ADVENTURE_MOVE_DURATION_MS = 1400;
+
 function movePlayerMarker(from, to, durationMs){
     return new Promise(function(resolve){
         const el = document.getElementById('adv-player');
         if (!el) { resolve(); return; }
         const start = performance.now();
         function tick(t){
-            const k = Math.min(1, (t - start) / Math.max(1, durationMs||700));
+            const k = Math.min(1, (t - start) / Math.max(1, durationMs||ADVENTURE_MOVE_DURATION_MS));
             const x = from.x + (to.x - from.x) * k;
             const y = from.y + (to.y - from.y) * k;
             el.setAttribute('transform', `translate(${x},${y})`);
@@ -749,7 +779,7 @@ async function movePlayerToNode(nodeId){
     adventureState.movingToNodeId = nodeId;
     persistAdventure();
     setAdventureInputBlock(true);
-    await movePlayerMarker(from, to, 700);
+    await movePlayerMarker(from, to, ADVENTURE_MOVE_DURATION_MS);
     setAdventureInputBlock(false);
     adventureState.movingToNodeId = undefined;
     persistAdventure();

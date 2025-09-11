@@ -382,14 +382,24 @@
 .adv-map-root { position: relative; flex: 1; min-height: 300px; overflow: auto; }
 .adv-map-svg { position: absolute; inset: 0; }
 .adv-map-svg line { pointer-events: none; }
+
+/* Состояния рёбер и узлов графа */
+.adv-edge { stroke-width: 2; opacity: .8; }
+.adv-edge.locked { stroke: #444; opacity: .45; }
+.adv-edge.available { stroke: #cd853f; }
+.adv-edge.visited { stroke: #c0c0c0; }
+.adv-edge.hover { stroke: #d4af37; stroke-width: 3; opacity: 1; }
+
+.adv-node rect { fill: #111; stroke:#654321; stroke-width:2; }
+.adv-node.locked rect { stroke: #555; opacity: .85; }
+.adv-node.available rect { stroke: #cd853f; }
+.adv-node.visited rect { stroke: #c0c0c0; }
+.adv-node.current rect { stroke: #cd853f; stroke-width: 3; }
+.adv-node.available:hover rect { stroke: #d4af37; }
 .adv-nodes-layer { position: absolute; inset: 0; pointer-events: none; }
 .adv-nodes-layer .adv-node { pointer-events: auto; }
-.adv-node { position: absolute; transform: translate(-50%, -50%); display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; }
-.adv-node .adv-node-icon { width: 44px; height: 44px; border:2px solid #654321; border-radius:10px; display:flex; align-items:center; justify-content:center; background:#1a1a1a; color:#cd853f; box-shadow:0 4px 10px rgba(0,0,0,0.4); font-size: 18px; }
-.adv-node.available .adv-node-icon { border-color:#cd853f; }
-.adv-node.visited .adv-node-icon { opacity:0.5; }
-.adv-node.locked .adv-node-icon { filter:grayscale(0.6); opacity:0.6; }
-.adv-node-label { color:#cd853f; font-size:0.9em; text-shadow:1px 1px 2px rgba(0,0,0,0.7); white-space:nowrap; }
+/* Сброс старых правил для SVG-узлов */
+svg .adv-node { position: static !important; display: inline !important; }
 .adv-player-dot { position:absolute; width:24px; height:24px; transform:translate(-50%, -50%); display:flex; align-items:center; justify-content:center; pointer-events:none; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)); }
 
 #adventure-input-blocker { position:absolute; inset:0; background:#000; opacity:0; pointer-events:none; transition: opacity .15s ease; }

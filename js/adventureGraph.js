@@ -151,24 +151,29 @@
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', String(p1.x)); line.setAttribute('y1', String(p1.y));
             line.setAttribute('x2', String(p2.x)); line.setAttribute('y2', String(p2.y));
-            line.setAttribute('stroke', '#654321'); line.setAttribute('stroke-width', '2'); line.setAttribute('opacity', '0.7');
+            line.setAttribute('class', 'adv-edge locked');
+            line.setAttribute('data-from', a.id);
+            line.setAttribute('data-to', b.id);
             svg.appendChild(line);
         });
         // nodes
         const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        nodesGroup.setAttribute('class','adv-nodes');
         svg.appendChild(nodesGroup);
         Object.values(map.nodes).forEach(function(n){
             const pos = nodePos(n);
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             g.setAttribute('data-id', n.id);
             g.setAttribute('transform', `translate(${pos.x},${pos.y})`);
+            g.setAttribute('class', 'adv-node locked');
             g.style.cursor = 'pointer';
             const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
             rect.setAttribute('x', '-22'); rect.setAttribute('y', '-22'); rect.setAttribute('rx', '8'); rect.setAttribute('ry', '8');
-            rect.setAttribute('width', '44'); rect.setAttribute('height', '44'); rect.setAttribute('fill', '#1a1a1a'); rect.setAttribute('stroke', '#654321'); rect.setAttribute('stroke-width', '2');
+            rect.setAttribute('width', '44'); rect.setAttribute('height', '44');
             const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             icon.setAttribute('text-anchor', 'middle'); icon.setAttribute('dominant-baseline', 'middle'); icon.setAttribute('fill', '#cd853f'); icon.style.fontSize = '18px';
-            icon.textContent = (n.type === 'boss') ? '👑' : (n.type === 'elite' ? '🛡️' : (n.type === 'event' ? '❔' : (n.type === 'reward' ? '🎁' : (n.type === 'start' ? '🧭' : '⚔️'))));
+            const t = (n.type === 'boss') ? '👑' : (n.type === 'elite' ? '🛡️' : (n.type === 'event' ? '❔' : (n.type === 'reward' ? '🎁' : (n.type === 'start' ? '' : '⚔️'))));
+            icon.textContent = t;
             g.appendChild(rect); g.appendChild(icon);
             nodesGroup.appendChild(g);
         });
