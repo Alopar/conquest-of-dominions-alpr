@@ -11,5 +11,19 @@
     { "id": "stage_4", "name": "Пещеры", "encounterIds": ["caves_patrol"] },
     { "id": "stage_5", "name": "Склеп", "encounterIds": ["crypt_bones", "crypt_vampire"] },
     { "id": "stage_6", "name": "Горы", "encounterIds": ["dragon_lair"] }
-  ]
+  ],
+  "mapGen": {
+    "depth": 5,
+    "widthRange": [3, 5],
+    "edgeDensity": 0.55,
+    "guaranteePath": true,
+    "seeded": true,
+    "tierByDepth": [1, 1, 2, 2],
+    "mixByDepth": [
+      { "battle": 0.6, "event": 0.2, "reward": 0.2 },
+      { "battle": 0.6, "event": 0.2, "reward": 0.2 },
+      { "battle": 0.65, "event": 0.2, "reward": 0.15 },
+      { "battle": 0.75, "event": 0.1,  "reward": 0.15, "elite": 0.05 }
+    ]
+  }
 }

@@ -4,6 +4,10 @@
       "id": "barn_rats",
       "shortName": "Амбар",
       "description": "Амбар с крысами",
+      "tier": 1,
+      "class": "normal",
+      "tags": ["village"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -32,6 +36,10 @@
       "id": "farm_chickens",
       "shortName": "Ферма",
       "description": "Двор фермы и проблема с курями",
+      "tier": 1,
+      "class": "normal",
+      "tags": ["village", "farm"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -60,6 +68,10 @@
       "id": "swamp_frogs",
       "shortName": "Болото",
       "description": "Болото с лягушками",
+      "tier": 2,
+      "class": "normal",
+      "tags": ["swamp"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -83,6 +95,10 @@
       "id": "snake_nest",
       "shortName": "Змеи",
       "description": "Змеиное гнездо",
+      "tier": 2,
+      "class": "normal",
+      "tags": ["swamp", "snakes"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -110,6 +126,10 @@
       "id": "goblin_scout",
       "shortName": "Разведка",
       "description": "Лагерь гоблиноидов: разведка",
+      "tier": 2,
+      "class": "normal",
+      "tags": ["horde", "goblins"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -133,6 +153,10 @@
       "id": "goblin_raid",
       "shortName": "Рейд",
       "description": "Лагерь гоблиноидов: рейд",
+      "tier": 3,
+      "class": "elite",
+      "tags": ["horde", "goblins"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -164,6 +188,10 @@
       "id": "caves_patrol",
       "shortName": "Пещеры",
       "description": "Пещеры: звериный дозор",
+      "tier": 3,
+      "class": "normal",
+      "tags": ["caves"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -196,6 +224,10 @@
       "id": "crypt_bones",
       "shortName": "Склеп I",
       "description": "Склеп: стражи из костей",
+      "tier": 3,
+      "class": "normal",
+      "tags": ["crypt", "undead"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -223,6 +255,10 @@
       "id": "crypt_vampire",
       "shortName": "Склеп II",
       "description": "Склеп: вампир-хозяин",
+      "tier": 4,
+      "class": "elite",
+      "tags": ["crypt", "undead"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",
@@ -254,6 +290,10 @@
       "id": "dragon_lair",
       "shortName": "Драконы",
       "description": "Логово драконов",
+      "tier": 5,
+      "class": "boss",
+      "tags": ["mountain", "dragon"],
+      "weight": 1,
       "rewards": [
         {
           "type": "currency",

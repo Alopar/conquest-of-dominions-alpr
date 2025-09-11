@@ -51,6 +51,10 @@ async function showAdventureSetup() {
         // Сбрасываем выбранный класс при входе на экран подготовки
         adventureState.selectedClassId = null;
     } catch {}
+    // Полный сброс сохранения приключения при входе на экран подготовки
+    try { localStorage.removeItem('adventureState'); } catch {}
+    adventureState = { config: null, currencies: {}, pool: {}, selectedClassId: null, currentStageIndex: 0, completedEncounterIds: [], inBattle: false, lastResult: '' };
+    window.adventureState = adventureState;
     restoreAdventure();
     if (adventureState.config) {
         const cfg = adventureState.config;
@@ -139,6 +143,12 @@ function beginAdventureFromSetup() {
     if (!adventureState.selectedClassId) return;
     if (adventureState.config) {
         initAdventureState(adventureState.config);
+        // Создаём новую карту пути для нового приключения
+        try {
+            const seed = Date.now();
+            const map = (window.AdventureGraph && window.AdventureGraph.generateAdventureMap) ? window.AdventureGraph.generateAdventureMap({ mapGen: (window.StaticData && window.StaticData.getConfig && window.StaticData.getConfig('adventure')?.mapGen) || (adventureState.config && adventureState.config.mapGen) }, seed) : null;
+            adventureState.map = map; adventureState.currentNodeId = map && map.startId; adventureState.resolvedNodeIds = [];
+        } catch {}
         applySelectedClassStartingArmy();
         showAdventure();
         return;
@@ -642,40 +652,173 @@ async function showAdventureResult(message) {
 function renderMapBoard() {
     const board = document.getElementById('adventure-map-board');
     if (!board) return;
-    const stages = (adventureState.config && Array.isArray(adventureState.config.stages)) ? adventureState.config.stages : [];
-    const encIdx = getEncountersIndex();
     board.innerHTML = '';
-    stages.forEach(function(stage, sIdx){
-        const col = document.createElement('div');
-        col.className = 'encounter-column';
-        const title = document.createElement('div');
-        title.textContent = stage.name || stage.id;
-        title.style.color = '#cd853f';
-        title.style.marginBottom = '6px';
-        col.appendChild(title);
-        const ids = Array.isArray(stage.encounterIds) ? stage.encounterIds : [];
-        ids.forEach(function(id){
-            const data = encIdx[id];
-            if (!data) return;
-            const tpl = document.getElementById('tpl-encounter-item');
-            let el = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
-            if (!tpl) el.className = 'encounter-item';
-            el.dataset.id = data.id;
-            const iconEl = el.querySelector('.encounter-icon') || el;
-            const nameEl = el.querySelector('.encounter-name');
-            if (iconEl) iconEl.textContent = '❗';
-            if (nameEl) nameEl.textContent = data.shortName || data.id;
-            try { if (window.UI && typeof window.UI.attachTooltip === 'function') window.UI.attachTooltip(el, function(){ return data.shortName || data.description || data.id; }); } catch {}
-            const isCurrentStage = sIdx === adventureState.currentStageIndex;
-            const done = isEncounterDone(data.id);
-            const available = isCurrentStage && !done;
-            if (done) el.classList.add('done');
-            if (!available && !done) el.classList.add('locked');
-            el.addEventListener('click', function(){ onEncounterClick(data, available); });
-            col.appendChild(el);
+    board.classList.add('adv-map-root');
+    // Ленивая генерация карты, если её нет
+    if (!adventureState.map) {
+        try {
+            const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('adventure') : (adventureState.config || null);
+            const seed = Date.now();
+            const map = (window.AdventureGraph && typeof window.AdventureGraph.generateAdventureMap === 'function') ? window.AdventureGraph.generateAdventureMap(cfg, seed) : null;
+            adventureState.map = map;
+            adventureState.currentNodeId = map && map.startId;
+            adventureState.resolvedNodeIds = [];
+            persistAdventure();
+        } catch {}
+    }
+    const map = adventureState.map;
+    if (!map || !map.nodes) { board.innerHTML = '<div>Карта недоступна</div>'; return; }
+    const svg = (window.AdventureGraph && window.AdventureGraph.renderSvgGraph) ? window.AdventureGraph.renderSvgGraph(board, map, { colW:160, colH:120, padX:120, padY:120 }) : null;
+    // Геометрия
+    const colW = 160; const colH = 120; const padX = 120; const padY = 120;
+    function nodePos(n){ return { x: padX + n.x * colW, y: padY + n.y * colH }; }
+    // навешиваем обработчики клика на узлы из сгенерированного SVG
+    if (svg) {
+        svg.querySelectorAll('g[data-id]').forEach(function(g){
+            const id = g.getAttribute('data-id');
+            g.addEventListener('click', function(){ onGraphNodeClick(id); });
         });
-        board.appendChild(col);
+    }
+    // Маркер игрока (SVG)
+    const player = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    player.setAttribute('id', 'adv-player');
+    player.setAttribute('text-anchor', 'middle'); player.setAttribute('dominant-baseline', 'middle');
+    player.style.fontSize = '20px'; player.textContent = '🧭';
+    const cn = map.nodes[adventureState.currentNodeId];
+    if (cn) { const p = nodePos(cn); player.setAttribute('transform', `translate(${p.x},${p.y})`); }
+    svg.appendChild(player);
+    // Если страница перезагружена в момент движения — доводим маркер и завершаем ноду
+    try {
+        const targetId = adventureState.movingToNodeId;
+        if (targetId && targetId !== adventureState.currentNodeId) {
+            setTimeout(async function(){
+                await movePlayerToNode(targetId);
+                adventureState.currentNodeId = targetId;
+                persistAdventure();
+                resolveGraphNode(targetId);
+            }, 0);
+        }
+    } catch {}
+}
+
+async function onGraphNodeClick(nodeId) {
+    if (!window.AdventureGraph) return;
+    const avail = window.AdventureGraph.isNodeAvailable({ map: adventureState.map, currentNodeId: adventureState.currentNodeId, resolvedNodeIds: adventureState.resolvedNodeIds }, nodeId);
+    if (!avail) return;
+    await movePlayerToNode(nodeId);
+    adventureState.currentNodeId = nodeId;
+    persistAdventure();
+    resolveGraphNode(nodeId);
+}
+
+function setAdventureInputBlock(on){
+    let layer = document.getElementById('adventure-input-blocker');
+    if (!layer) {
+        const scr = document.getElementById('adventure-screen');
+        if (scr) { layer = document.createElement('div'); layer.id = 'adventure-input-blocker'; scr.appendChild(layer); }
+    }
+    if (layer) { layer.style.opacity = on ? '0.15' : '0'; layer.style.pointerEvents = on ? 'auto' : 'none'; }
+}
+
+function getGraphNodePos(nodeId){
+    const map = adventureState.map; if (!map) return { x:0, y:0 };
+    const n = map.nodes[nodeId]; if (!n) return { x:0, y:0 };
+    const colW = 160; const colH = 120; const padX = 120; const padY = 120;
+    return { x: padX + n.x * colW, y: padY + n.y * colH };
+}
+
+function movePlayerMarker(from, to, durationMs){
+    return new Promise(function(resolve){
+        const el = document.getElementById('adv-player');
+        if (!el) { resolve(); return; }
+        const start = performance.now();
+        function tick(t){
+            const k = Math.min(1, (t - start) / Math.max(1, durationMs||700));
+            const x = from.x + (to.x - from.x) * k;
+            const y = from.y + (to.y - from.y) * k;
+            el.setAttribute('transform', `translate(${x},${y})`);
+            if (k < 1) requestAnimationFrame(tick); else resolve();
+        }
+        requestAnimationFrame(tick);
     });
+}
+
+async function movePlayerToNode(nodeId){
+    const from = getGraphNodePos(adventureState.currentNodeId);
+    const to = getGraphNodePos(nodeId);
+    adventureState.movingToNodeId = nodeId;
+    persistAdventure();
+    setAdventureInputBlock(true);
+    await movePlayerMarker(from, to, 700);
+    setAdventureInputBlock(false);
+    adventureState.movingToNodeId = undefined;
+    persistAdventure();
+}
+
+function resolveGraphNode(nodeId){
+    try {
+        const map = adventureState.map; if (!map) { renderAdventure(); return; }
+        const node = map.nodes[nodeId]; if (!node) { renderAdventure(); return; }
+        // Помечаем посещение
+        adventureState.resolvedNodeIds = Array.isArray(adventureState.resolvedNodeIds) ? adventureState.resolvedNodeIds : [];
+        if (!adventureState.resolvedNodeIds.includes(nodeId)) adventureState.resolvedNodeIds.push(nodeId);
+        persistAdventure();
+        if (node.type === 'event') {
+            handleEventNode();
+            return;
+        }
+        if (node.type === 'reward') {
+            handleRewardNode();
+            return;
+        }
+        // fight/elite/boss
+        const enc = (window.AdventureGraph && window.AdventureGraph.pickEncounterFor) ? window.AdventureGraph.pickEncounterFor({ class: node.class || 'normal', tier: node.tier || 1 }) : null;
+        if (enc) startEncounterBattle(enc);
+        else renderAdventure();
+    } catch { renderAdventure(); }
+}
+
+function handleEventNode(){
+    try {
+        const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('events') : null;
+        const list = (cfg && Array.isArray(cfg.events)) ? cfg.events : [];
+        const e = list[0] || null;
+        if (!e) { renderAdventure(); return; }
+        if (window.UI && typeof window.UI.showModal === 'function') {
+            const body = document.createElement('div');
+            const text = document.createElement('div'); text.textContent = e.description || e.name || e.id; text.style.textAlign = 'center'; text.style.margin = '8px 0 10px 0'; body.appendChild(text);
+            const wrap = document.createElement('div'); wrap.style.display = 'flex'; wrap.style.justifyContent = 'center'; wrap.style.gap = '10px'; body.appendChild(wrap);
+            const h = window.UI.showModal(body, { type: 'dialog', title: e.name || 'Событие', yesText: e.options?.[0]?.text || 'Ок', noText: e.options?.[1]?.text || 'Пропустить' });
+            h.closed.then(function(ok){
+                const opt = ok ? (e.options?.[0]) : (e.options?.[1]);
+                applyEffects(opt && opt.effects);
+                renderAdventure();
+            });
+        } else { renderAdventure(); }
+    } catch { renderAdventure(); }
+}
+
+function handleRewardNode(){
+    try {
+        const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('rewards') : null;
+        const tables = (cfg && Array.isArray(cfg.tables)) ? cfg.tables : [];
+        const t = tables[0] || null;
+        if (t) applyEffects(t.rewards);
+    } catch {}
+    renderAdventure();
+}
+
+function applyEffects(effects){
+    const arr = Array.isArray(effects) ? effects : [];
+    arr.forEach(function(e){
+        if (!e || !e.type) return;
+        if (e.type === 'currency') {
+            adventureState.currencies = adventureState.currencies || {};
+            adventureState.currencies[e.id] = (adventureState.currencies[e.id] || 0) + Number(e.amount||0);
+        }
+        // Другие типы можно добавить позже
+    });
+    persistAdventure();
 }
 
 function renderHeroClassSelectionSetup() {

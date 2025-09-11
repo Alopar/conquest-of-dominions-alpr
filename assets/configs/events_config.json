@@ -1,0 +1,23 @@
+{
+  "events": [
+    {
+      "id": "find_supplies",
+      "name": "Сломанный обоз",
+      "description": "На дороге найден сломанный обоз. Можно забрать припасы.",
+      "options": [
+        { "id": "take", "text": "Забрать припасы", "effects": [ { "type": "currency", "id": "gold", "amount": 40 } ] },
+        { "id": "leave", "text": "Пройти мимо", "effects": [] }
+      ]
+    },
+    {
+      "id": "mysterious_stone",
+      "name": "Таинственный камень",
+      "description": "Странный монолит с рунами. Прикоснуться?",
+      "options": [
+        { "id": "touch", "text": "Прикоснуться", "effects": [ { "type": "currency", "id": "glory", "amount": 150 } ] },
+        { "id": "ignore", "text": "Не трогать", "effects": [] }
+      ]
+    }
+  ]
+}
+

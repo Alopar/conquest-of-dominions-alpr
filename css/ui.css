@@ -1,4 +1,4 @@
-.encounter-board { display:flex; justify-content:center; align-items:flex-start; }
+/* устаревший стиль encounter-board больше не используется для карты приключения */
 .encounter-column { display:flex; flex-direction:column; gap:12px; align-items:center; position:relative; padding:0 12px; }
 .encounter-column::after { content:""; position:absolute; right:0; top:0; bottom:0; width:2px; background:linear-gradient(to bottom, transparent, #444, transparent); opacity:0.6; }
 .encounter-column:last-child::after { display:none; }
