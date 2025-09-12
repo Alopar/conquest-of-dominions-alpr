@@ -389,6 +389,7 @@
 .adv-edge.available { stroke: #cd853f; }
 .adv-edge.visited { stroke: #c0c0c0; }
 .adv-edge.hover { stroke: #d4af37; stroke-width: 3; opacity: 1; }
+.adv-edge.faded { stroke: #444; opacity: .18; }
 
 .adv-node rect { fill: #111; stroke:#654321; stroke-width:2; }
 .adv-node.locked rect { stroke: #555; opacity: .85; }
@@ -396,6 +397,7 @@
 .adv-node.visited rect { stroke: #c0c0c0; }
 .adv-node.current rect { stroke: #cd853f; stroke-width: 3; }
 .adv-node.available:hover rect { stroke: #d4af37; }
+.adv-node.faded { opacity: .35; }
 .adv-nodes-layer { position: absolute; inset: 0; pointer-events: none; }
 .adv-nodes-layer .adv-node { pointer-events: auto; }
 /* Сброс старых правил для SVG-узлов */

@@ -677,6 +677,21 @@ function renderMapBoard() {
     // навешиваем обработчики клика на узлы из сгенерированного SVG
     if (svg) {
         const mapState = { map: adventureState.map, currentNodeId: adventureState.currentNodeId, resolvedNodeIds: adventureState.resolvedNodeIds };
+        const reachable = new Set();
+        try {
+            // BFS из текущей ноды по доступным рёбрам для вычисления достижимых
+            const q = [adventureState.currentNodeId];
+            const seen = new Set(q);
+            const edges = Array.from(svg.querySelectorAll('.adv-edge'));
+            while (q.length > 0) {
+                const cur = q.shift(); reachable.add(cur);
+                for (const line of edges) {
+                    const from = line.getAttribute('data-from'); const to = line.getAttribute('data-to');
+                    if (from === cur && !seen.has(to)) { seen.add(to); q.push(to); }
+                }
+            }
+        } catch {}
+
         svg.querySelectorAll('g[data-id]').forEach(function(g){
             const id = g.getAttribute('data-id');
             const available = window.AdventureGraph.isNodeAvailable(mapState, id);
@@ -684,6 +699,8 @@ function renderMapBoard() {
             g.classList.toggle('available', available);
             g.classList.toggle('locked', !available && !visited);
             g.classList.toggle('visited', visited);
+            const isFaded = !available && !visited && !reachable.has(id);
+            g.classList.toggle('faded', isFaded);
             g.addEventListener('click', function(){ onGraphNodeClick(id); });
             if (available) {
                 g.addEventListener('mouseenter', function(){
@@ -703,7 +720,10 @@ function renderMapBoard() {
             line.classList.remove('locked','available','visited');
             if (toVisited && fromVisited) line.classList.add('visited');
             else if (available && from === adventureState.currentNodeId) line.classList.add('available');
-            else line.classList.add('locked');
+            else {
+                const faded = !reachable.has(to) && !fromVisited && !toVisited;
+                line.classList.add(faded ? 'faded' : 'locked');
+            }
         });
     }
     // Маркер игрока (SVG)
