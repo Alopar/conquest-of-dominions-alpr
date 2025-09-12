@@ -1,3 +1,5 @@
+const ADVENTURE_MOVE_DURATION_MS = 5000;
+
 function renderModsDebug() {
     const host = document.getElementById('mods-debug-table');
     if (!host) return;
@@ -712,8 +714,13 @@ function renderMapBoard() {
     const pIcon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     pIcon.setAttribute('text-anchor', 'middle'); pIcon.setAttribute('dominant-baseline', 'middle'); pIcon.style.fontSize = '14px'; pIcon.textContent = '🚩';
     player.appendChild(pBg); player.appendChild(pIcon);
-    const cn = map.nodes[adventureState.currentNodeId];
-    if (cn) { const p = nodePos(cn); player.setAttribute('transform', `translate(${p.x},${p.y})`); }
+    let p = null;
+    try {
+        const cur = adventureState.currentNodeId && map.nodes[adventureState.currentNodeId];
+        if (cur && map._posOf && map._posOf[cur.id]) p = map._posOf[cur.id];
+    } catch {}
+    if (!p) { const fallback = (function(){ const n = map.nodes[adventureState.currentNodeId]; if (!n) return {x:120,y:120}; const padX=120,padY=120; const cg=180, rg=120; return { x: padX + (n.x||0)*cg, y: padY + (n.y||0)*rg }; })(); p = fallback; }
+    player.setAttribute('transform', `translate(${p.x},${p.y})`);
     svg.appendChild(player);
     // Если страница перезагружена в момент движения — доводим маркер и завершаем ноду
     try {
@@ -755,8 +762,6 @@ function getGraphNodePos(nodeId){
     return { x: padX + n.x * colW, y: padY + n.y * colH };
 }
 
-const ADVENTURE_MOVE_DURATION_MS = 1400;
-
 function movePlayerMarker(from, to, durationMs){
     return new Promise(function(resolve){
         const el = document.getElementById('adv-player');
@@ -774,8 +779,13 @@ function movePlayerMarker(from, to, durationMs){
 }
 
 async function movePlayerToNode(nodeId){
-    const from = getGraphNodePos(adventureState.currentNodeId);
-    const to = getGraphNodePos(nodeId);
+    function getPos(id){
+        const m = adventureState.map; if (!m) return null;
+        try { if (m._posOf && m._posOf[id]) return m._posOf[id]; } catch {}
+        return getGraphNodePos(id);
+    }
+    const from = getPos(adventureState.currentNodeId);
+    const to = getPos(nodeId);
     adventureState.movingToNodeId = nodeId;
     persistAdventure();
     setAdventureInputBlock(true);

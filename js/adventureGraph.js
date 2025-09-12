@@ -133,21 +133,44 @@
         container.innerHTML = '';
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('class', 'adv-map-svg');
-        const colW = (options && options.colW) || 160;
-        const colH = (options && options.colH) || 120;
         const padX = (options && options.padX) || 120;
         const padY = (options && options.padY) || 120;
-        const maxX = Math.max(...Object.values(map.nodes).map(n => n.x));
-        const maxY = Math.max(...Object.values(map.nodes).map(n => n.y));
-        const width = Math.max(1200, padX * 2 + (maxX + 1) * colW);
-        const height = Math.max(600, padY * 2 + (maxY + 1) * colH);
+        const colGap = (options && options.colGap) || 180;   // минимальный горизонтальный шаг между колонками
+        const rowGap = (options && options.rowGap) || 120;    // минимальный вертикальный шаг между нодами
+
+        // Строим колонки по значениям x
+        const allNodes = Object.values(map.nodes);
+        const maxX = Math.max(...allNodes.map(n => n.x));
+        const colCount = maxX + 1;
+        const columnsByX = Array.from({ length: colCount }, () => []);
+        allNodes.forEach(n => { columnsByX[n.x].push(n); });
+        columnsByX.forEach(col => col.sort((a,b) => (a.y||0) - (b.y||0)));
+        const maxRows = Math.max(...columnsByX.map(c => c.length));
+
+        // Рассчитываем размеры полотна по самым высоким/широким колонкам
+        const width = Math.max(800, padX * 2 + (colCount - 1) * colGap);
+        const height = Math.max(400, padY * 2 + Math.max(0, (maxRows - 1)) * rowGap);
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
         container.appendChild(svg);
-        function nodePos(n){ return { x: padX + n.x * colW, y: padY + n.y * colH }; }
+        // Позиции: колонки равномерно по ширине, ноды — равномерно по высоте колонки и центрированы
+        const xAt = []; for (let i=0;i<colCount;i++) xAt[i] = padX + i * colGap;
+        const posOf = {};
+        for (let cx=0; cx<colCount; cx++){
+            const col = columnsByX[cx];
+            const m = col.length;
+            if (m === 0) continue;
+            const usedHeight = (m - 1) * rowGap;
+            const totalHeight = (maxRows - 1) * rowGap;
+            const offset = (totalHeight - usedHeight) / 2; // центрирование относительно самой высокой колонки
+            for (let i=0;i<m;i++){
+                const n = col[i];
+                posOf[n.id] = { x: xAt[cx], y: padY + offset + i * rowGap };
+            }
+        }
         // edges
         map.edges.forEach(function(e){
             const a = map.nodes[e.from]; const b = map.nodes[e.to]; if (!a||!b) return;
-            const p1 = nodePos(a); const p2 = nodePos(b);
+            const p1 = posOf[a.id]; const p2 = posOf[b.id];
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', String(p1.x)); line.setAttribute('y1', String(p1.y));
             line.setAttribute('x2', String(p2.x)); line.setAttribute('y2', String(p2.y));
@@ -161,7 +184,7 @@
         nodesGroup.setAttribute('class','adv-nodes');
         svg.appendChild(nodesGroup);
         Object.values(map.nodes).forEach(function(n){
-            const pos = nodePos(n);
+            const pos = posOf[n.id] || {x:padX, y:padY};
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             g.setAttribute('data-id', n.id);
             g.setAttribute('transform', `translate(${pos.x},${pos.y})`);
@@ -177,6 +200,8 @@
             g.appendChild(rect); g.appendChild(icon);
             nodesGroup.appendChild(g);
         });
+        // expose layout for external consumers (marker positioning)
+        try { map._posOf = posOf; map._layout = { padX, padY, colGap, rowGap, width, height }; } catch {}
         return svg;
     }
 
