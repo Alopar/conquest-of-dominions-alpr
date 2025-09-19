@@ -582,9 +582,12 @@ function finishBattleToAdventure() {
     const hasAnyUnits = Object.values(window.adventureState.pool || {}).some(v => v > 0);
     const encLeft = (function(){
         try {
-            const stages = (window.adventureState.config && Array.isArray(window.adventureState.config.stages)) ? window.adventureState.config.stages : [];
-            return window.adventureState.currentStageIndex < stages.length;
-        } catch { return false; }
+            const map = window.adventureState && window.adventureState.map;
+            if (!map || !map.nodes) return true;
+            const bossIds = Object.keys(map.nodes).filter(function(id){ const n = map.nodes[id]; return n && n.type === 'boss'; });
+            const done = bossIds.every(function(id){ return Array.isArray(window.adventureState.resolvedNodeIds) && window.adventureState.resolvedNodeIds.includes(id); });
+            return !done;
+        } catch { return true; }
     })();
     if (!hasAnyUnits) {
         window.showAdventureResult('💀💀💀 Поражение! Вся армия потеряна! 💀💀💀');

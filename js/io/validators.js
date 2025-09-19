@@ -7,11 +7,9 @@ function validateBattleConfig(config) {
 
 function validateAdventureConfig(cfg) {
     if (!cfg || typeof cfg !== 'object') throw new Error('Неверная структура adventure_config');
-    if (!cfg.adventure || !Array.isArray(cfg.stages)) { throw new Error('Отсутствуют adventure/stages'); }
+    if (!cfg.adventure || typeof cfg.adventure !== 'object') { throw new Error('Отсутствует adventure'); }
     if (cfg.adventure.startingCurrencies && !Array.isArray(cfg.adventure.startingCurrencies)) throw new Error('startingCurrencies должен быть массивом');
-    cfg.stages.forEach(function(st){
-        if (!st || typeof st.id !== 'string' || !Array.isArray(st.encounterIds)) throw new Error('Стадия должна содержать id и encounterIds');
-    });
+    if (cfg.mapGen && typeof cfg.mapGen !== 'object') throw new Error('mapGen должен быть объектом');
 }
 
 function validateEncountersConfig(cfg) {

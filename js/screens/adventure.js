@@ -158,11 +158,7 @@ function beginAdventureFromSetup() {
     loadDefaultAdventure().then(() => { applySelectedClassStartingArmy(); showAdventure(); });
 }
 
-function validateAdventureConfig(cfg) {
-    if (!cfg || !cfg.adventure || !Array.isArray(cfg.stages)) {
-        throw new Error('Неверная структура adventure_config');
-    }
-}
+// удалено локальное перекрытие validateAdventureConfig — используется глобальный валидатор из validators.js
 
 function initAdventureState(cfg) {
     adventureState.config = cfg;
@@ -693,23 +689,13 @@ function getEncountersIndex() {
     return map;
 }
 
-function getCurrentStage() {
-    const stages = (adventureState.config && Array.isArray(adventureState.config.stages)) ? adventureState.config.stages : [];
-    if (adventureState.currentStageIndex >= stages.length) return null;
-    return stages[adventureState.currentStageIndex];
-}
+function getCurrentStage() { return null; }
 
 function isEncounterDone(id) {
     return adventureState.completedEncounterIds.includes(id);
 }
 
-function getAvailableEncountersForCurrentStage() {
-    const stage = getCurrentStage();
-    if (!stage) return [];
-    const ids = Array.isArray(stage.encounterIds) ? stage.encounterIds : [];
-    const all = getEncountersIndex();
-    return ids.map(id => all[id]).filter(Boolean);
-}
+function getAvailableEncountersForCurrentStage() { return []; }
 
 async function showAdventureResult(message) {
     try {
@@ -1314,12 +1300,12 @@ function finishAdventureBattle(winner) {
     const last = window._lastEncounterData;
     if (winner === 'attackers' && last) {
         if (!isEncounterDone(last.id)) adventureState.completedEncounterIds.push(last.id);
-        const stage = getCurrentStage();
-        const allDone = stage && Array.isArray(stage.encounterIds) && stage.encounterIds.every(id => isEncounterDone(id));
-        const settings = window.getCurrentSettings ? window.getCurrentSettings() : {};
-        const mode = Number(settings?.adventureSettings?.stageProgressionMode || 1);
-        const passOnFirst = mode === 1;
-        if (passOnFirst || allDone) adventureState.currentStageIndex += 1;
+        try {
+            const map = adventureState.map;
+            const bossIds = Object.keys(map.nodes || {}).filter(function(id){ const n = map.nodes[id]; return n && n.type === 'boss'; });
+            const allVisited = bossIds.every(function(id){ return Array.isArray(adventureState.resolvedNodeIds) && adventureState.resolvedNodeIds.includes(id); });
+            if (allVisited) adventureState.lastResult = 'Победа!';
+        } catch {}
         adventureState.lastResult = `Победа!`;
     } else {
         adventureState.lastResult = 'Поражение';
