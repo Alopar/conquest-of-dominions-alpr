@@ -1,0 +1,28 @@
+{
+  "tracks": [
+    {
+      "id": "offense",
+      "icon": "⚔️",
+      "name": "Атака",
+      "currencyId": "glory",
+      "unitCost": 1,
+      "thresholds": [
+        { "value": 5,  "grantsPerks": ["dmg_melee_plus_1"] },
+        { "value": 10, "grantsPerks": ["dmg_range_plus_1"] }
+      ]
+    },
+    {
+      "id": "defense",
+      "icon": "🛡️",
+      "name": "Защита",
+      "currencyId": "glory",
+      "unitCost": 1,
+      "thresholds": [
+        { "value": 5,  "grantsPerks": ["hp_melee_plus_5"] },
+        { "value": 10, "grantsPerks": ["hp_range_plus_3"] }
+      ]
+    }
+  ]
+}
+
+

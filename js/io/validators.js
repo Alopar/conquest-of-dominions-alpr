@@ -112,3 +112,26 @@ function validatePerksConfig(cfg){
     });
 }
 window.validatePerksConfig = validatePerksConfig;
+
+function validateDevelopmentTracksConfig(cfg){
+    const list = Array.isArray(cfg) ? cfg : (cfg && Array.isArray(cfg.tracks) ? cfg.tracks : null);
+    if (!list) throw new Error('Неверная структура development_tracks');
+    const ids = new Set();
+    list.forEach(function(t){
+        if (!t || typeof t.id !== 'string' || typeof t.name !== 'string') throw new Error('Трек должен содержать id и name');
+        if (ids.has(t.id)) throw new Error('Дублирующийся id трека: ' + t.id);
+        ids.add(t.id);
+        if (typeof t.icon !== 'string') throw new Error('Трек должен содержать icon');
+        if (typeof t.currencyId !== 'string') throw new Error('Трек должен содержать currencyId');
+        if (typeof t.unitCost !== 'number' || !(t.unitCost > 0)) throw new Error('unitCost должен быть положительным числом');
+        if (!Array.isArray(t.thresholds)) throw new Error('thresholds должен быть массивом');
+        let prev = -Infinity;
+        t.thresholds.forEach(function(th){
+            if (!th || typeof th.value !== 'number') throw new Error('Порог должен содержать числовое value');
+            if (th.value <= prev) throw new Error('Пороги должны быть строго возрастающими');
+            prev = th.value;
+            if (th.grantsPerks && !Array.isArray(th.grantsPerks)) throw new Error('grantsPerks должен быть массивом строк');
+        });
+    });
+}
+window.validateDevelopmentTracksConfig = validateDevelopmentTracksConfig;

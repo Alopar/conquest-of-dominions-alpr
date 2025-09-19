@@ -405,3 +405,14 @@ svg .adv-node { position: static !important; display: inline !important; }
 .adv-player-dot { position:absolute; width:24px; height:24px; transform:translate(-50%, -50%); display:flex; align-items:center; justify-content:center; pointer-events:none; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)); }
 
 #adventure-input-blocker { position:absolute; inset:0; background:#000; opacity:0; pointer-events:none; transition: opacity .15s ease; }
+
+/* Шкалы развития героя */
+.dev-track-row { display:flex; align-items:center; gap:12px; padding:10px 12px; border:2px solid #654321; border-radius:10px; background: rgba(26,26,26,0.6); margin-bottom:10px; }
+.dev-track-left { display:flex; align-items:center; gap:8px; min-width:160px; }
+.dev-track-icon { font-size: 1.2em; }
+.dev-track-name { color:#cd853f; font-weight:600; }
+.dev-track-center { flex:1; display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+.dev-track-item { width:22px; height:22px; display:inline-flex; align-items:center; justify-content:center; color:#a0845c; border:2px solid #555; border-radius:4px; position: relative; }
+.dev-track-item.filled { background: linear-gradient(145deg, #8b7355, #a0845c); border-color:#654321; color:#1a1a1a; }
+.dev-track-item.threshold::after { content:'🥇'; font-size: 14px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); line-height: 1; }
+.dev-track-item.threshold.filled { background: linear-gradient(145deg, #d4af37, #b8860b); border-color:#d4af37; color:#1a1a1a; }

@@ -4,6 +4,7 @@ let gameSettings = {
     unitsPerRow: 10,
     meleeHitThreshold: 5,
     rangeHitThreshold: 11,
+    development: { mode: 'tracks' },
     adventureSettings: {
         stageProgressionMode: 2
     },
@@ -53,6 +54,12 @@ function displaySettings() {
         modeEl1.checked = mode === 1;
         modeEl2.checked = mode === 2;
     }
+    try {
+        const devMode = (gameSettings && gameSettings.development && gameSettings.development.mode) || 'tracks';
+        const dmShop = document.getElementById('devModeShop');
+        const dmTracks = document.getElementById('devModeTracks');
+        if (dmShop && dmTracks) { dmShop.checked = devMode === 'shop'; dmTracks.checked = devMode === 'tracks'; }
+    } catch {}
 }
 
 // Сохранение настроек с экрана
@@ -75,6 +82,13 @@ function saveSettingsFromScreen() {
     const mode = (modeEl2 && modeEl2.checked) ? 2 : 1;
     if (!gameSettings.adventureSettings) gameSettings.adventureSettings = {};
     gameSettings.adventureSettings.stageProgressionMode = mode;
+
+    try {
+        const dmShop = document.getElementById('devModeShop');
+        const useTracks = !(dmShop && dmShop.checked);
+        if (!gameSettings.development) gameSettings.development = {};
+        gameSettings.development.mode = useTracks ? 'tracks' : 'shop';
+    } catch {}
 
     saveGameSettings();
 }

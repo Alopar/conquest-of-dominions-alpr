@@ -6,6 +6,32 @@
     </div>
 </template>
 
+<!-- Герой: шкалы развития -->
+<template id="tpl-dev-tracks-screen">
+    <div class="hero-dev-root">
+        <div id="dev-tracks-header" class="hero-dev-header"></div>
+        <div id="dev-tracks-list" class="hero-dev-list"></div>
+    </div>
+    
+</template>
+
+<template id="tpl-dev-track-row">
+    <div class="dev-track-row">
+        <div class="dev-track-left">
+            <div class="dev-track-icon" data-role="icon">📊</div>
+            <div class="dev-track-name" data-role="name">Трек</div>
+        </div>
+        <div class="dev-track-center" data-role="progress"></div>
+        <div class="dev-track-right">
+            <button class="btn" data-role="invest1">+1</button>
+        </div>
+    </div>
+</template>
+
+<template id="tpl-dev-track-item">
+    <div class="dev-track-item" data-role="cell"></div>
+</template>
+
 <template id="tpl-hero-class-item">
     <div class="hero-class-item" data-id="">
         <div class="hero-class-icon" data-role="icon">❓</div>

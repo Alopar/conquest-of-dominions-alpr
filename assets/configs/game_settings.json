@@ -5,6 +5,7 @@
     "unitsPerRow": 10,
     "meleeHitThreshold": 5,
     "rangeHitThreshold": 11,
+    "development": { "mode": "tracks" },
     "adventureSettings": {
       "stageProgressionMode": 2
     },

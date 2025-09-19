@@ -11,6 +11,7 @@
         { "id": "archer", "count": 2 }
       ],
       "innatePerks": ["merc_tier_1"],
+      "developmentTracks": ["offense","defense"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
@@ -31,6 +32,7 @@
         { "id": "rogue", "count": 3 }
       ],
       "innatePerks": ["merc_tier_1", "gold_bonus_20"],
+      "developmentTracks": ["offense","defense"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
@@ -53,6 +55,7 @@
         { "id": "waterElemental", "count": 1 }
       ],
       "innatePerks": ["merc_tier_1"],
+      "developmentTracks": ["offense","defense"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
@@ -75,6 +78,7 @@
       ],
       "requiresAchievementId": "kill_10_wolf",
       "innatePerks": ["merc_tier_1"],
+      "developmentTracks": ["offense","defense"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },

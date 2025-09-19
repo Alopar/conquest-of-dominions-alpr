@@ -10,6 +10,7 @@
         { id: 'heroClasses', title: 'Классы героев', assets: ['assets/configs/hero_classes.json'], validatorName: 'validateHeroClassesConfig' },
         { id: 'heroUpgrades', title: 'Улучшения героя', assets: ['assets/configs/hero_upgrades.json'], validatorName: 'validateHeroUpgradesConfig' },
         { id: 'perks', title: 'Перки', assets: ['assets/configs/perks_config.json'], validatorName: 'validatePerksConfig' },
+        { id: 'developmentTracks', title: 'Треки развития', assets: ['assets/configs/development_tracks.json'], validatorName: 'validateDevelopmentTracksConfig' },
         // Основной файл сетапа боя
         { id: 'battleSetup', title: 'Сетап боя', assets: ['assets/configs/battle_setup.json'], validatorName: 'validateBattleConfig' }
     ];

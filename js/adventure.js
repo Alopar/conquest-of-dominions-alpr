@@ -185,6 +185,8 @@ function initAdventureState(cfg) {
         const innate = def && Array.isArray(def.innatePerks) ? def.innatePerks : [];
         if (innate.length > 0 && window.Perks && typeof window.Perks.addMany === 'function') window.Perks.addMany(innate);
     } catch {}
+    try { if (window.Tracks && typeof window.Tracks.initForClass === 'function') window.Tracks.initForClass((window.Hero && window.Hero.getClassId && window.Hero.getClassId()) || null); } catch {}
+    try { if (window.Tracks && typeof window.Tracks.resetProgress === 'function') window.Tracks.resetProgress(); } catch {}
 }
 
 async function showAdventure() {
@@ -295,7 +297,10 @@ function ensureAdventureTabs() {
     tabs.appendChild(makeBtn('map', '🗺️ Карта'));
     tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
     // tabs.appendChild(makeBtn('army', '🛡️ Армия'));
-    tabs.appendChild(makeBtn('hero', '💪 Улучшения'));
+    let devMode = 'shop';
+    try { devMode = ((window.GameSettings && window.GameSettings.get && window.GameSettings.get().development && window.GameSettings.get().development.mode) || 'shop'); } catch {}
+    const heroLabel = devMode === 'tracks' ? '📊 Улучшения' : '💪 Улучшения';
+    tabs.appendChild(makeBtn('hero', heroLabel));
     tabs.appendChild(makeBtn('perks', '🥇 Перки'));
     tabs.appendChild(makeBtn('mods', '🔧 Модификаторы'));
     content.insertBefore(tabs, content.firstElementChild || null);
@@ -474,6 +479,77 @@ function renderHeroDevelopment() {
     const rootHost = document.getElementById('hero-dev-root');
     if (!rootHost) return;
     rootHost.innerHTML = '';
+    let devMode = 'shop';
+    try { devMode = ((window.GameSettings && window.GameSettings.get && window.GameSettings.get().development && window.GameSettings.get().development.mode) || 'shop'); } catch {}
+    if (devMode === 'tracks') {
+        const scrTpl2 = document.getElementById('tpl-dev-tracks-screen');
+        const rowTpl2 = document.getElementById('tpl-dev-track-row');
+        const itemTpl2 = document.getElementById('tpl-dev-track-item');
+        const scr2 = scrTpl2 ? scrTpl2.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        const list2 = scr2.querySelector('#dev-tracks-list') || scr2;
+        try { if (window.Tracks && typeof window.Tracks.initForClass === 'function') window.Tracks.initForClass((window.Hero && window.Hero.getClassId && window.Hero.getClassId()) || null); } catch {}
+        const tracks = (window.Tracks && typeof window.Tracks.getAvailableTracks === 'function') ? window.Tracks.getAvailableTracks() : [];
+        tracks.forEach(function(t){
+            const row = rowTpl2 ? rowTpl2.content.firstElementChild.cloneNode(true) : document.createElement('div');
+            if (!rowTpl2) row.className = 'dev-track-row';
+            const iconEl = row.querySelector('[data-role="icon"]') || row;
+            const nameEl = row.querySelector('[data-role="name"]');
+            const progEl = row.querySelector('[data-role="progress"]') || row;
+            const b1 = row.querySelector('[data-role="invest1"]');
+            if (iconEl) iconEl.textContent = t.icon || '📊';
+            if (nameEl) nameEl.textContent = t.name || t.id;
+            const cur = (window.Tracks && window.Tracks.getProgress) ? window.Tracks.getProgress(t.id) : 0;
+            const maxVal = (Array.isArray(t.thresholds) && t.thresholds.length>0) ? t.thresholds[t.thresholds.length-1].value : cur + 10;
+            const cells = Math.max(cur, maxVal);
+            progEl.innerHTML = '';
+            for (let i=1; i<=cells; i++){
+                const it = itemTpl2 ? itemTpl2.content.firstElementChild.cloneNode(true) : document.createElement('span');
+                if (!itemTpl2) { it.className = 'dev-track-item'; }
+                const isThreshold = Array.isArray(t.thresholds) && t.thresholds.some(function(th){ return th && th.value === i; });
+                if (i <= cur) it.classList.add('filled');
+                if (isThreshold) it.classList.add('threshold');
+                if (isThreshold) {
+                    try {
+                        if (window.UI && typeof window.UI.attachTooltip === 'function') {
+                            window.UI.attachTooltip(it, function(){
+                                const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('perks') : null;
+                                const list = cfg && Array.isArray(cfg.perks) ? cfg.perks : [];
+                                const byId = {}; list.forEach(function(p){ byId[p.id] = p; });
+                                const th = (t.thresholds || []).find(function(x){ return x && x.value === i; }) || { grantsPerks: [] };
+                                const perks = Array.isArray(th.grantsPerks) ? th.grantsPerks : [];
+                                const wrap = document.createElement('div');
+                                perks.forEach(function(pid){
+                                    const p = byId[pid] || { id: pid, name: pid, icon: '🥇' };
+                                    const row = document.createElement('div');
+                                    row.textContent = `${p.icon || '🥇'} ${p.name || pid}`;
+                                    wrap.appendChild(row);
+                                });
+                                return wrap;
+                            }, { delay: 200 });
+                        }
+                    } catch {}
+                }
+                progEl.appendChild(it);
+            }
+            function wire(btn){
+                if (!btn) return;
+                try {
+                    const ch = window.Tracks && window.Tracks.canInvest ? window.Tracks.canInvest(t.id, 1) : { ok:false };
+                    btn.disabled = !(ch && ch.ok);
+                    const c = (window.StaticData && window.StaticData.getConfig && window.StaticData.getConfig('currencies'));
+                    const list = c && Array.isArray(c.currencies) ? c.currencies : [];
+                    const byId = {}; list.forEach(function(cc){ byId[cc.id] = cc; });
+                    const cd = byId[t.currencyId] || { icon:'', name:t.currencyId };
+                    btn.textContent = `${t.unitCost} ${cd.icon || ''}`;
+                    btn.addEventListener('click', function(){ if (window.Tracks && window.Tracks.invest && window.Tracks.invest(t.id, 1)) renderAdventure(); });
+                } catch { btn.textContent = ''; }
+            }
+            wire(b1);
+            list2.appendChild(row);
+        });
+        rootHost.appendChild(scr2);
+        return;
+    }
     const scrTpl = document.getElementById('tpl-hero-dev-screen');
     const headerTpl = document.getElementById('tpl-hero-dev-header');
     const rowTpl = document.getElementById('tpl-hero-dev-row');
