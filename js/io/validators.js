@@ -61,6 +61,18 @@ window.validateMonstersConfig = validateMonstersConfig;
 window.validateMercenariesConfig = validateMercenariesConfig;
 window.validateEncountersConfig = validateEncountersConfig;
 window.validateCurrenciesConfig = validateCurrenciesConfig;
+function validateAchievementsConfig(cfg) {
+    const list = Array.isArray(cfg && cfg.achievements) ? cfg.achievements : [];
+    list.forEach(function(a){
+        if (!a || typeof a.id !== 'string') throw new Error('Достижение должно содержать id');
+        if (typeof a.name !== 'string' || typeof a.description !== 'string') throw new Error('Достижение должно содержать name и description');
+        if (typeof a.icon !== 'string') throw new Error('Достижение должно содержать icon');
+        if (a.type !== 'monster' && a.type !== 'currency') throw new Error('achievement.type должен быть monster или currency');
+        if (typeof a.id_entity !== 'string') throw new Error('achievement.id_entity должен быть строкой');
+        if (typeof a.amount !== 'number') throw new Error('achievement.amount должен быть числом');
+    });
+}
+window.validateAchievementsConfig = validateAchievementsConfig;
 function validateHeroClassesConfig(cfg) {
     const list = Array.isArray(cfg) ? cfg : (cfg && Array.isArray(cfg.classes) ? cfg.classes : null);
     if (!list) throw new Error('Неверная структура hero_classes');

@@ -10,9 +10,25 @@ conquest-of-dominions-alpr/
 ├── assets/                    # Ресурсы
 │   ├── images/               # Изображения (для будущего использования)
 │   ├── configs/              # Конфигурационные файлы
-│   │   ├── battle_setup.json
-│   │   └── monsters_config.json
+│   │   ├── units/
+│   │   │   ├── monsters_config.json
+│   │   │   └── mercenaries_config.json
+│   │   ├── hero/
+│   │   │   ├── hero_classes.json
+│   │   │   ├── hero_upgrades.json
+│   │   │   └── perks_config.json
+│   │   ├── adventure/
+│   │   │   ├── adventure_config.json
+│   │   │   ├── encounters_config.json
+│   │   │   └── events_config.json
+│   │   └── game/
+│   │       ├── battle_setup.json
+│   │       ├── currencies_config.json
+│   │       ├── development_tracks.json
+│   │       ├── achievements_config.json
+│   │       └── game_settings.json
 │   └── data/                 # Игровые данные (для будущего использования)
+├── game_rules.md             # Игровые правила (загружается экраном Правил)
 ├── css/                      # Стили
 │   └── styles.css
 ├── js/                       # JavaScript код
@@ -67,8 +83,8 @@ conquest-of-dominions-alpr/
 - `js/ui.js` - Пользовательский интерфейс и отображение
 
 ### Конфигурации
-- `assets/configs/battle_setup.json` — Конфигурация конкретной битвы (армии, параметры)
-- `assets/configs/monsters_config.json` — Все типы юнитов/монстров (характеристики)
+- `assets/configs/game/battle_setup.json` — Конфигурация конкретной битвы (армии, параметры)
+- `assets/configs/units/monsters_config.json` — Все типы юнитов/монстров (характеристики)
 
 ## ⚙️ Конфигурация
 
