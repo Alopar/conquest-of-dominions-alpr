@@ -721,7 +721,7 @@ async function showRules() {
     if (!container) return;
     container.textContent = 'Загрузка правил...';
     try {
-        const url = 'game_rules.md?_=' + Date.now();
+        const url = 'assets/info/game_rules.md?_=' + Date.now();
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
         const md = await res.text();
