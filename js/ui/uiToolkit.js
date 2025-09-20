@@ -186,7 +186,12 @@
 
         // Выбираем шаблон
         const type = (opts && opts.type) || 'info';
-        const tplId = type === 'confirm' ? 'tpl-modal-confirm' : (type === 'dialog' ? 'tpl-modal-dialog' : 'tpl-modal-info');
+        const tplId = (function(){
+            if (type === 'confirm') return 'tpl-modal-confirm';
+            if (type === 'dialog') return 'tpl-modal-dialog';
+            if (type === 'reward-pick') return 'tpl-modal-reward-pick';
+            return 'tpl-modal-info';
+        })();
         const tpl = document.getElementById(tplId);
         const win = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
         if (!tpl) {
@@ -228,7 +233,7 @@
         } else if (type === 'confirm') {
             const okBtn = win.querySelector('[data-action="ok"]');
             if (okBtn) okBtn.addEventListener('click', function(){ close(true); });
-        } else if (type === 'dialog') {
+        } else if (type === 'dialog' || type === 'reward-pick') {
             const yesBtn = win.querySelector('[data-action="yes"]');
             const noBtn = win.querySelector('[data-action="no"]');
             if (yesBtn && opts && typeof opts.yesText === 'string') yesBtn.textContent = opts.yesText;
@@ -250,11 +255,11 @@
             if (e.key === 'Escape') {
                 e.preventDefault();
                 if (type === 'info') { close(); return; }
-                if (type === 'confirm' || type === 'dialog') { close(false); return; }
+                if (type === 'confirm' || type === 'dialog' || type === 'reward-pick') { close(false); return; }
             }
             if (e.key === 'Enter') {
                 if (type === 'info') { e.preventDefault(); close(); return; }
-                if (type === 'confirm' || type === 'dialog') {
+                if (type === 'confirm' || type === 'dialog' || type === 'reward-pick') {
                     const preferred = win.querySelector('[data-action="ok"],[data-action="yes"]');
                     if (preferred) { e.preventDefault(); preferred.click(); return; }
                 }

@@ -1,0 +1,28 @@
+{
+  "tables": [
+    {
+      "id": "tier1_basic",
+      "tier": 1,
+      "tags": ["village"],
+      "mode": "all",
+      "rewards": [
+        { "type": "currency", "id": "gold", "amount": "15-30" },
+        { "type": "currency", "id": "glory", "amount": 200 },
+        { "type": "unit", "id": "dog", "amount": 1 }
+      ]
+    },
+    {
+      "id": "tier2_select",
+      "tier": 1,
+      "tags": ["swamp"],
+      "mode": "select",
+      "rewards": [
+        { "type": "currency", "id": "gold", "amount": "40-80" },
+        { "type": "unit", "id": "frog", "amount": "1-2" },
+        { "type": "perk", "id": "glory_bonus_10", "amount": 1 }
+      ]
+    }
+  ]
+}
+
+

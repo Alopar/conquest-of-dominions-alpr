@@ -148,6 +148,25 @@
     <!-- Карточка юнита-союзника -->
 </template>
 
+<template id="tpl-reward-perk">
+    <div class="reward-item" data-id="">
+        <div class="reward-icon">🥈</div>
+        <div class="reward-name">Перк</div>
+    </div>
+</template>
+
+<template id="tpl-modal-reward-pick">
+    <div class="modal-window">
+        <div class="modal-title" data-slot="title"></div>
+        <div class="modal-body" data-role="body"></div>
+        <div class="modal-actions" data-role="actions" style="display:flex; justify-content:center; gap:12px;">
+            <button class="btn" data-action="yes" disabled>Выбрать</button>
+            <button class="btn secondary-btn" data-action="no">Отмена</button>
+        </div>
+    </div>
+    
+</template>
+
 <template id="tpl-achievement-item">
     <div class="achievement-card clickable" data-id="">
         <div class="achievement-icon">🏆</div>

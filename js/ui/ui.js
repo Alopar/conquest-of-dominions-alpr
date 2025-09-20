@@ -576,7 +576,7 @@ window.addToLog = addToLog;
 window.renderArmies = renderArmies;
 window.updateButtonStates = updateButtonStates;
 
-function finishBattleToAdventure() {
+async function finishBattleToAdventure() {
     if (!window.adventureState || !window.adventureState.config) return;
     // Возврат на экран приключения с модалкой наград
     const hasAnyUnits = Object.values(window.adventureState.pool || {}).some(v => v > 0);
@@ -593,11 +593,26 @@ function finishBattleToAdventure() {
         window.showAdventureResult('💀💀💀 Поражение! Вся армия потеряна! 💀💀💀');
         return;
     }
+    const last = window._lastEncounterData;
+
+    // Если модуль Rewards доступен и у энкаунтера нет inline-наград — используем модуль
+    try {
+        const hasInline = !!(last && Array.isArray(last.rewards) && last.rewards.length > 0);
+        if (window.Rewards && (!hasInline)) {
+            if (last && typeof last.rewardId === 'string' && last.rewardId) {
+                await window.Rewards.grantById(last.rewardId);
+            } else {
+                await window.Rewards.grantByTier(Number(last && last.tier || 1));
+            }
+            if (!encLeft) { window.showAdventureResult('✨🏆✨ Победа! Все испытания пройдены! ✨🏆✨'); return; }
+            window.showAdventure();
+            return;
+        }
+    } catch {}
+
     function resolveRewards() {
         try {
-            const last = window._lastEncounterData;
-            if (!last) return [];
-            const list = Array.isArray(last.rewards) ? last.rewards : [];
+            const list = Array.isArray(last && last.rewards) ? last.rewards : [];
             return list.filter(function(r){ return r && (r.type === 'currency' || r.type === 'monster'); });
         } catch { return []; }
     }

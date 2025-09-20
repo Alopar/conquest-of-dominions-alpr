@@ -6,6 +6,7 @@
         { id: 'adventure', title: 'Приключение', assets: ['assets/configs/adventure/adventure_config.json'], validatorName: 'validateAdventureConfig' },
         { id: 'encounters', title: 'Встречи', assets: ['assets/configs/adventure/encounters_config.json'], validatorName: 'validateEncountersConfig' },
         { id: 'events', title: 'События', assets: ['assets/configs/adventure/events_config.json'] },
+        { id: 'rewards', title: 'Награды', assets: ['assets/configs/adventure/rewards_config.json'], validatorName: 'validateRewardsConfig' },
         { id: 'currencies', title: 'Валюты', assets: ['assets/configs/game/currencies_config.json'], validatorName: 'validateCurrenciesConfig' },
         { id: 'mercenaries', title: 'Наёмники', assets: ['assets/configs/units/mercenaries_config.json'], validatorName: 'validateMercenariesConfig' },
         { id: 'heroClasses', title: 'Классы героев', assets: ['assets/configs/hero/hero_classes.json'], validatorName: 'validateHeroClassesConfig' },

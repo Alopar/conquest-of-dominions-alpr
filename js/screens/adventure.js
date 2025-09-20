@@ -937,6 +937,10 @@ function applyEffects(effects){
         if (e.type === 'currency') {
             adventureState.currencies = adventureState.currencies || {};
             adventureState.currencies[e.id] = (adventureState.currencies[e.id] || 0) + Number(e.amount||0);
+        } else if (e.type === 'rewardByTier') {
+            try { if (window.Rewards && typeof window.Rewards.grantByTier === 'function') window.Rewards.grantByTier(Number(e.tier||1)); } catch {}
+        } else if (e.type === 'rewardById') {
+            try { if (window.Rewards && typeof window.Rewards.grantById === 'function') window.Rewards.grantById(String(e.id||'')); } catch {}
         }
         // Другие типы можно добавить позже
     });

@@ -83,16 +83,16 @@
 - «Валидируй rewards_config.json с некорректным amountRange»
 
 ## Чек-лист
-- [ ] Создан файл `assets/configs/adventure/rewards_config.json` (базовый пример)
-- [ ] Добавлен валидатор `validateRewardsConfig` в `js/io/validators.js`
-- [ ] Конфиг `rewards` подключён в `js/state/staticData.js`
-- [ ] Реализован модуль `js/state/rewards.js` (init, generate, applyModifiers, distribute, grantById, grantByTier)
-- [ ] Добавлены шаблоны `tpl-reward-perk`, `tpl-modal-reward-pick` в `fragments/templates.html`
-- [ ] Интеграция в `js/ui/ui.js` (замена прямой выдачи в конце боя на модуль)
-- [ ] Переделаны энкаунтеры: `rewardId` вместо детальных списков; поведение при пустом `rewardId` → tier
-- [ ] Переделаны эвенты: эффекты на `rewardById`/`rewardByTier`
-- [ ] Поддержаны модификаторы в выдаче
-- [ ] Обновлена документация в `docs/configs.md` и `docs/ui-toolkit.md`
+- [x] Создан файл `assets/configs/adventure/rewards_config.json` (базовый пример)
+- [x] Добавлен валидатор `validateRewardsConfig` в `js/io/validators.js`
+- [x] Конфиг `rewards` подключён в `js/state/staticData.js`
+- [x] Реализован модуль `js/state/rewards.js` (init, generate, applyModifiers, distribute, grantById, grantByTier)
+- [x] Добавлены шаблоны `tpl-reward-perk`, `tpl-modal-reward-pick` в `fragments/templates.html`
+- [x] Интеграция в `js/ui/ui.js` (замена прямой выдачи в конце боя на модуль)
+- [x] Переделаны энкаунтеры: `rewardId` вместо детальных списков; поведение при пустом `rewardId` → tier
+- [x] Переделаны эвенты: эффекты на `rewardById`/`rewardByTier`
+- [x] Поддержаны модификаторы в выдаче
+- [x] Обновлена документация в `docs/configs.md` и `docs/ui-toolkit.md`
 
 ## Замечания по совместимости
 - На переходный период `Rewards` поддержит чтение старого поля `rewards` у энкаунтера, но будет логировать предупреждение с рекомендацией миграции.

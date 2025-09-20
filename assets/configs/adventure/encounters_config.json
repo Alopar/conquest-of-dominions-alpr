@@ -8,23 +8,7 @@
       "class": "normal",
       "tags": ["village"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 20
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 200
-        },
-        {
-          "type": "monster",
-          "id": "dog",
-          "amount": 1
-        }
-      ],
+      "rewardId": "tier1_basic",
       "monsters": [
         {
           "id": "rat",
@@ -40,23 +24,7 @@
       "class": "normal",
       "tags": ["village", "farm"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 30
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 250
-        },
-        {
-          "type": "monster",
-          "id": "fox",
-          "amount": 1
-        }
-      ],
+      "rewardId": "tier1_basic",
       "monsters": [
         {
           "id": "chicken",
@@ -72,18 +40,7 @@
       "class": "normal",
       "tags": ["swamp"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 50
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 350
-        }
-      ],
+      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "frog",
@@ -99,18 +56,7 @@
       "class": "normal",
       "tags": ["swamp", "snakes"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 80
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 450
-        }
-      ],
+      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "giant_snake",
@@ -130,18 +76,7 @@
       "class": "normal",
       "tags": ["horde", "goblins"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 100
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 600
-        }
-      ],
+      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "goblin",
@@ -157,18 +92,7 @@
       "class": "elite",
       "tags": ["horde", "goblins"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 200
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 700
-        }
-      ],
+      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "goblin",
@@ -192,23 +116,7 @@
       "class": "normal",
       "tags": ["caves"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 300
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 800
-        },
-        {
-          "type": "monster",
-          "id": "wolf",
-          "amount": 3
-        }
-      ],
+      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "wolf",
@@ -228,18 +136,7 @@
       "class": "normal",
       "tags": ["crypt", "undead"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 500
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 600
-        }
-      ],
+      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "skeleton",
@@ -294,18 +191,7 @@
       "class": "boss",
       "tags": ["mountain", "dragon"],
       "weight": 1,
-      "rewards": [
-        {
-          "type": "currency",
-          "id": "gold",
-          "amount": 30000
-        },
-        {
-          "type": "currency",
-          "id": "glory",
-          "amount": 10000
-        }
-      ],
+      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "dragon",

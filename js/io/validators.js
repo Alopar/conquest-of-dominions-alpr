@@ -18,7 +18,8 @@ function validateEncountersConfig(cfg) {
         if (!e || typeof e.id !== 'string') throw new Error('Встреча должна содержать id');
         if (typeof e.shortName !== 'string' || typeof e.description !== 'string') throw new Error('Встреча должна содержать shortName и description');
         if (!Array.isArray(e.monsters)) throw new Error('Встреча должна содержать monsters');
-        if (e.rewards && !Array.isArray(e.rewards)) throw new Error('rewards должен быть массивом');
+        if (e.rewardId != null && typeof e.rewardId !== 'string') throw new Error('rewardId должен быть строкой');
+        if (e.rewards != null && !Array.isArray(e.rewards)) throw new Error('rewards должен быть массивом');
         if (Array.isArray(e.rewards)) {
             e.rewards.forEach(function(r){
                 if (!r || (r.type !== 'currency' && r.type !== 'monster')) throw new Error('reward.type должен быть currency или monster');
@@ -58,6 +59,26 @@ window.validateAdventureConfig = validateAdventureConfig;
 window.validateMonstersConfig = validateMonstersConfig;
 window.validateMercenariesConfig = validateMercenariesConfig;
 window.validateEncountersConfig = validateEncountersConfig;
+
+function validateRewardsConfig(cfg){
+    if (!cfg || !Array.isArray(cfg.tables)) throw new Error('Неверная структура rewards_config');
+    cfg.tables.forEach(function(t){
+        if (!t || typeof t.id !== 'string') throw new Error('Таблица наград должна содержать id');
+        if (typeof t.tier !== 'number') throw new Error('Таблица наград должна содержать числовой tier');
+        if (t.tags != null && !Array.isArray(t.tags)) throw new Error('tags должен быть массивом строк');
+        if (typeof t.mode !== 'string' || (t.mode !== 'all' && t.mode !== 'select')) throw new Error('mode должен быть all или select');
+        if (!Array.isArray(t.rewards)) throw new Error('rewards должен быть массивом');
+        t.rewards.forEach(function(r){
+            if (!r || (r.type !== 'currency' && r.type !== 'unit' && r.type !== 'perk')) throw new Error('reward.type должен быть currency, unit или perk');
+            if (typeof r.id !== 'string') throw new Error('reward.id должен быть строкой');
+            if (r.amount == null) throw new Error('reward.amount обязателен');
+            var okNumber = (typeof r.amount === 'number' && r.amount >= 0);
+            var okRange = (typeof r.amount === 'string' && /^\s*\d+\s*-\s*\d+\s*$/.test(r.amount));
+            if (!okNumber && !okRange) throw new Error('reward.amount должен быть числом или строкой диапазона "min-max"');
+        });
+    });
+}
+window.validateRewardsConfig = validateRewardsConfig;
 window.validateCurrenciesConfig = validateCurrenciesConfig;
 function validateAchievementsConfig(cfg) {
     const list = Array.isArray(cfg && cfg.achievements) ? cfg.achievements : [];
