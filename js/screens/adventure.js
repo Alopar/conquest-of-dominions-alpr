@@ -886,7 +886,7 @@ function resolveGraphNode(nodeId){
         if (!adventureState.resolvedNodeIds.includes(nodeId)) adventureState.resolvedNodeIds.push(nodeId);
         persistAdventure();
         if (node.type === 'event') {
-            handleEventNode();
+            handleEventNode(node);
             return;
         }
         if (node.type === 'reward') {
@@ -900,11 +900,13 @@ function resolveGraphNode(nodeId){
     } catch { renderAdventure(); }
 }
 
-function handleEventNode(){
+function handleEventNode(node){
     try {
         const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('events') : null;
         const list = (cfg && Array.isArray(cfg.events)) ? cfg.events : [];
-        const e = list[0] || null;
+        const tier = Number(node && node.tier || 1);
+        const pool = list.filter(function(ev){ return Number(ev && ev.tier) === tier; });
+        const e = (pool.length > 0 ? pool[Math.floor(Math.random()*pool.length)] : (list[0] || null));
         if (!e) { renderAdventure(); return; }
         if (window.UI && typeof window.UI.showModal === 'function') {
             const body = document.createElement('div');

@@ -37,6 +37,17 @@ function validateEncountersConfig(cfg) {
     });
 }
 
+function validateEventsConfig(cfg){
+    if (!cfg || !Array.isArray(cfg.events)) throw new Error('Неверная структура events_config');
+    cfg.events.forEach(function(e){
+        if (!e || typeof e.id !== 'string') throw new Error('Событие должно содержать id');
+        if (typeof e.tier !== 'number') throw new Error('Событие должно содержать числовой tier');
+        if (!Array.isArray(e.options)) throw new Error('Событие должно содержать options');
+        e.options.forEach(function(o){ if (!o || typeof o.id !== 'string' || typeof o.text !== 'string') throw new Error('option требует id и text'); });
+    });
+}
+window.validateEventsConfig = validateEventsConfig;
+
 function validateCurrenciesConfig(cfg) {
     if (!cfg || !Array.isArray(cfg.currencies)) throw new Error('Неверная структура currencies_config');
     cfg.currencies.forEach(function(c){ if (!c || typeof c.id !== 'string' || typeof c.name !== 'string') throw new Error('Валюта должна содержать id и name'); });
