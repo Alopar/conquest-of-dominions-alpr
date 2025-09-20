@@ -195,7 +195,7 @@
             rect.setAttribute('width', '44'); rect.setAttribute('height', '44');
             const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             icon.setAttribute('text-anchor', 'middle'); icon.setAttribute('dominant-baseline', 'middle'); icon.setAttribute('fill', '#cd853f'); icon.style.fontSize = '18px';
-            const t = (n.type === 'boss') ? '👑' : (n.type === 'elite' ? '🛡️' : (n.type === 'event' ? '❔' : (n.type === 'reward' ? '🎁' : (n.type === 'start' ? '' : '⚔️'))));
+            const t = (n.type === 'boss') ? '👑' : (n.type === 'elite' ? '💀' : (n.type === 'event' ? '🎲' : (n.type === 'start' ? '' : '💢')));
             icon.textContent = t;
             g.appendChild(rect); g.appendChild(icon);
             nodesGroup.appendChild(g);
