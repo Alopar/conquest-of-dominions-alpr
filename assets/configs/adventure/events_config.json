@@ -14,10 +14,9 @@
       "name": "Таинственный камень",
       "description": "Странный монолит с рунами. Прикоснуться?",
       "options": [
-        { "id": "touch", "text": "Прикоснуться", "effects": [ { "type": "rewardById", "id": "tier2_select" } ] },
+        { "id": "touch", "text": "Прикоснуться", "effects": [ { "type": "rewardById", "id": "monolith" } ] },
         { "id": "ignore", "text": "Не трогать", "effects": [] }
       ]
     }
   ]
 }
-

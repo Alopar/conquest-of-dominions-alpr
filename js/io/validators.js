@@ -16,7 +16,6 @@ function validateEncountersConfig(cfg) {
     if (!cfg || !Array.isArray(cfg.encounters)) throw new Error('Неверная структура encounters_config');
     cfg.encounters.forEach(function(e){
         if (!e || typeof e.id !== 'string') throw new Error('Встреча должна содержать id');
-        if (typeof e.shortName !== 'string' || typeof e.description !== 'string') throw new Error('Встреча должна содержать shortName и description');
         if (!Array.isArray(e.monsters)) throw new Error('Встреча должна содержать monsters');
         if (e.rewardId != null && typeof e.rewardId !== 'string') throw new Error('rewardId должен быть строкой');
         if (e.rewards != null && !Array.isArray(e.rewards)) throw new Error('rewards должен быть массивом');
@@ -27,6 +26,14 @@ function validateEncountersConfig(cfg) {
                 if (typeof r.amount !== 'number') throw new Error('reward.amount должен быть числом');
             });
         }
+        // Валидация монстров: amount — число или строка диапазона 'min-max'
+        e.monsters.forEach(function(m){
+            if (!m || typeof m.id !== 'string') throw new Error('monster.id должен быть строкой');
+            const v = m.amount;
+            const okNumber = typeof v === 'number';
+            const okRange = (typeof v === 'string' && /^\s*\d+\s*-\s*\d+\s*$/.test(v));
+            if (!okNumber && !okRange) throw new Error('monster.amount должен быть числом или строкой диапазона');
+        });
     });
 }
 

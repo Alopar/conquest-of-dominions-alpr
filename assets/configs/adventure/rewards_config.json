@@ -1,28 +1,23 @@
 {
   "tables": [
     {
-      "id": "tier1_basic",
+      "id": "01.001",
       "tier": 1,
       "tags": ["village"],
       "mode": "all",
       "rewards": [
-        { "type": "currency", "id": "gold", "amount": "15-30" },
-        { "type": "currency", "id": "glory", "amount": 200 },
-        { "type": "unit", "id": "dog", "amount": 1 }
+        { "type": "currency", "id": "gold", "amount": "10-30" },
+        { "type": "currency", "id": "glory", "amount": "100-200" }
       ]
     },
     {
-      "id": "tier2_select",
-      "tier": 1,
-      "tags": ["swamp"],
-      "mode": "select",
-      "rewards": [
-        { "type": "currency", "id": "gold", "amount": "40-80" },
-        { "type": "unit", "id": "frog", "amount": "1-2" },
-        { "type": "perk", "id": "glory_bonus_10", "amount": 1 }
-      ]
-    }
+        "id": "monolith",
+        "tier": 99,
+        "tags": ["village"],
+        "mode": "all",
+        "rewards": [
+          { "type": "currency", "id": "glory", "amount": 300 }
+        ]
+      }
   ]
 }
-
-

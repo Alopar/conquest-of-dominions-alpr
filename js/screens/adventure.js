@@ -1131,13 +1131,13 @@ async function onEncounterClick(encData, available) {
         body.appendChild(rewardsWrap);
     }
     if (!available) {
-        try { if (window.UI && window.UI.showModal) window.UI.showModal(body, { type: 'info', title: encData.shortName || encData.id }); else alert('Встреча недоступна'); } catch {}
+        try { if (window.UI && window.UI.showModal) window.UI.showModal(body, { type: 'info', title: encData.id }); else alert('Встреча недоступна'); } catch {}
         return;
     }
     let accepted = false;
     try {
         if (window.UI && typeof window.UI.showModal === 'function') {
-            const h = window.UI.showModal(body, { type: 'dialog', title: encData.shortName || encData.id, yesText: 'Бой', noText: 'Отмена' });
+            const h = window.UI.showModal(body, { type: 'dialog', title: encData.id, yesText: 'Бой', noText: 'Отмена' });
             accepted = await h.closed;
         } else { accepted = confirm('Начать встречу?'); }
     } catch {}
@@ -1223,10 +1223,25 @@ async function startEncounterBattle(encData) {
     if (attackers.length === 0) return;
     for (const g of attackers) { adventureState.pool[g.id] -= g.count; if (adventureState.pool[g.id] < 0) adventureState.pool[g.id] = 0; }
     const cfg = {
-        battleConfig: { name: adventureState.config.adventure.name, description: enc.description || enc.shortName, defendersStart: true },
+        battleConfig: { name: adventureState.config.adventure.name, defendersStart: true },
         armies: {
             attackers: { name: 'Отряд игрока', units: attackers },
-            defenders: { name: enc.shortName || enc.id, units: enc.monsters }
+            defenders: { name: enc.id, units: (enc.monsters || []).map(function(g){
+                const v = g && g.amount;
+                let cnt = 0;
+                if (typeof v === 'number') cnt = Math.max(0, Math.floor(v));
+                else if (typeof v === 'string') {
+                    const m = v.match(/^(\s*\d+)\s*-\s*(\d+\s*)$/);
+                    if (m) {
+                        const a = Number(m[1]); const b = Number(m[2]);
+                        const min = Math.min(a,b); const max = Math.max(a,b);
+                        cnt = min + Math.floor(Math.random() * (max - min + 1));
+                    } else {
+                        const n = Number(v); if (!isNaN(n)) cnt = Math.max(0, Math.floor(n));
+                    }
+                }
+                return { id: g.id, count: cnt };
+            }) }
         },
         unitTypes: (window.StaticData && typeof window.StaticData.getConfig === 'function') ? (function(){
             const m = window.StaticData.getConfig('monsters');
