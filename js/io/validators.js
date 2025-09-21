@@ -24,15 +24,17 @@ function validatePathSchemesConfig(cfg){
         if (!s || typeof s.sector !== 'number' || s.sector < 1) throw new Error('scheme.sector должен быть числом >= 1');
         if (seen.has(s.sector)) throw new Error('Дублирующийся scheme.sector: ' + s.sector);
         seen.add(s.sector);
-        if (!s.mapGen || typeof s.mapGen !== 'object') throw new Error('scheme.mapGen обязателен');
-        const g = s.mapGen;
-        if (typeof g.depth !== 'number' || g.depth < 1) throw new Error('mapGen.depth должен быть числом >= 1');
-        if (!Array.isArray(g.widthRange) || g.widthRange.length !== 2) throw new Error('mapGen.widthRange должен быть массивом [min,max]');
-        if (typeof g.edgeDensity !== 'number' || g.edgeDensity <= 0 || g.edgeDensity > 1) throw new Error('mapGen.edgeDensity должен быть (0,1]');
-        if (typeof g.guaranteePath !== 'boolean') throw new Error('mapGen.guaranteePath должен быть boolean');
-        if (typeof g.seeded !== 'boolean') throw new Error('mapGen.seeded должен быть boolean');
-        if (!Array.isArray(s.tierByDepth)) throw new Error('tierByDepth должен быть массивом');
-        if (!Array.isArray(s.mixByDepth)) throw new Error('mixByDepth должен быть массивом');
+        if (typeof s.edgeDensity !== 'number' || s.edgeDensity <= 0 || s.edgeDensity > 1) throw new Error('edgeDensity должен быть (0,1]');
+        if (!Array.isArray(s.columns) || s.columns.length < 2) throw new Error('columns должен быть массивом (последний столбец — boss)');
+        const last = s.columns[s.columns.length - 1];
+        if (!last || !last.types || last.types.boss !== 1) throw new Error('последний столбец должен иметь types { boss: 1 }');
+        for (let i=0;i<s.columns.length;i++){
+            const col = s.columns[i];
+            if (!col || !Array.isArray(col.widthRange) || col.widthRange.length !== 2) throw new Error('column.widthRange должен быть [min,max]');
+            if (typeof col.widthRange[0] !== 'number' || typeof col.widthRange[1] !== 'number') throw new Error('widthRange элементы должны быть числами');
+            if (col.tier != null && typeof col.tier !== 'number') throw new Error('column.tier должен быть числом');
+            if (!col.types || typeof col.types !== 'object') throw new Error('column.types обязателен (weight map)');
+        }
     });
 }
 window.validatePathSchemesConfig = validatePathSchemesConfig;

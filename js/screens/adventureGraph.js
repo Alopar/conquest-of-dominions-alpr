@@ -15,11 +15,10 @@
 
     function generateAdventureMap(cfg, seed){
         const gen = (cfg && cfg.mapGen) || {};
-        const contentDepth = Math.max(1, Number(gen.depth||6)); // количество «содержательных» колонок между стартом и боссом
-        const wMin = Math.max(2, Number((gen.widthRange && gen.widthRange[0])||3));
-        const wMax = Math.max(wMin, Number((gen.widthRange && gen.widthRange[1])||5));
-        const edgeDensity = Math.min(1, Math.max(0.05, Number(gen.edgeDensity||0.5)));
-        const rand = gen.seeded ? lcg(seed||Date.now()) : Math.random;
+        // Новая схема: cfg.mapGen.columns[] и cfg.mapGen.edgeDensity, без depth/seeded/guaranteePath/tierByDepth/mixByDepth
+        const columnsSpec = Array.isArray(gen.columns) ? gen.columns : [];
+        const edgeDensity = Math.min(1, Math.max(0.05, Number((gen.edgeDensity!=null?gen.edgeDensity:0.5))));
+        const rand = Math.random;
         const nodes = {}; const columns = [];
         function addNode(d, idx){
             const id = `n_${d}_${idx}`; const x = d, y = idx;
@@ -28,21 +27,26 @@
         }
         // Колонка 0 — старт, один узел
         columns.push([ (function(){ const n = addNode(0,0); n.type = 'start'; n.class = undefined; n.tier = undefined; return n; })() ]);
-        // Колонки 1..contentDepth — сгенерированные ширины
-        for (let d=1; d<=contentDepth; d++){
+        // Колонки по спецификации (включая последний столбец)
+        for (let i=0;i<columnsSpec.length;i++){
+            const spec = columnsSpec[i];
+            const d = i + 1; // индекс столбца относительно старта
+            const wMin = Math.max(1, Number((spec && spec.widthRange && spec.widthRange[0])||1));
+            const wMax = Math.max(wMin, Number((spec && spec.widthRange && spec.widthRange[1])||wMin));
             const w = Math.round(wMin + (wMax - wMin) * rand());
-            const col = []; for (let i=0;i<w;i++){ col.push(addNode(d,i)); }
+            const col = []; for (let i2=0;i2<w;i2++){ col.push(addNode(d,i2)); }
+            col._spec = spec || {};
             columns.push(col);
         }
-        // Финальная колонка — босс, один узел на колонке contentDepth+1
-        columns.push([ (function(){ const n = addNode(contentDepth+1,0); n.type = 'boss'; n.class = 'boss'; n.tier = undefined; return n; })() ]);
+        const lastIndex = columns.length - 1; // индекс последней (босс) колонки
+        const contentDepth = Math.max(0, lastIndex - 1);
 
         const edges = []; const edgeSet = new Set();
         function addEdge(a,b){ const k=a+">"+b; if (edgeSet.has(k)) return; edgeSet.add(k); edges.push({ from:a, to:b }); }
         // Из старта — ко всем узлам первой «содержательной» колонки
         for (const b of columns[1]) addEdge(columns[0][0].id, b.id);
         // Между внутренними колонками 1..contentDepth-1
-        for (let d=1; d<contentDepth; d++){
+        for (let d=1; d<lastIndex; d++){
             const a = columns[d]; const b = columns[d+1];
             for (let i=0;i<a.length;i++){
                 for (let j=0;j<b.length;j++){
@@ -63,37 +67,36 @@
                 }
             }
         }
-        // Из последней «содержательной» колонки — ко «боссу»
-        for (const a of columns[contentDepth]) addEdge(a.id, columns[contentDepth+1][0].id);
+        // Отдельной прошивки к последней колонке не требуется: цикл выше соединил d..d+1, включая последнюю пару
 
-        // Гарантируем хотя бы один путь: старт -> ... -> босс
+        // Гарантируем хотя бы один путь: старт -> ... -> последняя колонка (босс)
         let prev = pickWeighted(columns[1], () => 1);
-        for (let d=2; d<=contentDepth; d++){
+        for (let d=2; d<=lastIndex; d++){
             const next = pickWeighted(columns[d], () => 1);
             addEdge(prev.id, next.id);
             prev = next;
         }
-        addEdge(prev.id, columns[contentDepth+1][0].id);
 
-        // Расстановка типов/тиров: только для колонок 1..contentDepth
-        const mix = Array.isArray(gen.mixByDepth) ? gen.mixByDepth : [];
-        const tierByDepth = Array.isArray(gen.tierByDepth) ? gen.tierByDepth : [];
+        // Расстановка типов/тиров: по спецификации столбцов 1..contentDepth
         function rollType(m){
             const entries = Object.keys(m||{}).map(k => ({ k, w: Number(m[k]||0) }));
             const chosen = pickWeighted(entries, e => e.w);
             return (chosen && chosen.k) || 'battle';
         }
-        for (let d=1; d<=contentDepth; d++){
-            const mixRow = mix[d-1] || { battle: 1 };
-            const tier = tierByDepth[d-1];
+        for (let d=1; d<=lastIndex; d++){
+            const spec = columns[d]._spec || {};
+            const isLast = (d === lastIndex);
+            const mixRow = isLast ? { boss: 1 } : (spec.types || { battle: 1 });
+            const tier = spec.tier;
             for (const n of columns[d]){
                 n.type = rollType(mixRow);
-                n.tier = (tier === 'boss') ? undefined : Number(tier||1);
+                n.tier = (n.type === 'boss') ? undefined : (tier!=null ? Number(tier) : undefined);
                 if (n.type === 'elite') n.class = 'elite';
                 else if (n.type === 'battle') n.class = 'normal';
                 else if (n.type === 'boss') { n.class = 'boss'; }
             }
         }
+        // последний столбец уже размечен как boss
 
         const startId = columns[0][0].id;
         return { nodes, edges, startId };

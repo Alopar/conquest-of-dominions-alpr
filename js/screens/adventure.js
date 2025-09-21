@@ -217,9 +217,10 @@ function generateSectorMap(index){
     const sectorNumber = getSectorNumberByIndex(index);
     const scheme = getPathSchemeForSector(sectorNumber);
     if (!scheme) throw new Error('Не найдена схема пути для сектора ' + sectorNumber);
-    const gen = Object.assign({}, scheme.mapGen || {});
-    if (Array.isArray(scheme.tierByDepth)) gen.tierByDepth = scheme.tierByDepth.slice();
-    if (Array.isArray(scheme.mixByDepth)) gen.mixByDepth = scheme.mixByDepth.slice();
+    const gen = {
+        columns: Array.isArray(scheme.columns) ? scheme.columns : [],
+        edgeDensity: (scheme.edgeDensity != null) ? scheme.edgeDensity : 0.5
+    };
     const cfg = { mapGen: gen };
     const seed = adventureState.sectorSeeds[index] || Date.now();
     const map = (window.AdventureGraph && typeof window.AdventureGraph.generateAdventureMap === 'function') ? window.AdventureGraph.generateAdventureMap(cfg, seed) : null;
