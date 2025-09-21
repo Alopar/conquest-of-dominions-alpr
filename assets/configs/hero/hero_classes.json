@@ -5,13 +5,13 @@
       "name": "Воин",
       "description": "Закалённый в боях боец ближнего боя. Надёжен и силён.",
       "icon": "🛡️",
-      "stats": { "armySize": 10 },
+      "stats": { "armySize": 15 },
       "startingArmy": [
-        { "id": "knight", "count": 1 },
-        { "id": "archer", "count": 2 }
+        { "id": "knight", "count": 10 },
+        { "id": "archer", "count": 50 }
       ],
       "innatePerks": ["merc_tier_1"],
-      "developmentTracks": ["offense","defense"],
+      "developmentTracks": ["army_management","guild_master","melee_training","range_training","support_training"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
@@ -32,7 +32,7 @@
         { "id": "rogue", "count": 3 }
       ],
       "innatePerks": ["merc_tier_1", "gold_bonus_20"],
-      "developmentTracks": ["offense","defense"],
+      "developmentTracks": ["army_management","guild_master","melee_training","range_training","support_training"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
@@ -48,14 +48,14 @@
       "name": "Маг",
       "description": "Повелитель стихий. Слаб в броне, но силён в уроне.",
       "icon": "🔮",
-      "stats": { "armySize": 10 },
+      "stats": { "armySize": 5 },
       "startingArmy": [
         { "id": "mage", "count": 1 },
         { "id": "fireElemental", "count": 1 },
         { "id": "waterElemental", "count": 1 }
       ],
       "innatePerks": ["merc_tier_1"],
-      "developmentTracks": ["offense","defense"],
+      "developmentTracks": ["army_management","guild_master","melee_training","range_training","support_training"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },
@@ -78,7 +78,7 @@
       ],
       "requiresAchievementId": "kill_10_wolf",
       "innatePerks": ["merc_tier_1"],
-      "developmentTracks": ["offense","defense"],
+      "developmentTracks": ["army_management","guild_master","melee_training","range_training","support_training"],
       "development": {
         "levels": [
           { "level": 1, "price": [ { "id": "glory", "amount": 100 } ], "autoUpgrades": ["army_plus_1"], "paidUpgrades": ["perk_hp_melee","perk_dmg_range"] },

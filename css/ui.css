@@ -370,7 +370,7 @@
 .hero-dev-title { font-weight:600; color:#cd853f; white-space:nowrap; }
 .hero-dev-level { opacity:.85; white-space:nowrap; font-weight:600; }
 .hero-dev-list { display:flex; flex-direction:column; gap:8px; }
-.hero-dev-list { max-height: 480px; overflow-y: auto; padding-right: 8px; margin-left: 8px; }
+.hero-dev-list { overflow-y: auto; padding-right: 8px; margin-left: 8px; }
 /* Скроллбар как у бестиария */
 .hero-dev-list { scrollbar-width: thin; scrollbar-color: #cd853f #1a1a1a; }
 .hero-dev-list::-webkit-scrollbar { width: 10px; background: #1a1a1a; border-radius: 8px; }
