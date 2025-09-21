@@ -1,0 +1,42 @@
+{
+  "schemes": [
+    {
+      "sector": 1,
+      "mapGen": { "depth": 4, "widthRange": [1, 3], "edgeDensity": 0.55, "guaranteePath": true, "seeded": true },
+      "tierByDepth": [1, 1, 1, 1],
+      "mixByDepth": [
+        { "battle": 0.7, "event": 0.3 },
+        { "battle": 0.6, "event": 0.4 },
+        { "battle": 0.7, "elite": 0.3 },
+        { "battle": 0.5, "event": 0.5 }
+      ]
+    },
+    {
+      "sector": 2,
+      "mapGen": { "depth": 5, "widthRange": [1, 3], "edgeDensity": 0.6, "guaranteePath": true, "seeded": true },
+      "tierByDepth": [1, 1, 2, 2, 2],
+      "mixByDepth": [
+        { "battle": 0.6, "event": 0.4 },
+        { "battle": 0.5, "event": 0.5 },
+        { "battle": 0.65, "event": 0.35 },
+        { "battle": 0.5, "elite": 0.5 },
+        { "event": 1.0 }
+      ]
+    },
+    {
+      "sector": 3,
+      "mapGen": { "depth": 6, "widthRange": [2, 3], "edgeDensity": 0.55, "guaranteePath": true, "seeded": true },
+      "tierByDepth": [2, 2, 3, 3, 3, 3],
+      "mixByDepth": [
+        { "battle": 0.5, "event": 0.5 },
+        { "battle": 0.2, "event": 0.8 },
+        { "battle": 0.65, "event": 0.35 },
+        { "battle": 0.5, "elite": 0.5 },
+        { "event": 1.0 },
+        { "battle": 0.8, "elite": 0.2 }
+      ]
+    }
+  ]
+}
+
+

@@ -19,7 +19,6 @@
       "class": "elite",
       "tags": ["horde", "goblins"],
       "weight": 1,
-      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "goblin",
@@ -41,7 +40,6 @@
       "class": "boss",
       "tags": ["mountain", "dragon"],
       "weight": 1,
-      "rewardId": "tier2_select",
       "monsters": [
         {
           "id": "dragon",

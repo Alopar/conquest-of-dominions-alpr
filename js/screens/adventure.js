@@ -145,11 +145,11 @@ function beginAdventureFromSetup() {
     if (!adventureState.selectedClassId) return;
     if (adventureState.config) {
         initAdventureState(adventureState.config);
-        // Создаём новую карту пути для нового приключения
         try {
-            const seed = Date.now();
-            const map = (window.AdventureGraph && window.AdventureGraph.generateAdventureMap) ? window.AdventureGraph.generateAdventureMap({ mapGen: (window.StaticData && window.StaticData.getConfig && window.StaticData.getConfig('adventure')?.mapGen) || (adventureState.config && adventureState.config.mapGen) }, seed) : null;
-            adventureState.map = map; adventureState.currentNodeId = map && map.startId; adventureState.resolvedNodeIds = map && map.startId ? [map.startId] : [];
+            adventureState.currentStageIndex = 0;
+            adventureState.sectorCount = getSectorCount();
+            ensureSectorSeeds(adventureState.sectorCount || 1);
+            generateSectorMap(0);
         } catch {}
         applySelectedClassStartingArmy();
         showAdventure();
@@ -184,6 +184,84 @@ function initAdventureState(cfg) {
     try { if (window.Tracks && typeof window.Tracks.initForClass === 'function') window.Tracks.initForClass((window.Hero && window.Hero.getClassId && window.Hero.getClassId()) || null); } catch {}
     try { if (window.Tracks && typeof window.Tracks.resetProgress === 'function') window.Tracks.resetProgress(); } catch {}
 }
+
+// Секторные хелперы и генерация
+function getSectorCount(){
+    const s = adventureState && adventureState.config && adventureState.config.sectors;
+    return Array.isArray(s) ? s.length : 0;
+}
+
+function getSectorNumberByIndex(index){
+    const s = adventureState && adventureState.config && adventureState.config.sectors;
+    if (Array.isArray(s) && s[index] && typeof s[index].number === 'number') return s[index].number;
+    return index + 1;
+}
+
+function getPathSchemeForSector(sectorNumber){
+    try {
+        const ps = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('pathSchemes') : null;
+        const list = ps && Array.isArray(ps.schemes) ? ps.schemes : [];
+        return list.find(function(x){ return x && x.sector === sectorNumber; }) || null;
+    } catch { return null; }
+}
+
+function ensureSectorSeeds(count){
+    adventureState.sectorSeeds = Array.isArray(adventureState.sectorSeeds) ? adventureState.sectorSeeds : [];
+    for (let i = adventureState.sectorSeeds.length; i < count; i++) adventureState.sectorSeeds[i] = Date.now() + i * 7919;
+}
+
+function generateSectorMap(index){
+    const total = getSectorCount();
+    adventureState.sectorCount = total;
+    ensureSectorSeeds(total);
+    const sectorNumber = getSectorNumberByIndex(index);
+    const scheme = getPathSchemeForSector(sectorNumber);
+    if (!scheme) throw new Error('Не найдена схема пути для сектора ' + sectorNumber);
+    const gen = Object.assign({}, scheme.mapGen || {});
+    if (Array.isArray(scheme.tierByDepth)) gen.tierByDepth = scheme.tierByDepth.slice();
+    if (Array.isArray(scheme.mixByDepth)) gen.mixByDepth = scheme.mixByDepth.slice();
+    const cfg = { mapGen: gen };
+    const seed = adventureState.sectorSeeds[index] || Date.now();
+    const map = (window.AdventureGraph && typeof window.AdventureGraph.generateAdventureMap === 'function') ? window.AdventureGraph.generateAdventureMap(cfg, seed) : null;
+    adventureState.map = map;
+    adventureState.currentNodeId = map && map.startId;
+    adventureState.resolvedNodeIds = map && map.startId ? [map.startId] : [];
+    persistAdventure();
+}
+
+function isCurrentSectorCleared(){
+    const map = adventureState.map;
+    if (!map || !map.nodes) return false;
+    const bossIds = Object.keys(map.nodes).filter(function(id){ const n = map.nodes[id]; return n && n.type === 'boss'; });
+    if (bossIds.length === 0) return false;
+    return bossIds.every(function(id){ return Array.isArray(adventureState.resolvedNodeIds) && adventureState.resolvedNodeIds.includes(id); });
+}
+
+async function advanceToNextSectorWithModal(){
+    const idx = Number(adventureState.currentStageIndex || 0);
+    const total = Number(adventureState.sectorCount || getSectorCount() || 0);
+    const hasNext = idx + 1 < total;
+    if (!hasNext) return false;
+    const nextNum = getSectorNumberByIndex(idx + 1);
+    try {
+        if (window.UI && typeof window.UI.showModal === 'function'){
+            const body = document.createElement('div');
+            body.style.textAlign = 'center';
+            body.style.padding = '6px 4px';
+            const p1 = document.createElement('div'); p1.textContent = 'Впереди следующая локация: ' + nextNum + ' 🌍'; body.appendChild(p1);
+            const h = window.UI.showModal(body, { type: 'confirm', title: 'Путь пройден!' });
+            await h.closed;
+        }
+    } catch {}
+    adventureState.currentStageIndex = idx + 1;
+    generateSectorMap(adventureState.currentStageIndex);
+    await showAdventure();
+    return true;
+}
+
+window.isCurrentSectorCleared = isCurrentSectorCleared;
+window.advanceToNextSectorWithModal = advanceToNextSectorWithModal;
+window.generateSectorMap = generateSectorMap;
 
 async function showAdventure() {
     try {
@@ -718,16 +796,22 @@ function renderMapBoard() {
     if (!board) return;
     board.innerHTML = '';
     board.classList.add('adv-map-root');
-    // Ленивая генерация карты, если её нет
+    try {
+        const sectorEl = document.getElementById('adventure-sector-indicator');
+        if (sectorEl) {
+            const total = (function(){ const s = adventureState && adventureState.config && adventureState.config.sectors; return Array.isArray(s) ? s.length : 0; })();
+            const idx = Number(adventureState.currentStageIndex || 0);
+            const secNum = (function(){ const s = adventureState && adventureState.config && adventureState.config.sectors; return (Array.isArray(s) && s[idx] && s[idx].number) || (idx+1); })();
+            sectorEl.textContent = total > 0 ? ('Сектор: ' + secNum + '/' + total + '🌍') : '';
+        }
+    } catch {}
+    // Ленивая генерация карты сектора, если её нет
     if (!adventureState.map) {
         try {
-            const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('adventure') : (adventureState.config || null);
-            const seed = Date.now();
-            const map = (window.AdventureGraph && typeof window.AdventureGraph.generateAdventureMap === 'function') ? window.AdventureGraph.generateAdventureMap(cfg, seed) : null;
-            adventureState.map = map;
-            adventureState.currentNodeId = map && map.startId;
-            adventureState.resolvedNodeIds = [];
-            persistAdventure();
+            if (typeof adventureState.currentStageIndex !== 'number') adventureState.currentStageIndex = 0;
+            if (!adventureState.sectorCount) adventureState.sectorCount = getSectorCount();
+            ensureSectorSeeds(adventureState.sectorCount || 1);
+            generateSectorMap(adventureState.currentStageIndex || 0);
         } catch {}
     }
     const map = adventureState.map;

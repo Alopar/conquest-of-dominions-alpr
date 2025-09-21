@@ -7,10 +7,35 @@ function validateBattleConfig(config) {
 
 function validateAdventureConfig(cfg) {
     if (!cfg || typeof cfg !== 'object') throw new Error('Неверная структура adventure_config');
-    if (!cfg.adventure || typeof cfg.adventure !== 'object') { throw new Error('Отсутствует adventure'); }
-    if (cfg.adventure.startingCurrencies && !Array.isArray(cfg.adventure.startingCurrencies)) throw new Error('startingCurrencies должен быть массивом');
-    if (cfg.mapGen && typeof cfg.mapGen !== 'object') throw new Error('mapGen должен быть объектом');
+    if (!cfg.adventure || typeof cfg.adventure !== 'object') throw new Error('Отсутствует adventure');
+    if (!Array.isArray(cfg.adventure.startingCurrencies)) throw new Error('startingCurrencies должен быть массивом');
+    if (!Array.isArray(cfg.sectors) || cfg.sectors.length === 0) throw new Error('sectors должен быть непустым массивом');
+    cfg.sectors.forEach(function(s){
+        if (!s || typeof s.number !== 'number' || s.number < 1) throw new Error('sector.number должен быть числом >= 1');
+        if (s.name != null && typeof s.name !== 'string') throw new Error('sector.name должен быть строкой');
+    });
+    if (cfg.mapGen != null) throw new Error('mapGen должен быть вынесен в path_schemes.json');
 }
+
+function validatePathSchemesConfig(cfg){
+    if (!cfg || !Array.isArray(cfg.schemes) || cfg.schemes.length === 0) throw new Error('schemes должен быть непустым массивом');
+    const seen = new Set();
+    cfg.schemes.forEach(function(s){
+        if (!s || typeof s.sector !== 'number' || s.sector < 1) throw new Error('scheme.sector должен быть числом >= 1');
+        if (seen.has(s.sector)) throw new Error('Дублирующийся scheme.sector: ' + s.sector);
+        seen.add(s.sector);
+        if (!s.mapGen || typeof s.mapGen !== 'object') throw new Error('scheme.mapGen обязателен');
+        const g = s.mapGen;
+        if (typeof g.depth !== 'number' || g.depth < 1) throw new Error('mapGen.depth должен быть числом >= 1');
+        if (!Array.isArray(g.widthRange) || g.widthRange.length !== 2) throw new Error('mapGen.widthRange должен быть массивом [min,max]');
+        if (typeof g.edgeDensity !== 'number' || g.edgeDensity <= 0 || g.edgeDensity > 1) throw new Error('mapGen.edgeDensity должен быть (0,1]');
+        if (typeof g.guaranteePath !== 'boolean') throw new Error('mapGen.guaranteePath должен быть boolean');
+        if (typeof g.seeded !== 'boolean') throw new Error('mapGen.seeded должен быть boolean');
+        if (!Array.isArray(s.tierByDepth)) throw new Error('tierByDepth должен быть массивом');
+        if (!Array.isArray(s.mixByDepth)) throw new Error('mixByDepth должен быть массивом');
+    });
+}
+window.validatePathSchemesConfig = validatePathSchemesConfig;
 
 function validateEncountersConfig(cfg) {
     if (!cfg || !Array.isArray(cfg.encounters)) throw new Error('Неверная структура encounters_config');

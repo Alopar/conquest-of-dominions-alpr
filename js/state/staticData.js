@@ -4,6 +4,7 @@
     const CONFIG_DEFS = [
         { id: 'monsters', title: 'Монстры', assets: ['assets/configs/units/monsters_config.json'], validatorName: 'validateMonstersConfig' },
         { id: 'adventure', title: 'Приключение', assets: ['assets/configs/adventure/adventure_config.json'], validatorName: 'validateAdventureConfig' },
+        { id: 'pathSchemes', title: 'Схемы путей', assets: ['assets/configs/adventure/path_schemes.json'], validatorName: 'validatePathSchemesConfig' },
         { id: 'encounters', title: 'Встречи', assets: ['assets/configs/adventure/encounters_config.json'], validatorName: 'validateEncountersConfig' },
         { id: 'events', title: 'События', assets: ['assets/configs/adventure/events_config.json'] },
         { id: 'rewards', title: 'Награды', assets: ['assets/configs/adventure/rewards_config.json'], validatorName: 'validateRewardsConfig' },

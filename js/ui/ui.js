@@ -580,14 +580,8 @@ async function finishBattleToAdventure() {
     if (!window.adventureState || !window.adventureState.config) return;
     // Возврат на экран приключения с модалкой наград
     const hasAnyUnits = Object.values(window.adventureState.pool || {}).some(v => v > 0);
-    const encLeft = (function(){
-        try {
-            const map = window.adventureState && window.adventureState.map;
-            if (!map || !map.nodes) return true;
-            const bossIds = Object.keys(map.nodes).filter(function(id){ const n = map.nodes[id]; return n && n.type === 'boss'; });
-            const done = bossIds.every(function(id){ return Array.isArray(window.adventureState.resolvedNodeIds) && window.adventureState.resolvedNodeIds.includes(id); });
-            return !done;
-        } catch { return true; }
+    const sectorCleared = (function(){
+        try { return (typeof window.isCurrentSectorCleared === 'function') ? window.isCurrentSectorCleared() : false; } catch { return false; }
     })();
     if (!hasAnyUnits) {
         window.showAdventureResult('💀💀💀 Поражение! Вся армия потеряна! 💀💀💀');
@@ -604,8 +598,12 @@ async function finishBattleToAdventure() {
             } else {
                 await window.Rewards.grantByTier(Number(last && last.tier || 1));
             }
-            if (!encLeft) { window.showAdventureResult('✨🏆✨ Победа! Все испытания пройдены! ✨🏆✨'); return; }
-            window.showAdventure();
+            if (sectorCleared) {
+                const advanced = (typeof window.advanceToNextSectorWithModal === 'function') ? await window.advanceToNextSectorWithModal() : false;
+                if (!advanced) { window.showAdventureResult('✨🏆✨ Победа! Все испытания пройдены! ✨🏆✨'); return; }
+            } else {
+                window.showAdventure();
+            }
             return;
         }
     } catch {}
@@ -692,8 +690,12 @@ async function finishBattleToAdventure() {
 
     async function proceed() {
         await applyRewards();
-        if (!encLeft) { window.showAdventureResult('✨🏆✨ Победа! Все испытания пройдены! ✨🏆✨'); return; }
-        window.showAdventure();
+        if (sectorCleared) {
+            const advanced = (typeof window.advanceToNextSectorWithModal === 'function') ? await window.advanceToNextSectorWithModal() : false;
+            if (!advanced) { window.showAdventureResult('✨🏆✨ Победа! Все испытания пройдены! ✨🏆✨'); return; }
+        } else {
+            window.showAdventure();
+        }
     }
 
     if (rewards.length > 0 && window.UI && typeof window.UI.showModal === 'function') {
