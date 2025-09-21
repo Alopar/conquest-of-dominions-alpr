@@ -5,9 +5,6 @@ let gameSettings = {
     meleeHitThreshold: 5,
     rangeHitThreshold: 11,
     development: { mode: 'tracks' },
-    adventureSettings: {
-        stageProgressionMode: 2
-    },
     battleSettings: {
         showDetailedLog: true,
         attackAlternate: true,
@@ -47,13 +44,7 @@ function displaySettings() {
     const autoEl = document.getElementById('autoPlay');
     if (autoEl) autoEl.checked = !!gameSettings.battleSettings.autoPlay;
 
-    const modeEl1 = document.getElementById('stageProgressionMode1');
-    const modeEl2 = document.getElementById('stageProgressionMode2');
-    if (modeEl1 && modeEl2) {
-        const mode = Number(gameSettings.adventureSettings.stageProgressionMode || 1);
-        modeEl1.checked = mode === 1;
-        modeEl2.checked = mode === 2;
-    }
+    // Блок приключения удалён
     try {
         const devMode = (gameSettings && gameSettings.development && gameSettings.development.mode) || 'tracks';
         const dmShop = document.getElementById('devModeShop');
@@ -77,11 +68,7 @@ function saveSettingsFromScreen() {
     const autoEl = document.getElementById('autoPlay');
     if (autoEl) gameSettings.battleSettings.autoPlay = autoEl.checked;
 
-    const modeEl1 = document.getElementById('stageProgressionMode1');
-    const modeEl2 = document.getElementById('stageProgressionMode2');
-    const mode = (modeEl2 && modeEl2.checked) ? 2 : 1;
-    if (!gameSettings.adventureSettings) gameSettings.adventureSettings = {};
-    gameSettings.adventureSettings.stageProgressionMode = mode;
+    // Блок приключения удалён
 
     try {
         const dmShop = document.getElementById('devModeShop');
@@ -99,9 +86,6 @@ function resetSettingsToDefault() {
         unitsPerRow: 10,
         meleeHitThreshold: 5,
         rangeHitThreshold: 11,
-        adventureSettings: {
-            stageProgressionMode: 2
-        },
         battleSettings: {
             showDetailedLog: true,
             attackAlternate: true,
