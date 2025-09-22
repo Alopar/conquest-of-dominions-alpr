@@ -985,7 +985,7 @@ function resolveGraphNode(nodeId){
     } catch { renderAdventure(); }
 }
 
-function handleEventNode(node){
+async function handleEventNode(node){
     try {
         const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('events') : null;
         const list = (cfg && Array.isArray(cfg.events)) ? cfg.events : [];
@@ -998,39 +998,38 @@ function handleEventNode(node){
             const text = document.createElement('div'); text.textContent = e.description || e.name || e.id; text.style.textAlign = 'center'; text.style.margin = '8px 0 10px 0'; body.appendChild(text);
             const wrap = document.createElement('div'); wrap.style.display = 'flex'; wrap.style.justifyContent = 'center'; wrap.style.gap = '10px'; body.appendChild(wrap);
             const h = window.UI.showModal(body, { type: 'dialog', title: e.name || 'Событие', yesText: e.options?.[0]?.text || 'Ок', noText: e.options?.[1]?.text || 'Пропустить' });
-            h.closed.then(function(ok){
+            h.closed.then(async function(ok){
                 const opt = ok ? (e.options?.[0]) : (e.options?.[1]);
-                applyEffects(opt && opt.effects);
+                await applyEffects(opt && opt.effects);
                 renderAdventure();
             });
         } else { renderAdventure(); }
     } catch { renderAdventure(); }
 }
 
-function handleRewardNode(){
+async function handleRewardNode(){
     try {
         const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('rewards') : null;
         const tables = (cfg && Array.isArray(cfg.tables)) ? cfg.tables : [];
         const t = tables[0] || null;
-        if (t) applyEffects(t.rewards);
+        if (t) await applyEffects(t.rewards);
     } catch {}
     renderAdventure();
 }
 
-function applyEffects(effects){
+async function applyEffects(effects){
     const arr = Array.isArray(effects) ? effects : [];
-    arr.forEach(function(e){
-        if (!e || !e.type) return;
+    for (const e of arr){
+        if (!e || !e.type) continue;
         if (e.type === 'currency') {
             adventureState.currencies = adventureState.currencies || {};
             adventureState.currencies[e.id] = (adventureState.currencies[e.id] || 0) + Number(e.amount||0);
         } else if (e.type === 'rewardByTier') {
-            try { if (window.Rewards && typeof window.Rewards.grantByTier === 'function') window.Rewards.grantByTier(Number(e.tier||1)); } catch {}
+            try { if (window.Rewards && typeof window.Rewards.grantByTier === 'function') await window.Rewards.grantByTier(Number(e.tier||1)); } catch {}
         } else if (e.type === 'rewardById') {
-            try { if (window.Rewards && typeof window.Rewards.grantById === 'function') window.Rewards.grantById(String(e.id||'')); } catch {}
+            try { if (window.Rewards && typeof window.Rewards.grantById === 'function') await window.Rewards.grantById(String(e.id||'')); } catch {}
         }
-        // Другие типы можно добавить позже
-    });
+    }
     persistAdventure();
 }
 

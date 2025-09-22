@@ -90,7 +90,7 @@
             const tier = spec.tier;
             for (const n of columns[d]){
                 n.type = rollType(mixRow);
-                n.tier = (n.type === 'boss') ? undefined : (tier!=null ? Number(tier) : undefined);
+                n.tier = (tier!=null ? Number(tier) : undefined);
                 if (n.type === 'elite') n.class = 'elite';
                 else if (n.type === 'battle') n.class = 'normal';
                 else if (n.type === 'boss') { n.class = 'boss'; }
@@ -120,11 +120,14 @@
             const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('encounters') : null;
             const list = (cfg && Array.isArray(cfg.encounters)) ? cfg.encounters : [];
             const cls = params.class || 'normal';
-            const tier = Number(params.tier||0) || undefined;
+            const hasTier = (params.tier != null);
+            const tier = hasTier ? Number(params.tier) : undefined;
+            if (!hasTier || isNaN(tier)) return null;
             const pool = list.filter(function(e){
-                if (cls === 'boss') return e.class === 'boss';
-                if (cls === 'elite') return e.class === 'elite' || (e.class === 'normal' && tier >= (e.tier||0));
-                return e.class === 'normal' && (!tier || (e.tier||0) <= tier);
+                const et = Number(e && e.tier);
+                if (cls === 'boss') return e.class === 'boss' && et === tier;
+                if (cls === 'elite') return e.class === 'elite' && et === tier;
+                return e.class === 'normal' && et === tier;
             });
             if (pool.length === 0) return null;
             return pickWeighted(pool, e => Number(e.weight||1));
