@@ -7,7 +7,7 @@
       "tags": ["village"],
       "weight": 1,
       "monsters": [
-        { "id": "rat", "amount": "4-8"}
+        { "id": "rat", "amount": "4-6"}
       ]
     },
     {
@@ -17,8 +17,8 @@
       "tags": ["village"],
       "weight": 1,
       "monsters": [
-        { "id": "rogue", "amount": "3-5"},
-        { "id": "dog", "amount": "3-5"}
+        { "id": "rogue", "amount": "2-3"},
+        { "id": "dog", "amount": "2-3"}
       ]
     },
     {
@@ -75,6 +75,86 @@
       "monsters": [
         { "id": "rogue", "amount": 1},
         { "id": "chicken", "amount": "40-50"}
+      ]
+    },
+    {
+      "id": "03.001",
+      "tier": 3,
+      "class": "normal",
+      "tags": ["swamp"],
+      "weight": 1,
+      "monsters": [
+        { "id": "giant_snake", "amount": "4-6"},
+        { "id": "frog", "amount": "10-16"}
+      ]
+    },
+    {
+      "id": "03.002",
+      "tier": 3,
+      "class": "normal",
+      "tags": ["swamp"],
+      "weight": 1,
+      "monsters": [
+        { "id": "spider", "amount": "8-10"},
+        { "id": "frog", "amount": "10-16"}
+      ]
+    },
+    {
+      "id": "03.003",
+      "tier": 3,
+      "class": "elite",
+      "tags": ["swamp"],
+      "weight": 1,
+      "monsters": [
+        { "id": "mage", "amount": "3-4"},
+        { "id": "spider", "amount": "15-20"}
+      ]
+    },
+    {
+      "id": "04.001",
+      "tier": 4,
+      "class": "normal",
+      "tags": ["mountain"],
+      "weight": 1,
+      "monsters": [
+        { "id": "orc", "amount": "10-12"},
+        { "id": "wolf", "amount": "10-16"}
+      ]
+    },
+    {
+      "id": "04.002",
+      "tier": 4,
+      "class": "normal",
+      "tags": ["mountain"],
+      "weight": 1,
+      "monsters": [
+        { "id": "orc", "amount": "6-8"},
+        { "id": "goblin", "amount": "14-20"}
+      ]
+    },
+    {
+      "id": "04.003",
+      "tier": 4,
+      "class": "elite",
+      "tags": ["mountain"],
+      "weight": 1,
+      "monsters": [
+        { "id": "troll", "amount": "3-4"},
+        { "id": "boar", "amount": "8-14"},
+        { "id": "goblin", "amount": "8-16"}
+      ]
+    },
+    {
+      "id": "04.004",
+      "tier": 4,
+      "class": "boss",
+      "tags": ["mountain"],
+      "weight": 1,
+      "monsters": [
+        { "id": "troll", "amount": "2-4"},
+        { "id": "bear", "amount": "4-6"},
+        { "id": "goblin", "amount": "10-20"},
+        { "id": "orc", "amount": "10-20"}
       ]
     }
   ]
