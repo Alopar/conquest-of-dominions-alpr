@@ -17,8 +17,8 @@
       "tags": ["village"],
       "weight": 1,
       "monsters": [
-        { "id": "rogue", "amount": "1-3"},
-        { "id": "dog", "amount": "1-3"}
+        { "id": "rogue", "amount": "3-5"},
+        { "id": "dog", "amount": "3-5"}
       ]
     },
     {
@@ -28,7 +28,8 @@
       "tags": ["village"],
       "weight": 1,
       "monsters": [
-        { "id": "chicken", "amount": "5-8"}
+        { "id": "chicken", "amount": "8-12"},
+        { "id": "fox", "amount": 1}
       ]
     },
     {
@@ -38,9 +39,9 @@
       "tags": ["village"],
       "weight": 1,
       "monsters": [
-        { "id": "rogue", "amount": "3-5"},
-        { "id": "archer", "amount": "2-3"},
-        { "id": "dog", "amount": "3-5"}
+        { "id": "rogue", "amount": "5-8"},
+        { "id": "archer", "amount": "3-5"},
+        { "id": "dog", "amount": "5-10"}
       ]
     },
     {
@@ -50,8 +51,8 @@
       "tags": ["village"],
       "weight": 1,
       "monsters": [
-        { "id": "archer", "amount": "3-6"},
-        { "id": "fox", "amount": "4-6"}
+        { "id": "archer", "amount": "8-14"},
+        { "id": "fox", "amount": "6-10"}
       ]
     },
     {
@@ -61,8 +62,8 @@
       "tags": ["village"],
       "weight": 1,
       "monsters": [
-        { "id": "rogue", "amount": "6-8"},
-        { "id": "archer", "amount": "4-6"}
+        { "id": "rogue", "amount": "8-10"},
+        { "id": "archer", "amount": "6-8"}
       ]
     },
     {
@@ -73,7 +74,7 @@
       "weight": 1,
       "monsters": [
         { "id": "rogue", "amount": 1},
-        { "id": "chicken", "amount": "10-20"}
+        { "id": "chicken", "amount": "40-50"}
       ]
     }
   ]

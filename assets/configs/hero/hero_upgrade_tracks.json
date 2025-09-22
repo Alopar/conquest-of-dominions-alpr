@@ -16,7 +16,7 @@
       "icon": "💢",
       "name": "Управление армией",
       "currencyId": "gold",
-      "unitCost": 50,
+      "unitCost": 100,
       "thresholds": [
         { "value": 2, "grantsPerks": ["army_size_1"] },
         { "value": 5, "grantsPerks": ["army_size_2"] },
