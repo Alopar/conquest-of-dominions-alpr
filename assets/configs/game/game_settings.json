@@ -15,7 +15,8 @@
       "autoPlay": true
     },
     "mapSettings": {
-      "hideNodeTypes": false
+      "hideNodeTypes": false,
+      "hidePath": false
     }
   }
 }

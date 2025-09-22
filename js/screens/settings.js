@@ -47,6 +47,8 @@ function displaySettings() {
     try {
         const hideEl = document.getElementById('hideNodeTypes');
         if (hideEl) hideEl.checked = !!(gameSettings.mapSettings && gameSettings.mapSettings.hideNodeTypes);
+        const hidePathEl = document.getElementById('hidePath');
+        if (hidePathEl) hidePathEl.checked = !!(gameSettings.mapSettings && gameSettings.mapSettings.hidePath);
     } catch {}
 
     // Блок приключения удалён
@@ -77,6 +79,8 @@ function saveSettingsFromScreen() {
         const hideEl = document.getElementById('hideNodeTypes');
         if (!gameSettings.mapSettings) gameSettings.mapSettings = {};
         if (hideEl) gameSettings.mapSettings.hideNodeTypes = !!hideEl.checked;
+        const hidePathEl = document.getElementById('hidePath');
+        if (hidePathEl) gameSettings.mapSettings.hidePath = !!hidePathEl.checked;
     } catch {}
 
     // Блок приключения удалён
@@ -102,7 +106,7 @@ function resetSettingsToDefault() {
             attackAlternate: true,
             autoPlay: true
         },
-        mapSettings: { hideNodeTypes: false }
+        mapSettings: { hideNodeTypes: false, hidePath: false }
     };
     displaySettings();
     saveGameSettings();

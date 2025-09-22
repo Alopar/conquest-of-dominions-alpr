@@ -175,9 +175,31 @@
                 posOf[n.id] = { x: xAt[cx], y: padY + offset + i * rowGap };
             }
         }
+        const s2 = (typeof window.getCurrentSettings === 'function') ? window.getCurrentSettings() : {};
+        const hidePath = !!(s2 && s2.mapSettings && s2.mapSettings.hidePath);
+        const visitedSetForEdges = (function(){
+            try { return new Set((window.adventureState && Array.isArray(window.adventureState.resolvedNodeIds)) ? window.adventureState.resolvedNodeIds : []); } catch { return new Set(); }
+        })();
+        const currentId = (function(){ try { return window.adventureState && window.adventureState.currentNodeId; } catch { return null; } })();
+        const availableSet = new Set(hidePath && currentId ? getNeighbors(map, currentId) : []);
+        const skippedSet = new Set();
+        if (hidePath) {
+            try {
+                map.edges.forEach(function(e){
+                    if (visitedSetForEdges.has(e.from) && !visitedSetForEdges.has(e.to) && !availableSet.has(e.to)) skippedSet.add(e.to);
+                });
+            } catch {}
+        }
+        const visibleNodeSet = new Set();
+        if (hidePath) {
+            visitedSetForEdges.forEach(function(id){ visibleNodeSet.add(id); });
+            availableSet.forEach(function(id){ visibleNodeSet.add(id); });
+            skippedSet.forEach(function(id){ visibleNodeSet.add(id); });
+        }
         // edges
         map.edges.forEach(function(e){
             const a = map.nodes[e.from]; const b = map.nodes[e.to]; if (!a||!b) return;
+            if (hidePath) { if (!(visibleNodeSet.has(a.id) && visibleNodeSet.has(b.id))) return; }
             const p1 = posOf[a.id]; const p2 = posOf[b.id];
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', String(p1.x)); line.setAttribute('y1', String(p1.y));
@@ -200,6 +222,7 @@
             } catch { return new Set(); }
         })();
         Object.values(map.nodes).forEach(function(n){
+            if (hidePath) { if (!visibleNodeSet.has(n.id)) return; }
             const pos = posOf[n.id] || {x:padX, y:padY};
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             g.setAttribute('data-id', n.id);
