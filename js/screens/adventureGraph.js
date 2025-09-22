@@ -157,6 +157,8 @@
         const width = Math.max(800, padX * 2 + (colCount - 1) * colGap);
         const height = Math.max(400, padY * 2 + Math.max(0, (maxRows - 1)) * rowGap);
         svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        svg.setAttribute('width', String(width));
+        svg.setAttribute('height', String(height));
         container.appendChild(svg);
         // Позиции: колонки равномерно по ширине, ноды — равномерно по высоте колонки и центрированы
         const xAt = []; for (let i=0;i<colCount;i++) xAt[i] = padX + i * colGap;

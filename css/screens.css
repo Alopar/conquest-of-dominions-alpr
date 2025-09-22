@@ -380,7 +380,7 @@
 
 /* Adventure graph */
 .adv-map-root { position: relative; flex: 1; min-height: 300px; overflow: auto; }
-.adv-map-svg { position: absolute; inset: 0; }
+.adv-map-svg { position: absolute; left: 0; top: 0; display: block; }
 .adv-map-svg line { pointer-events: none; }
 
 /* Состояния рёбер и узлов графа */
