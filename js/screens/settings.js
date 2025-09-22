@@ -44,6 +44,11 @@ function displaySettings() {
     const autoEl = document.getElementById('autoPlay');
     if (autoEl) autoEl.checked = !!gameSettings.battleSettings.autoPlay;
 
+    try {
+        const hideEl = document.getElementById('hideNodeTypes');
+        if (hideEl) hideEl.checked = !!(gameSettings.mapSettings && gameSettings.mapSettings.hideNodeTypes);
+    } catch {}
+
     // Блок приключения удалён
     try {
         const devMode = (gameSettings && gameSettings.development && gameSettings.development.mode) || 'tracks';
@@ -68,6 +73,12 @@ function saveSettingsFromScreen() {
     const autoEl = document.getElementById('autoPlay');
     if (autoEl) gameSettings.battleSettings.autoPlay = autoEl.checked;
 
+    try {
+        const hideEl = document.getElementById('hideNodeTypes');
+        if (!gameSettings.mapSettings) gameSettings.mapSettings = {};
+        if (hideEl) gameSettings.mapSettings.hideNodeTypes = !!hideEl.checked;
+    } catch {}
+
     // Блок приключения удалён
 
     try {
@@ -90,7 +101,8 @@ function resetSettingsToDefault() {
             showDetailedLog: true,
             attackAlternate: true,
             autoPlay: true
-        }
+        },
+        mapSettings: { hideNodeTypes: false }
     };
     displaySettings();
     saveGameSettings();

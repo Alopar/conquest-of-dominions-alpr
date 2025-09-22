@@ -13,6 +13,9 @@
       "showDetailedLog": true,
       "attackAlternate": true,
       "autoPlay": true
+    },
+    "mapSettings": {
+      "hideNodeTypes": false
     }
   }
 }

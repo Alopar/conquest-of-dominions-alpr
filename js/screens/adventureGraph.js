@@ -191,6 +191,8 @@
         const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         nodesGroup.setAttribute('class','adv-nodes');
         svg.appendChild(nodesGroup);
+        const s = (typeof window.getCurrentSettings === 'function') ? window.getCurrentSettings() : {};
+        const hideTypes = !!(s && s.mapSettings && s.mapSettings.hideNodeTypes);
         Object.values(map.nodes).forEach(function(n){
             const pos = posOf[n.id] || {x:padX, y:padY};
             const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -203,7 +205,8 @@
             rect.setAttribute('width', '44'); rect.setAttribute('height', '44');
             const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             icon.setAttribute('text-anchor', 'middle'); icon.setAttribute('dominant-baseline', 'middle'); icon.setAttribute('fill', '#cd853f'); icon.style.fontSize = '18px';
-            const t = (n.type === 'boss') ? '👑' : (n.type === 'elite' ? '💀' : (n.type === 'event' ? '✨' : (n.type === 'start' ? '' : '😡')));
+            const t = hideTypes && (n.type !== 'start' && n.type !== 'boss') ? '❔'
+                : ((n.type === 'boss') ? '👑' : (n.type === 'elite' ? '💀' : (n.type === 'event' ? '✨' : (n.type === 'start' ? '' : '😡'))));
             icon.textContent = t;
             g.appendChild(rect); g.appendChild(icon);
             nodesGroup.appendChild(g);
