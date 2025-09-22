@@ -7,8 +7,8 @@
       "icon": "🛡️",
       "stats": { "armySize": 15 },
       "startingArmy": [
-        { "id": "knight", "count": 10 },
-        { "id": "archer", "count": 50 }
+        { "id": "knight", "count": 1 },
+        { "id": "archer", "count": 3 }
       ],
       "innatePerks": ["merc_tier_1"],
       "developmentTracks": ["army_management","guild_master","melee_training","range_training","support_training"],
