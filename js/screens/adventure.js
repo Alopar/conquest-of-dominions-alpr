@@ -889,6 +889,13 @@ function renderMapBoard() {
     if (!p) { const fallback = (function(){ const n = map.nodes[adventureState.currentNodeId]; if (!n) return {x:120,y:120}; const padX=120,padY=120; const cg=180, rg=120; return { x: padX + (n.x||0)*cg, y: padY + (n.y||0)*rg }; })(); p = fallback; }
     player.setAttribute('transform', `translate(${p.x},${p.y})`);
     svg.appendChild(player);
+    // Автопрокрутка контейнера к позиции фишки героя
+    try {
+        const bx = Math.max(0, Math.min(board.scrollWidth - board.clientWidth, Math.round(p.x - board.clientWidth * 0.5)));
+        const by = Math.max(0, Math.min(board.scrollHeight - board.clientHeight, Math.round(p.y - board.clientHeight * 0.5)));
+        board.scrollLeft = bx;
+        board.scrollTop = by;
+    } catch {}
     // Если страница перезагружена в момент движения — доводим маркер и завершаем ноду
     try {
         const targetId = adventureState.movingToNodeId;
@@ -958,6 +965,16 @@ async function movePlayerToNode(nodeId){
     setAdventureInputBlock(true);
     await movePlayerMarker(from, to, ADVENTURE_MOVE_DURATION_MS);
     setAdventureInputBlock(false);
+    // Центрируем контейнер на новой позиции героя
+    try {
+        const board = document.getElementById('adventure-map-board');
+        if (board && to) {
+            const left = Math.max(0, Math.min(board.scrollWidth - board.clientWidth, Math.round(to.x - board.clientWidth * 0.5)));
+            const top = Math.max(0, Math.min(board.scrollHeight - board.clientHeight, Math.round(to.y - board.clientHeight * 0.5)));
+            board.scrollLeft = left;
+            board.scrollTop = top;
+        }
+    } catch {}
     adventureState.movingToNodeId = undefined;
     persistAdventure();
 }
