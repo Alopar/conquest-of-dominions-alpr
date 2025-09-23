@@ -156,6 +156,75 @@
         { "id": "goblin", "amount": "10-20"},
         { "id": "orc", "amount": "10-20"}
       ]
+    },
+    {
+      "id": "05.001",
+      "tier": 5,
+      "class": "normal",
+      "tags": ["graveyard"],
+      "weight": 1,
+      "monsters": [
+        { "id": "skeleton", "amount": "12-24"},
+        { "id": "spider", "amount": "15-20"},
+        { "id": "bat", "amount": "10-16"}
+      ]
+    },
+    {
+      "id": "05.002",
+      "tier": 5,
+      "class": "normal",
+      "tags": ["graveyard"],
+      "weight": 1,
+      "monsters": [
+        { "id": "vampire", "amount": "8-10"},
+        { "id": "skeleton", "amount": "10-20"},
+        { "id": "bat", "amount": "10-16"}
+      ]
+    },
+    {
+      "id": "05.003",
+      "tier": 5,
+      "class": "elite",
+      "tags": ["graveyard"],
+      "weight": 1,
+      "monsters": [
+        { "id": "wizard", "amount": "4-6"},
+        { "id": "skeleton", "amount": "20-30"},
+        { "id": "bat", "amount": "20-40"}
+      ]
+    },
+    {
+      "id": "06.001",
+      "tier": 6,
+      "class": "normal",
+      "tags": ["cave"],
+      "weight": 1,
+      "monsters": [
+        { "id": "giant_snake", "amount": "10-20"},
+        { "id": "bat", "amount": "20-40"}
+      ]
+    },
+    {
+      "id": "06.002",
+      "tier": 6,
+      "class": "elite",
+      "tags": ["cave"],
+      "weight": 1,
+      "monsters": [
+        { "id": "dragon", "amount": "1-2"},
+        { "id": "giant_snake", "amount": "20-30"}
+      ]
+    },
+    {
+      "id": "06.003",
+      "tier": 6,
+      "class": "boss",
+      "tags": ["cave"],
+      "weight": 1,
+      "monsters": [
+        { "id": "dragon", "amount": "8-10"},
+        { "id": "rabbit", "amount": 1}
+      ]
     }
   ]
 }

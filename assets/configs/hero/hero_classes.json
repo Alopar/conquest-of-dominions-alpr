@@ -5,7 +5,7 @@
       "name": "Воин",
       "description": "Закалённый в боях боец ближнего боя. Надёжен и силён.",
       "icon": "🛡️",
-      "stats": { "armySize": 10 },
+      "stats": { "armySize": 15 },
       "startingArmy": [
         { "id": "knight", "count": 1 },
         { "id": "archer", "count": 3 }
@@ -27,9 +27,9 @@
       "name": "Разбойник",
       "description": "Хитрый и быстрый. Делает ставку на скорость и внезапность.",
       "icon": "🔪",
-      "stats": { "armySize": 5 },
+      "stats": { "armySize": 10 },
       "startingArmy": [
-        { "id": "rogue", "count": 3 }
+        { "id": "rogue", "count": 5 }
       ],
       "innatePerks": ["merc_tier_1", "gold_bonus_20"],
       "developmentTracks": ["army_management","guild_master","melee_training","range_training","support_training"],
@@ -48,11 +48,11 @@
       "name": "Маг",
       "description": "Повелитель стихий. Слаб в броне, но силён в уроне.",
       "icon": "🔮",
-      "stats": { "armySize": 5 },
+      "stats": { "armySize": 10 },
       "startingArmy": [
         { "id": "mage", "count": 1 },
-        { "id": "fireElemental", "count": 1 },
-        { "id": "waterElemental", "count": 1 }
+        { "id": "fireElemental", "count": 2 },
+        { "id": "waterElemental", "count": 2 }
       ],
       "innatePerks": ["merc_tier_1"],
       "developmentTracks": ["army_management","guild_master","melee_training","range_training","support_training"],
@@ -74,7 +74,7 @@
       "stats": { "armySize": 10 },
       "startingArmy": [
         { "id": "archer", "count": 1 },
-        { "id": "wolf", "count": 3 }
+        { "id": "wolf", "count": 4 }
       ],
       "requiresAchievementId": "kill_10_wolf",
       "innatePerks": ["merc_tier_1"],

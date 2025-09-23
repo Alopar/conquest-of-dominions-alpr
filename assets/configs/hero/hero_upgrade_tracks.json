@@ -5,10 +5,10 @@
       "icon": "✒️",
       "name": "Гильдия наёмников",
       "currencyId": "glory",
-      "unitCost": 500,
+      "unitCost": 100,
       "thresholds": [
-        { "value": 3, "grantsPerks": ["merc_tier_2"] },
-        { "value": 8, "grantsPerks": ["merc_tier_3"] }
+        { "value": 5, "grantsPerks": ["merc_tier_2"] },
+        { "value": 15, "grantsPerks": ["merc_tier_3"] }
       ]
     },
     {
@@ -61,7 +61,7 @@
       "icon": "💫",
       "name": "Магические практики",
       "currencyId": "glory",
-      "unitCost": 150,
+      "unitCost": 100,
       "thresholds": [
         { "value": 3,  "grantsPerks": ["hp_support_1"] },
         { "value": 5, "grantsPerks": ["dmg_support_1"] },
