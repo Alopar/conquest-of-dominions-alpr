@@ -178,6 +178,7 @@ function initAdventureState(cfg) {
     adventureState.lastResult = '';
     persistAdventure();
     window.adventureState = adventureState;
+    try { if (window.AdventureTime && typeof window.AdventureTime.init === 'function') window.AdventureTime.init(); } catch {}
     try { if (window.Perks && typeof window.Perks.clear === 'function') window.Perks.clear(); } catch {}
     try {
         const def = (window.Hero && typeof window.Hero.getClassDef === 'function') ? window.Hero.getClassDef() : null;
@@ -330,8 +331,9 @@ function renderAdventure() {
     }
     const nameEl = document.getElementById('adventure-name');
     if (nameEl) {
-        const n = adventureState.config && adventureState.config.adventure ? adventureState.config.adventure.name : 'Приключение';
-        nameEl.innerHTML = '🧭 ' + n;
+        const day = (window.AdventureTime && typeof window.AdventureTime.getCurrentDay === 'function') ? window.AdventureTime.getCurrentDay() : 1;
+        nameEl.style.fontSize = '1.05em';
+        nameEl.textContent = `Дни: ${day} ⏳`;
     }
     // Блок сводки скрыт/удален
     ensureAdventureTabs();
@@ -1039,6 +1041,7 @@ async function handleEventNode(node){
             h.closed.then(async function(ok){
                 const opt = ok ? (e.options?.[0]) : (e.options?.[1]);
                 await applyEffects(opt && opt.effects);
+                try { if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') window.AdventureTime.addDays(1); } catch {}
                 renderAdventure();
             });
         } else { renderAdventure(); }
@@ -1052,6 +1055,7 @@ async function handleRewardNode(){
         const t = tables[0] || null;
         if (t) await applyEffects(t.rewards);
     } catch {}
+    try { if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') window.AdventureTime.addDays(1); } catch {}
     renderAdventure();
 }
 
@@ -1450,6 +1454,7 @@ function finishAdventureBattle(winner) {
             if (allVisited) adventureState.lastResult = 'Победа!';
         } catch {}
         adventureState.lastResult = `Победа!`;
+        try { if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') window.AdventureTime.addDays(1); } catch {}
     } else {
         adventureState.lastResult = 'Поражение';
     }
