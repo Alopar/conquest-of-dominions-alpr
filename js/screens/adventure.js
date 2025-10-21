@@ -143,6 +143,9 @@ async function downloadSampleAdventureConfig() { try {} catch {} }
 function beginAdventureFromSetup() {
     try { localStorage.removeItem('adventureState'); } catch {}
     if (!adventureState.selectedClassId) return;
+    if (window.Router && window.Router.setSubscreen) window.Router.setSubscreen('map');
+    else window.AppState = Object.assign(window.AppState || {}, { subscreen: 'map' });
+    if (console && console.log) console.log('[Adventure] Starting new adventure, reset subscreen to map');
     if (adventureState.config) {
         initAdventureState(adventureState.config);
         try {
@@ -340,7 +343,23 @@ function ensureAdventureTabs() {
     const screen = document.getElementById('adventure-screen');
     if (!screen) return;
     let tabs = screen.querySelector('#adventure-tabs');
-    if (tabs) { updateTabsActive(tabs); return; }
+    let isDebugMode = false;
+    try { 
+        const settings = window.GameSettings && window.GameSettings.get ? window.GameSettings.get() : {};
+        isDebugMode = !!(settings.uiSettings && settings.uiSettings.debugMode);
+        if (console && console.log) console.log('[Adventure] Debug mode:', isDebugMode, 'Settings:', settings.uiSettings);
+    } catch (e) {
+        if (console && console.error) console.error('[Adventure] Error reading debug mode:', e);
+    }
+    if (tabs) {
+        const hasModsBtn = !!tabs.querySelector('button[data-subscreen="mods"]');
+        if (hasModsBtn === isDebugMode) {
+            updateTabsActive(tabs);
+            return;
+        }
+        tabs.remove();
+        tabs = null;
+    }
     const content = screen.querySelector('.settings-content');
     if (!content) return;
     tabs = document.createElement('div');
@@ -377,7 +396,9 @@ function ensureAdventureTabs() {
     const heroLabel = devMode === 'tracks' ? '📊 Улучшения' : '💪 Улучшения';
     tabs.appendChild(makeBtn('hero', heroLabel));
     tabs.appendChild(makeBtn('perks', '🥇 Перки'));
-    tabs.appendChild(makeBtn('mods', '🔧 Модификаторы'));
+    if (isDebugMode) {
+        tabs.appendChild(makeBtn('mods', '🔧 MODS'));
+    }
     content.insertBefore(tabs, content.firstElementChild || null);
     updateTabsActive(tabs);
 }
