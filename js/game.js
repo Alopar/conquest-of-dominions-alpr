@@ -141,7 +141,9 @@ function assignLinesToArmy(units, perRow) {
         return sb.dmg - sa.dmg;
     }
     
-    function takeNextRow() {
+    const hasMeleeInArmy = remaining.some(u => (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'melee');
+    
+    function takeNextRow(isFirstLine) {
         const melee = remaining.filter(u => (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'melee').sort(sortByStrengthDesc);
         const range = remaining.filter(u => (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'range').sort(sortByStrengthDesc);
         const support = remaining.filter(u => (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'support').sort(sortByStrengthDesc);
@@ -151,9 +153,13 @@ function assignLinesToArmy(units, perRow) {
             while (from.length > 0 && row.length < perRow) row.push(from.shift());
         }
         
-        pull(melee);
-        if (row.length < perRow) pull(range);
-        if (row.length < perRow) pull(support);
+        if (isFirstLine && hasMeleeInArmy) {
+            pull(melee);
+        } else {
+            pull(melee);
+            if (row.length < perRow) pull(range);
+            if (row.length < perRow) pull(support);
+        }
         
         const used = new Set(row.map(u => u.id));
         for (let i = remaining.length - 1; i >= 0; i--) {
@@ -162,8 +168,10 @@ function assignLinesToArmy(units, perRow) {
         return row;
     }
     
+    let isFirstLine = true;
     while (remaining.length > 0) {
-        rows.push(takeNextRow());
+        rows.push(takeNextRow(isFirstLine));
+        isFirstLine = false;
     }
     
     for (let lineNum = 0; lineNum < rows.length; lineNum++) {

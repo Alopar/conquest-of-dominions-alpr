@@ -100,7 +100,9 @@ function renderArmyLine(units, army, lineEl) {
         return sb.dmg - sa.dmg;
     }
 
-    function takeNextRow(){
+    const hasMeleeInArmy = remaining.some(function(u){ return (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'melee'; });
+
+    function takeNextRow(isFirstLine){
         const melee = remaining.filter(function(u){ return (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'melee'; }).sort(sortByStrengthDesc);
         const range = remaining.filter(function(u){ return (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'range'; }).sort(sortByStrengthDesc);
         const support = remaining.filter(function(u){ return (window.getUnitRole ? window.getUnitRole(u) : 'melee') === 'support'; }).sort(sortByStrengthDesc);
@@ -108,7 +110,15 @@ function renderArmyLine(units, army, lineEl) {
         function pull(from){
             while (from.length > 0 && row.length < perRow) row.push(from.shift());
         }
-        pull(melee); if (row.length < perRow) pull(range); if (row.length < perRow) pull(support);
+        
+        if (isFirstLine && hasMeleeInArmy) {
+            pull(melee);
+        } else {
+            pull(melee);
+            if (row.length < perRow) pull(range);
+            if (row.length < perRow) pull(support);
+        }
+        
         // Переупорядочиваем внутри строки: самые сильные в центре, далее по убыванию симметрично
         const rolePriorityOrder = row.slice();
         // Уже удовлетворяет приоритетам ролей: melee -> range -> support, и отсортирован по силе в каждой группе
@@ -132,7 +142,11 @@ function renderArmyLine(units, army, lineEl) {
         return row;
     }
 
-    while (remaining.length > 0) { rows.push(takeNextRow()); }
+    var isFirstLine = true;
+    while (remaining.length > 0) {
+        rows.push(takeNextRow(isFirstLine));
+        isFirstLine = false;
+    }
 
     const frag = document.createDocumentFragment();
     const container = document.createElement('div');
