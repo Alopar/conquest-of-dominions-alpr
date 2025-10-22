@@ -346,7 +346,7 @@ function renderAdventure() {
     if (nameEl) {
         const day = (window.AdventureTime && typeof window.AdventureTime.getCurrentDay === 'function') ? window.AdventureTime.getCurrentDay() : 1;
         nameEl.style.fontSize = '1.05em';
-        nameEl.textContent = `Дни: ${day} ⏳`;
+        nameEl.textContent = `День: ${day} ⏳`;
     }
     // Блок сводки скрыт/удален
     ensureAdventureTabs();
@@ -404,8 +404,8 @@ function ensureAdventureTabs() {
         return b;
     };
     tabs.appendChild(makeBtn('map', '🗺️ Карта'));
-    tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
     tabs.appendChild(makeBtn('raids', '⚔️ Рейды'));
+    tabs.appendChild(makeBtn('tavern', '🍻 Таверна'));
     // tabs.appendChild(makeBtn('army', '🛡️ Армия'));
     let devMode = 'shop';
     try { devMode = ((window.GameSettings && window.GameSettings.get && window.GameSettings.get().development && window.GameSettings.get().development.mode) || 'shop'); } catch {}
