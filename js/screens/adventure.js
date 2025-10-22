@@ -1507,21 +1507,16 @@ function finishAdventureBattle(winner) {
                 }
                 persistAdventure();
             } catch {}
-            try {
-                if (window.UI && window.UI.showModal) {
-                    setTimeout(function(){
-                        const body = document.createElement('div');
-                        body.style.textAlign = 'center';
-                        body.textContent = 'Рейд провален. Отряд погиб.';
-                        window.UI.showModal(body, { type: 'confirm', title: 'Неудача' });
-                    }, 500);
-                }
-            } catch {}
-            if (raid && raid.id && window.Raids && typeof window.Raids.removeRaid === 'function') {
-                window.Raids.removeRaid(raid.id);
-            }
-            window._currentRaidData = null;
         }
+        if (raid && raid.id && window.Raids && typeof window.Raids.removeRaid === 'function') {
+            window.Raids.removeRaid(raid.id);
+        }
+        window._raidBattleResult = {
+            raidId: raid && raid.id,
+            rewardId: raid && raid.rewardId,
+            won: winner === 'attackers'
+        };
+        window._currentRaidData = null;
     } else {
         for (const u of attackersAlive) { adventureState.pool[u.typeId] = (adventureState.pool[u.typeId] || 0) + 1; }
         try {
@@ -1960,3 +1955,5 @@ window.startEncounterBattle = startEncounterBattle;
 window.renderAdventure = renderAdventure;
 window.showAdventureResult = showAdventureResult;
 window.showUnitInfoModal = showUnitInfoModal;
+
+window._raidBattleResult = null;

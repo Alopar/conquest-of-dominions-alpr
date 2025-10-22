@@ -560,18 +560,31 @@ window.updateButtonStates = updateButtonStates;
 async function finishBattleToAdventure() {
     if (!window.adventureState || !window.adventureState.config) return;
     
-    const isRaid = !!window._currentRaidData;
-    const raid = window._currentRaidData;
+    const isRaid = !!(window._raidBattleResult);
+    const raidResult = window._raidBattleResult;
     
     if (isRaid) {
         const won = window.adventureState.lastResult && window.adventureState.lastResult.includes('успешен');
-        if (won && raid && raid.rewardId && window.Rewards && typeof window.Rewards.grantById === 'function') {
-            await window.Rewards.grantById(raid.rewardId);
-        }
-        if (raid && raid.id && window.Raids && typeof window.Raids.removeRaid === 'function') {
-            window.Raids.removeRaid(raid.id);
+        
+        if (won) {
+            if (raidResult && raidResult.rewardId && window.Rewards && typeof window.Rewards.grantById === 'function') {
+                await window.Rewards.grantById(raidResult.rewardId);
+            }
+        } else {
+            try {
+                if (window.UI && window.UI.showModal) {
+                    const body = document.createElement('div');
+                    body.style.textAlign = 'center';
+                    body.textContent = 'Рейд провален. Отряд погиб.';
+                    const h = window.UI.showModal(body, { type: 'confirm', title: 'Неудача' });
+                    if (h && h.closed) {
+                        await h.closed;
+                    }
+                }
+            } catch {}
         }
         window._currentRaidData = null;
+        window._raidBattleResult = null;
         window.showAdventure();
         return;
     }
