@@ -200,7 +200,7 @@ function updateButtonStates() {
             try { if (window._autoPlayActive) window._stopAutoPlay && window._stopAutoPlay(); } catch {}
         }
         if (autoSpeedBtn) autoSpeedBtn.style.display = 'none';
-        const isAdventureBattle = (typeof window.battleConfigSource !== 'undefined' && window.battleConfigSource === 'adventure');
+        const isAdventureBattle = (typeof window.battleConfigSource !== 'undefined' && (window.battleConfigSource === 'adventure' || window.battleConfigSource === 'raid'));
         if (finishBtn) finishBtn.style.display = isAdventureBattle ? '' : 'none';
         if (retryBtn) retryBtn.style.display = isAdventureBattle ? 'none' : '';
         return;
@@ -559,12 +559,39 @@ window.updateButtonStates = updateButtonStates;
 
 async function finishBattleToAdventure() {
     if (!window.adventureState || !window.adventureState.config) return;
+    
+    const isRaid = !!window._currentRaidData;
+    const raid = window._currentRaidData;
+    
+    if (isRaid) {
+        const won = window.adventureState.lastResult && window.adventureState.lastResult.includes('успешен');
+        if (won && raid && raid.rewardId && window.Rewards && typeof window.Rewards.grantById === 'function') {
+            await window.Rewards.grantById(raid.rewardId);
+        }
+        if (raid && raid.id && window.Raids && typeof window.Raids.removeRaid === 'function') {
+            window.Raids.removeRaid(raid.id);
+        }
+        window._currentRaidData = null;
+        window.showAdventure();
+        return;
+    }
+    
     // Возврат на экран приключения с модалкой наград
-    const hasAnyUnits = Object.values(window.adventureState.pool || {}).some(v => v > 0);
+    const assigned = (window.Raids && typeof window.Raids.getAssignedUnitsByType === 'function') ? window.Raids.getAssignedUnitsByType() : {};
+    let hasAvailableUnits = false;
+    for (const unitId in (window.adventureState.pool || {})) {
+        const total = Number(window.adventureState.pool[unitId] || 0);
+        const inRaids = Number(assigned[unitId] || 0);
+        const available = Math.max(0, total - inRaids);
+        if (available > 0) {
+            hasAvailableUnits = true;
+            break;
+        }
+    }
     const sectorCleared = (function(){
         try { return (typeof window.isCurrentSectorCleared === 'function') ? window.isCurrentSectorCleared() : false; } catch { return false; }
     })();
-    if (!hasAnyUnits) {
+    if (!hasAvailableUnits) {
         window.showAdventureResult('💀💀💀 Поражение! Вся армия потеряна! 💀💀💀');
         return;
     }
