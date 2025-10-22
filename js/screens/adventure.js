@@ -1728,7 +1728,7 @@ async function showRaidCompleteModal(raid, def) {
     const text = document.createElement('div');
     text.style.textAlign = 'center';
     text.style.margin = '8px 0';
-    text.textContent = `Рейд "${def.name}" завершен и готов к бою!`;
+    text.textContent = `Рейд "${def.name}" готов к завершению!`;
     body.appendChild(text);
     let accepted = false;
     try {
@@ -1813,6 +1813,11 @@ async function showArmySplitModal(raid, def) {
             if (countEl) countEl.textContent = `x${mainArmy[unitId]}`;
             el.addEventListener('click', function(){
                 if (mainArmy[unitId] > 0) {
+                    const totalMainArmy = Object.values(mainArmy).reduce(function(sum, v){ return sum + Number(v || 0); }, 0);
+                    if (totalMainArmy <= 1) {
+                        if (window.UI && window.UI.showToast) window.UI.showToast('error', 'В основной армии должен остаться хотя бы один юнит');
+                        return;
+                    }
                     mainArmy[unitId]--;
                     raidArmy[unitId] = (raidArmy[unitId] || 0) + 1;
                     renderSplit();
