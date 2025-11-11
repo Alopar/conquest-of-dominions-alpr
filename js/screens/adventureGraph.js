@@ -91,6 +91,7 @@
             for (const n of columns[d]){
                 n.type = rollType(mixRow);
                 n.tier = (tier!=null ? Number(tier) : undefined);
+                n.typesMix = mixRow;
                 if (n.type === 'elite') n.class = 'elite';
                 else if (n.type === 'battle') n.class = 'normal';
                 else if (n.type === 'boss') { n.class = 'boss'; }
@@ -99,7 +100,25 @@
         // последний столбец уже размечен как boss
 
         const startId = columns[0][0].id;
-        return { nodes, edges, startId };
+        const nodeContents = {};
+        const terrainEmojis = ['🌳', '🌵', '🌾', '🌲', '🗻', '🛕', '🕍', '🏰'];
+        for (const nodeId in nodes) {
+            const node = nodes[nodeId];
+            if (node.type === 'start') {
+                nodeContents[nodeId] = [];
+            } else if (node.type === 'boss') {
+                node.terrainEmoji = '👑';
+                const tier = node.tier || 1;
+                const typesMix = node.typesMix || { boss: 1 };
+                nodeContents[nodeId] = populateNodeContent(node, tier, typesMix);
+            } else {
+                node.terrainEmoji = terrainEmojis[Math.floor(Math.random() * terrainEmojis.length)];
+                const tier = node.tier || 1;
+                const typesMix = node.typesMix || { battle: 1 };
+                nodeContents[nodeId] = populateNodeContent(node, tier, typesMix);
+            }
+        }
+        return { nodes, edges, startId, nodeContents };
     }
 
     function getNeighbors(map, nodeId){
@@ -132,6 +151,73 @@
             if (pool.length === 0) return null;
             return pickWeighted(pool, e => Number(e.weight||1));
         } catch { return null; }
+    }
+
+    function pickEventFor(tier){
+        try {
+            const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('events') : null;
+            const list = (cfg && Array.isArray(cfg.events)) ? cfg.events : [];
+            const t = Number(tier || 1);
+            if (isNaN(t)) return null;
+            const pool = list.filter(function(e){
+                return Number(e && e.tier) === t;
+            });
+            if (pool.length === 0) return null;
+            return pickWeighted(pool, e => Number(e.weight||1));
+        } catch { return null; }
+    }
+
+    function populateNodeContent(node, tier, typesMix){
+        if (!node || node.type === 'start') return [];
+        const count = Math.floor(Math.random() * 5) + 1;
+        const content = [];
+        const nodeTier = tier || node.tier || 1;
+        const usedIds = new Set();
+        let attempts = 0;
+        const maxAttempts = count * 20;
+        const mix = typesMix || { battle: 1 };
+        
+        while (content.length < count && attempts < maxAttempts) {
+            attempts++;
+            const typeEntries = Object.keys(mix).map(k => ({ k, w: Number(mix[k] || 0) })).filter(e => e.w > 0);
+            if (typeEntries.length === 0) break;
+            const chosenType = pickWeighted(typeEntries, e => e.w);
+            if (!chosenType) break;
+            
+            const contentType = chosenType.k;
+            let item = null;
+            
+            if (contentType === 'event') {
+                const event = pickEventFor(nodeTier);
+                if (event && !usedIds.has('event_' + event.id)) {
+                    item = { type: 'event', id: event.id, data: event };
+                    usedIds.add('event_' + event.id);
+                }
+            } else if (contentType === 'battle') {
+                const encounter = pickEncounterFor({ class: 'normal', tier: nodeTier });
+                if (encounter && !usedIds.has('encounter_' + encounter.id)) {
+                    item = { type: 'encounter', id: encounter.id, data: encounter };
+                    usedIds.add('encounter_' + encounter.id);
+                }
+            } else if (contentType === 'elite') {
+                const encounter = pickEncounterFor({ class: 'elite', tier: nodeTier });
+                if (encounter && !usedIds.has('encounter_' + encounter.id)) {
+                    item = { type: 'encounter', id: encounter.id, data: encounter };
+                    usedIds.add('encounter_' + encounter.id);
+                }
+            } else if (contentType === 'boss') {
+                const encounter = pickEncounterFor({ class: 'boss', tier: nodeTier });
+                if (encounter && !usedIds.has('encounter_' + encounter.id)) {
+                    item = { type: 'encounter', id: encounter.id, data: encounter };
+                    usedIds.add('encounter_' + encounter.id);
+                }
+            }
+            
+            if (item) {
+                content.push(item);
+            }
+        }
+        return content;
     }
 
     function renderSvgGraph(container, map, options){
@@ -235,12 +321,16 @@
             const icon = document.createElementNS('http://www.w3.org/2000/svg', 'text');
             icon.setAttribute('text-anchor', 'middle'); icon.setAttribute('dominant-baseline', 'middle'); icon.setAttribute('fill', '#cd853f'); icon.style.fontSize = '18px';
             const isVisited = visitedSet.has(n.id);
-            const t = (n.type === 'start') ? ''
-                : (n.type === 'boss') ? '👑'
-                : (hideTypes && !isVisited) ? '❔'
-                : (n.type === 'elite') ? '💀'
-                : (n.type === 'event') ? '✨'
-                : '😡';
+            let t = '';
+            if (n.type === 'start') {
+                t = '';
+            } else if (n.type === 'boss') {
+                t = '👑';
+            } else if (hideTypes && !isVisited) {
+                t = '❔';
+            } else {
+                t = n.terrainEmoji || '🌳';
+            }
             icon.textContent = t;
             g.appendChild(rect); g.appendChild(icon);
             nodesGroup.appendChild(g);
@@ -250,7 +340,8 @@
         return svg;
     }
 
-    window.AdventureGraph = { generateAdventureMap, getNeighbors, isNodeAvailable, pickEncounterFor, renderSvgGraph };
+    window.AdventureGraph = { generateAdventureMap, getNeighbors, isNodeAvailable, pickEncounterFor, pickEventFor, populateNodeContent, renderSvgGraph };
 })();
+
 
 

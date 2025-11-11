@@ -30,7 +30,9 @@ let adventureState = {
     currentStageIndex: 0,
     completedEncounterIds: [],
     inBattle: false,
-    lastResult: ''
+    lastResult: '',
+    nodeContents: {},
+    currentNodeContent: []
 };
 
 let adventureUserLoaded = false;
@@ -55,7 +57,7 @@ async function showAdventureSetup() {
     } catch {}
     // Полный сброс сохранения приключения при входе на экран подготовки
     try { localStorage.removeItem('adventureState'); } catch {}
-    adventureState = { config: null, currencies: {}, pool: {}, selectedClassId: null, currentStageIndex: 0, completedEncounterIds: [], inBattle: false, lastResult: '' };
+    adventureState = { config: null, currencies: {}, pool: {}, selectedClassId: null, currentStageIndex: 0, completedEncounterIds: [], inBattle: false, lastResult: '', nodeContents: {}, currentNodeContent: [] };
     window.adventureState = adventureState;
     restoreAdventure();
     if (adventureState.config) {
@@ -176,6 +178,8 @@ function initAdventureState(cfg) {
     adventureState.completedEncounterIds = [];
     adventureState.inBattle = false;
     adventureState.lastResult = '';
+    adventureState.nodeContents = adventureState.nodeContents || {};
+    adventureState.currentNodeContent = adventureState.currentNodeContent || [];
     persistAdventure();
     window.adventureState = adventureState;
     try { if (window.AdventureTime && typeof window.AdventureTime.init === 'function') window.AdventureTime.init(); } catch {}
@@ -232,6 +236,12 @@ function generateSectorMap(index){
     adventureState.map = map;
     adventureState.currentNodeId = map && map.startId;
     adventureState.resolvedNodeIds = map && map.startId ? [map.startId] : [];
+    if (map && map.nodeContents) {
+        adventureState.nodeContents = map.nodeContents;
+    } else {
+        adventureState.nodeContents = {};
+    }
+    adventureState.currentNodeContent = [];
     try {
         if (window.Raids && typeof window.Raids.clearNonStarted === 'function') window.Raids.clearNonStarted();
         const sectors = (adventureState.config && Array.isArray(adventureState.config.sectors)) ? adventureState.config.sectors : [];
@@ -952,16 +962,96 @@ function renderMapBoard() {
             }, 0);
         }
     } catch {}
+    renderNodeContentItems();
 }
 
 async function onGraphNodeClick(nodeId) {
     if (!window.AdventureGraph) return;
     const avail = window.AdventureGraph.isNodeAvailable({ map: adventureState.map, currentNodeId: adventureState.currentNodeId, resolvedNodeIds: adventureState.resolvedNodeIds }, nodeId);
     if (!avail) return;
-    await movePlayerToNode(nodeId);
-    adventureState.currentNodeId = nodeId;
-    persistAdventure();
-    resolveGraphNode(nodeId);
+    await showNodePreviewModal(nodeId);
+}
+
+async function showNodePreviewModal(nodeId) {
+    try {
+        const contents = Array.isArray(adventureState.nodeContents[nodeId]) ? adventureState.nodeContents[nodeId] : [];
+        if (!window.UI || typeof window.UI.showModal !== 'function') {
+            await movePlayerToNode(nodeId);
+            adventureState.currentNodeId = nodeId;
+            adventureState.resolvedNodeIds = Array.isArray(adventureState.resolvedNodeIds) ? adventureState.resolvedNodeIds : [];
+            if (!adventureState.resolvedNodeIds.includes(nodeId)) {
+                adventureState.resolvedNodeIds.push(nodeId);
+            }
+            adventureState.currentNodeContent = contents.slice();
+            persistAdventure();
+            renderAdventure();
+            return;
+        }
+        const body = document.createElement('div');
+        body.style.padding = '8px';
+        if (contents.length === 0) {
+            const text = document.createElement('div');
+            text.textContent = 'Эта нода не содержит событий или энкаунтеров.';
+            text.style.textAlign = 'center';
+            text.style.marginBottom = '12px';
+            body.appendChild(text);
+        } else {
+            const list = document.createElement('div');
+            list.style.display = 'flex';
+            list.style.flexDirection = 'column';
+            list.style.gap = '8px';
+            contents.forEach(function(item) {
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.alignItems = 'center';
+                row.style.gap = '8px';
+                row.style.padding = '4px';
+                const icon = document.createElement('span');
+                icon.style.fontSize = '20px';
+                if (item.type === 'event') {
+                    icon.textContent = '✨';
+                } else if (item.type === 'encounter') {
+                    const enc = item.data;
+                    if (enc.class === 'boss') icon.textContent = '👑';
+                    else if (enc.class === 'elite') icon.textContent = '💀';
+                    else icon.textContent = '😡';
+                }
+                const name = document.createElement('span');
+                if (item.type === 'event') {
+                    name.textContent = item.data.name || item.data.id || 'Событие';
+                } else {
+                    name.textContent = 'Бой: ' + (item.data.id || 'Энкаунтер');
+                }
+                row.appendChild(icon);
+                row.appendChild(name);
+                list.appendChild(row);
+            });
+            body.appendChild(list);
+        }
+        const h = window.UI.showModal(body, { type: 'dialog', title: 'Содержимое ноды', yesText: 'Перейти', noText: 'Закрыть' });
+        const proceed = await h.closed;
+        if (proceed) {
+            adventureState.currentNodeContent = [];
+            adventureState.currentNodeContent = contents.slice();
+            await movePlayerToNode(nodeId);
+            adventureState.currentNodeId = nodeId;
+            adventureState.resolvedNodeIds = Array.isArray(adventureState.resolvedNodeIds) ? adventureState.resolvedNodeIds : [];
+            if (!adventureState.resolvedNodeIds.includes(nodeId)) {
+                adventureState.resolvedNodeIds.push(nodeId);
+            }
+            persistAdventure();
+            renderAdventure();
+        }
+    } catch {
+        await movePlayerToNode(nodeId);
+        adventureState.currentNodeId = nodeId;
+        adventureState.resolvedNodeIds = Array.isArray(adventureState.resolvedNodeIds) ? adventureState.resolvedNodeIds : [];
+        if (!adventureState.resolvedNodeIds.includes(nodeId)) {
+            adventureState.resolvedNodeIds.push(nodeId);
+        }
+        persistAdventure();
+        renderAdventure();
+    }
 }
 
 function setAdventureInputBlock(on){
@@ -1021,6 +1111,150 @@ async function movePlayerToNode(nodeId){
     } catch {}
     adventureState.movingToNodeId = undefined;
     persistAdventure();
+    renderNodeContentItems();
+}
+
+function renderNodeContentItems() {
+    const container = document.getElementById('adventure-node-content-area');
+    if (!container) return;
+    container.innerHTML = '';
+    const contents = Array.isArray(adventureState.currentNodeContent) ? adventureState.currentNodeContent : [];
+    if (contents.length === 0) return;
+    contents.forEach(function(item, index) {
+        const tpl = document.getElementById('tpl-node-content-item');
+        const el = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+        if (!tpl) {
+            el.className = 'node-content-item';
+            const icon = document.createElement('div');
+            icon.className = 'node-content-icon';
+            el.appendChild(icon);
+        }
+        const iconEl = el.querySelector('.node-content-icon') || el.querySelector('[data-role="icon"]');
+        if (iconEl) {
+            if (item.type === 'event') {
+                iconEl.textContent = '✨';
+            } else if (item.type === 'encounter') {
+                const enc = item.data;
+                if (enc.class === 'boss') iconEl.textContent = '👑';
+                else if (enc.class === 'elite') iconEl.textContent = '💀';
+                else iconEl.textContent = '😡';
+            }
+        }
+        el.setAttribute('data-index', String(index));
+        el.style.cursor = 'pointer';
+        el.addEventListener('click', function() {
+            showContentItemModal(item, index);
+        });
+        container.appendChild(el);
+    });
+}
+
+async function showContentItemModal(item, index) {
+    try {
+        if (!window.UI || typeof window.UI.showModal !== 'function') return;
+        const body = document.createElement('div');
+        body.style.padding = '8px';
+        if (item.type === 'encounter') {
+            const enc = item.data;
+            const title = document.createElement('div');
+            title.style.fontSize = '1.1em';
+            title.style.fontWeight = 'bold';
+            title.style.marginBottom = '12px';
+            title.style.textAlign = 'center';
+            title.textContent = 'Энкаунтер: ' + (enc.id || 'Бой');
+            body.appendChild(title);
+            if (enc.monsters && Array.isArray(enc.monsters)) {
+                const monstersList = document.createElement('div');
+                monstersList.style.display = 'flex';
+                monstersList.style.flexDirection = 'column';
+                monstersList.style.gap = '6px';
+                monstersList.style.marginTop = '8px';
+                enc.monsters.forEach(function(m) {
+                    const row = document.createElement('div');
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.gap = '8px';
+                    const name = document.createElement('span');
+                    name.textContent = (m.id || 'Монстр') + ': ' + (m.amount || '?');
+                    row.appendChild(name);
+                    monstersList.appendChild(row);
+                });
+                body.appendChild(monstersList);
+            }
+        } else if (item.type === 'event') {
+            const ev = item.data;
+            const title = document.createElement('div');
+            title.style.fontSize = '1.1em';
+            title.style.fontWeight = 'bold';
+            title.style.marginBottom = '12px';
+            title.style.textAlign = 'center';
+            title.textContent = ev.name || ev.id || 'Событие';
+            body.appendChild(title);
+            if (ev.description) {
+                const desc = document.createElement('div');
+                desc.style.textAlign = 'center';
+                desc.style.marginBottom = '12px';
+                desc.textContent = ev.description;
+                body.appendChild(desc);
+            }
+            if (ev.options && Array.isArray(ev.options) && ev.options.length > 0) {
+                const opts = document.createElement('div');
+                opts.style.display = 'flex';
+                opts.style.flexDirection = 'column';
+                opts.style.gap = '6px';
+                opts.style.marginTop = '8px';
+                ev.options.forEach(function(opt) {
+                    const optRow = document.createElement('div');
+                    optRow.textContent = '• ' + (opt.text || opt.id || 'Опция');
+                    opts.appendChild(optRow);
+                });
+                body.appendChild(opts);
+            }
+        }
+        const h = window.UI.showModal(body, { type: 'dialog', title: item.type === 'event' ? 'Событие' : 'Энкаунтер', yesText: 'Начать', noText: 'Закрыть' });
+        const proceed = await h.closed;
+        if (proceed) {
+            if (item.type === 'encounter') {
+                startEncounterBattle(item.data);
+            } else if (item.type === 'event') {
+                await handleEventFromContent(item.data);
+            }
+            const idx = adventureState.currentNodeContent.findIndex(function(ci) {
+                return ci.type === item.type && ci.id === item.id && ci.data && ci.data.id === item.data.id;
+            });
+            if (idx >= 0) {
+                adventureState.currentNodeContent.splice(idx, 1);
+                persistAdventure();
+                renderNodeContentItems();
+            }
+        }
+    } catch {}
+}
+
+async function handleEventFromContent(eventData) {
+    try {
+        if (!eventData) return;
+        if (window.UI && typeof window.UI.showModal === 'function') {
+            const body = document.createElement('div');
+            const text = document.createElement('div');
+            text.textContent = eventData.description || eventData.name || eventData.id;
+            text.style.textAlign = 'center';
+            text.style.margin = '8px 0 10px 0';
+            body.appendChild(text);
+            const wrap = document.createElement('div');
+            wrap.style.display = 'flex';
+            wrap.style.justifyContent = 'center';
+            wrap.style.gap = '10px';
+            body.appendChild(wrap);
+            const h = window.UI.showModal(body, { type: 'dialog', title: eventData.name || 'Событие', yesText: eventData.options?.[0]?.text || 'Ок', noText: eventData.options?.[1]?.text || 'Пропустить' });
+            h.closed.then(async function(ok) {
+                const opt = ok ? (eventData.options?.[0]) : (eventData.options?.[1]);
+                await applyEffects(opt && opt.effects);
+                try { if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') window.AdventureTime.addDays(1); } catch {}
+                renderAdventure();
+            });
+        }
+    } catch {}
 }
 
 function resolveGraphNode(nodeId){
@@ -1031,18 +1265,7 @@ function resolveGraphNode(nodeId){
         adventureState.resolvedNodeIds = Array.isArray(adventureState.resolvedNodeIds) ? adventureState.resolvedNodeIds : [];
         if (!adventureState.resolvedNodeIds.includes(nodeId)) adventureState.resolvedNodeIds.push(nodeId);
         persistAdventure();
-        if (node.type === 'event') {
-            handleEventNode(node);
-            return;
-        }
-        if (node.type === 'reward') {
-            handleRewardNode();
-            return;
-        }
-        // fight/elite/boss
-        const enc = (window.AdventureGraph && window.AdventureGraph.pickEncounterFor) ? window.AdventureGraph.pickEncounterFor({ class: node.class || 'normal', tier: node.tier || 1 }) : null;
-        if (enc) startEncounterBattle(enc);
-        else renderAdventure();
+        renderAdventure();
     } catch { renderAdventure(); }
 }
 
@@ -1462,6 +1685,7 @@ function finishAdventureBattle(winner) {
     const isRaid = !!window._currentRaidData;
     const raid = window._currentRaidData;
     const attackersAlive = (window.gameState.attackers || []).filter(u => u.alive);
+    const encData = window._lastEncounterData;
     if (isRaid) {
         try {
             const sent = Number(window._lastAttackersSentCount || 0);
@@ -1543,6 +1767,16 @@ function finishAdventureBattle(winner) {
     adventureState.inBattle = false;
     persistAdventure();
     window.adventureState = adventureState;
+    if (!isRaid && encData) {
+        const idx = adventureState.currentNodeContent.findIndex(function(item) {
+            return item.type === 'encounter' && item.data && item.data.id === encData.id;
+        });
+        if (idx >= 0) {
+            adventureState.currentNodeContent.splice(idx, 1);
+            persistAdventure();
+            renderNodeContentItems();
+        }
+    }
     const btnHome = document.getElementById('battle-btn-home');
     if (btnHome) btnHome.style.display = 'none';
     if (window.addToLog) window.addToLog('📯 Бой завершён. Нажмите «Завершить бой», чтобы вернуться к приключению.');
