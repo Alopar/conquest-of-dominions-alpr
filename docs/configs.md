@@ -14,3 +14,7 @@
 - achievements → assets/configs/game/achievements_config.json
 - battleSetup → assets/configs/game/battle_setup.json
 
+## События и награды
+
+Подробное описание структуры событий (`events_config.json`) и наград (`rewards_config.json`) см. в [events-and-rewards.md](events-and-rewards.md).
+
