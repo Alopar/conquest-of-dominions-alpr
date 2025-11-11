@@ -987,8 +987,69 @@ async function showNodePreviewModal(nodeId) {
             renderAdventure();
             return;
         }
+        
+        const terrainNames = {
+            'town': 'Город',
+            'plain': 'Поля',
+            'forest': 'Лес',
+            'mountains': 'Горы'
+        };
+        
+        const terrainEmojis = {
+            'town': '🏰',
+            'plain': '🌾',
+            'forest': '🌲',
+            'mountains': '🗻'
+        };
+        
+        const node = adventureState.map && adventureState.map.nodes ? adventureState.map.nodes[nodeId] : null;
+        const terrainType = node && node.terrainType ? node.terrainType : null;
+        const travelDays = node && node.travelDays ? node.travelDays : 1;
+        const terrainName = terrainType && terrainNames[terrainType] ? terrainNames[terrainType] : 'Местность';
+        const terrainEmoji = terrainType && terrainEmojis[terrainType] ? terrainEmojis[terrainType] : '';
+        
+        function getDaysText(days) {
+            const lastDigit = days % 10;
+            const lastTwoDigits = days % 100;
+            if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+                return days + ' дней';
+            }
+            if (lastDigit === 1) {
+                return days + ' день';
+            }
+            if (lastDigit >= 2 && lastDigit <= 4) {
+                return days + ' дня';
+            }
+            return days + ' дней';
+        }
+        
         const body = document.createElement('div');
         body.style.padding = '8px';
+        
+        if (terrainType && travelDays) {
+            const travelInfo = document.createElement('div');
+            travelInfo.style.textAlign = 'center';
+            travelInfo.style.marginBottom = '16px';
+            travelInfo.style.padding = '12px';
+            travelInfo.style.background = '#1a1a1a';
+            travelInfo.style.border = '1px solid #654321';
+            travelInfo.style.borderRadius = '8px';
+            travelInfo.style.boxShadow = '0 4px 10px rgba(0,0,0,0.4)';
+            const travelText = document.createElement('div');
+            travelText.textContent = 'Время пути: ' + getDaysText(travelDays);
+            travelText.style.fontSize = '16px';
+            travelText.style.fontWeight = '600';
+            travelText.style.color = '#cd853f';
+            travelInfo.appendChild(travelText);
+            body.appendChild(travelInfo);
+            
+            const separator = document.createElement('div');
+            separator.style.height = '2px';
+            separator.style.margin = '0 0 16px 0';
+            separator.style.background = 'linear-gradient(to right, rgba(128,128,128,0), rgba(160,160,160,0.6), rgba(128,128,128,0))';
+            body.appendChild(separator);
+        }
+        
         if (contents.length === 0) {
             const text = document.createElement('div');
             text.textContent = 'Эта нода не содержит событий или энкаунтеров.';
@@ -998,16 +1059,20 @@ async function showNodePreviewModal(nodeId) {
         } else {
             const list = document.createElement('div');
             list.style.display = 'flex';
-            list.style.flexDirection = 'column';
-            list.style.gap = '8px';
+            list.style.flexWrap = 'wrap';
+            list.style.gap = '12px';
+            list.style.justifyContent = 'center';
             contents.forEach(function(item) {
-                const row = document.createElement('div');
-                row.style.display = 'flex';
-                row.style.alignItems = 'center';
-                row.style.gap = '8px';
-                row.style.padding = '4px';
-                const icon = document.createElement('span');
-                icon.style.fontSize = '20px';
+                const card = document.createElement('div');
+                card.className = 'achievement-card';
+                card.style.width = '100px';
+                card.style.height = '90px';
+                card.style.minHeight = '90px';
+                card.style.padding = '8px';
+                
+                const icon = document.createElement('div');
+                icon.className = 'achievement-icon';
+                icon.style.fontSize = '1.6em';
                 if (item.type === 'event') {
                     icon.textContent = '✨';
                 } else if (item.type === 'encounter') {
@@ -1016,19 +1081,52 @@ async function showNodePreviewModal(nodeId) {
                     else if (enc.class === 'elite') icon.textContent = '💀';
                     else icon.textContent = '😡';
                 }
-                const name = document.createElement('span');
+                
+                const name = document.createElement('div');
+                name.className = 'achievement-name';
+                name.style.fontSize = '0.9em';
+                name.style.lineHeight = '1.2';
+                name.style.maxWidth = '100%';
+                name.style.overflow = 'hidden';
+                name.style.textOverflow = 'ellipsis';
+                name.style.display = '-webkit-box';
+                name.style.webkitLineClamp = '2';
+                name.style.webkitBoxOrient = 'vertical';
+                name.style.whiteSpace = 'normal';
                 if (item.type === 'event') {
                     name.textContent = item.data.name || item.data.id || 'Событие';
                 } else {
-                    name.textContent = 'Бой: ' + (item.data.id || 'Энкаунтер');
+                    name.textContent = item.data.id || 'Энкаунтер';
                 }
-                row.appendChild(icon);
-                row.appendChild(name);
-                list.appendChild(row);
+                
+                card.appendChild(icon);
+                card.appendChild(name);
+                list.appendChild(card);
             });
             body.appendChild(list);
         }
-        const h = window.UI.showModal(body, { type: 'dialog', title: 'Содержимое ноды', yesText: 'Перейти', noText: 'Закрыть' });
+        
+        const h = window.UI.showModal(body, { type: 'dialog', title: '', yesText: 'Перейти', noText: 'Закрыть' });
+        
+        setTimeout(function() {
+            const titleEl = document.querySelector('.modal-title');
+            if (titleEl && terrainEmoji) {
+                titleEl.innerHTML = '';
+                titleEl.style.display = 'flex';
+                titleEl.style.alignItems = 'center';
+                titleEl.style.justifyContent = 'center';
+                titleEl.style.gap = '8px';
+                const iconSpan = document.createElement('span');
+                iconSpan.textContent = terrainEmoji;
+                iconSpan.style.fontSize = '1.5em';
+                const textSpan = document.createElement('span');
+                textSpan.textContent = terrainName;
+                titleEl.appendChild(iconSpan);
+                titleEl.appendChild(textSpan);
+            } else if (titleEl) {
+                titleEl.textContent = terrainName;
+            }
+        }, 0);
         const proceed = await h.closed;
         if (proceed) {
             adventureState.currentNodeContent = [];
@@ -1099,7 +1197,20 @@ async function movePlayerToNode(nodeId){
     setAdventureInputBlock(true);
     await movePlayerMarker(from, to, ADVENTURE_MOVE_DURATION_MS);
     setAdventureInputBlock(false);
-    // Центрируем контейнер на новой позиции героя
+    
+    const map = adventureState.map;
+    const node = map && map.nodes ? map.nodes[nodeId] : null;
+    if (node && node.terrainType && node.travelDays && nodeId !== adventureState.currentNodeId && node.type !== 'start') {
+        try {
+            if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') {
+                window.AdventureTime.addDays(node.travelDays);
+            }
+        } catch {}
+    }
+    
+    adventureState.currentNodeId = nodeId;
+    persistAdventure();
+    
     try {
         const board = document.getElementById('adventure-map-board');
         if (board && to) {
@@ -1250,7 +1361,6 @@ async function handleEventFromContent(eventData) {
             h.closed.then(async function(ok) {
                 const opt = ok ? (eventData.options?.[0]) : (eventData.options?.[1]);
                 await applyEffects(opt && opt.effects);
-                try { if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') window.AdventureTime.addDays(1); } catch {}
                 renderAdventure();
             });
         }
@@ -1285,7 +1395,6 @@ async function handleEventNode(node){
             h.closed.then(async function(ok){
                 const opt = ok ? (e.options?.[0]) : (e.options?.[1]);
                 await applyEffects(opt && opt.effects);
-                try { if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') window.AdventureTime.addDays(1); } catch {}
                 renderAdventure();
             });
         } else { renderAdventure(); }
@@ -1299,7 +1408,6 @@ async function handleRewardNode(){
         const t = tables[0] || null;
         if (t) await applyEffects(t.rewards);
     } catch {}
-    try { if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') window.AdventureTime.addDays(1); } catch {}
     renderAdventure();
 }
 
@@ -1759,7 +1867,6 @@ function finishAdventureBattle(winner) {
                 if (allVisited) adventureState.lastResult = 'Победа!';
             } catch {}
             adventureState.lastResult = `Победа!`;
-            try { if (window.AdventureTime && typeof window.AdventureTime.addDays === 'function') window.AdventureTime.addDays(1); } catch {}
         } else {
             adventureState.lastResult = 'Поражение';
         }

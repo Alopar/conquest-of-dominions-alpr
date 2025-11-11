@@ -77,16 +77,30 @@
             prev = next;
         }
 
-        // Расстановка типов/тиров: по спецификации столбцов 1..contentDepth
+        const terrainMap = {
+            'town': { emoji: '🏰', days: 1 },
+            'plain': { emoji: '🌾', days: 1 },
+            'forest': { emoji: '🌲', days: 2 },
+            'mountains': { emoji: '🗻', days: 3 }
+        };
+
         function rollType(m){
             const entries = Object.keys(m||{}).map(k => ({ k, w: Number(m[k]||0) }));
             const chosen = pickWeighted(entries, e => e.w);
             return (chosen && chosen.k) || 'battle';
         }
+
+        function rollTerrainType(m){
+            const entries = Object.keys(m||{}).map(k => ({ k, w: Number(m[k]||0) }));
+            const chosen = pickWeighted(entries, e => e.w);
+            return (chosen && chosen.k) || 'plain';
+        }
+
         for (let d=1; d<=lastIndex; d++){
             const spec = columns[d]._spec || {};
             const isLast = (d === lastIndex);
             const mixRow = isLast ? { boss: 1 } : (spec.types || { battle: 1 });
+            const terrainMix = spec.terrain || { town: 0.25, plain: 0.25, forest: 0.25, mountains: 0.25 };
             const tier = spec.tier;
             for (const n of columns[d]){
                 n.type = rollType(mixRow);
@@ -95,13 +109,20 @@
                 if (n.type === 'elite') n.class = 'elite';
                 else if (n.type === 'battle') n.class = 'normal';
                 else if (n.type === 'boss') { n.class = 'boss'; }
+                
+                if (!isLast) {
+                    const terrainType = rollTerrainType(terrainMix);
+                    n.terrainType = terrainType;
+                    const terrainInfo = terrainMap[terrainType] || terrainMap['plain'];
+                    n.terrainEmoji = terrainInfo.emoji;
+                    n.travelDays = terrainInfo.days;
+                }
             }
         }
         // последний столбец уже размечен как boss
 
         const startId = columns[0][0].id;
         const nodeContents = {};
-        const terrainEmojis = ['🌳', '🌵', '🌾', '🌲', '🗻', '🛕', '🕍', '🏰'];
         for (const nodeId in nodes) {
             const node = nodes[nodeId];
             if (node.type === 'start') {
@@ -112,7 +133,11 @@
                 const typesMix = node.typesMix || { boss: 1 };
                 nodeContents[nodeId] = populateNodeContent(node, tier, typesMix);
             } else {
-                node.terrainEmoji = terrainEmojis[Math.floor(Math.random() * terrainEmojis.length)];
+                if (!node.terrainEmoji) {
+                    node.terrainEmoji = terrainMap['plain'].emoji;
+                    node.terrainType = 'plain';
+                    node.travelDays = terrainMap['plain'].days;
+                }
                 const tier = node.tier || 1;
                 const typesMix = node.typesMix || { battle: 1 };
                 nodeContents[nodeId] = populateNodeContent(node, tier, typesMix);
