@@ -1,4 +1,12 @@
-const ADVENTURE_MOVE_DURATION_MS = 5000;
+function getAdventureMoveDurationMs() {
+    try {
+        const settings = (window.GameSettings && typeof window.GameSettings.get === 'function') ? window.GameSettings.get() : null;
+        const seconds = settings && typeof settings.adventureMoveDuration === 'number' ? settings.adventureMoveDuration : 5;
+        return Math.max(100, seconds * 1000);
+    } catch {
+        return 5000;
+    }
+}
 
 function renderModsDebug() {
     const host = document.getElementById('mods-debug-table');
@@ -1173,8 +1181,9 @@ function movePlayerMarker(from, to, durationMs){
         const el = document.getElementById('adv-player');
         if (!el) { resolve(); return; }
         const start = performance.now();
+        const duration = durationMs || getAdventureMoveDurationMs();
         function tick(t){
-            const k = Math.min(1, (t - start) / Math.max(1, durationMs||ADVENTURE_MOVE_DURATION_MS));
+            const k = Math.min(1, (t - start) / Math.max(1, duration));
             const x = from.x + (to.x - from.x) * k;
             const y = from.y + (to.y - from.y) * k;
             el.setAttribute('transform', `translate(${x},${y})`);
@@ -1195,7 +1204,7 @@ async function movePlayerToNode(nodeId){
     adventureState.movingToNodeId = nodeId;
     persistAdventure();
     setAdventureInputBlock(true);
-    await movePlayerMarker(from, to, ADVENTURE_MOVE_DURATION_MS);
+    await movePlayerMarker(from, to, getAdventureMoveDurationMs());
     setAdventureInputBlock(false);
     
     const map = adventureState.map;
