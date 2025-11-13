@@ -1082,9 +1082,7 @@ async function showNodePreviewModal(nodeId) {
                     icon.textContent = ev.icon || '✨';
                 } else if (item.type === 'encounter') {
                     const enc = item.data;
-                    if (enc.class === 'boss') icon.textContent = '👑';
-                    else if (enc.class === 'elite') icon.textContent = '💀';
-                    else icon.textContent = '😡';
+                    icon.textContent = enc.icon || (enc.class === 'boss' ? '👑' : enc.class === 'elite' ? '💀' : '😡');
                 } else if (item.type === 'raid') {
                     const raid = item.data;
                     icon.textContent = raid.icon || '⚔️';
@@ -1105,6 +1103,8 @@ async function showNodePreviewModal(nodeId) {
                     name.textContent = item.data.name || item.data.id || 'Событие';
                 } else if (item.type === 'raid') {
                     name.textContent = item.data.name || item.data.id || 'Рейд';
+                } else if (item.type === 'encounter') {
+                    name.textContent = item.data.name || item.data.id || 'Энкаунтер';
                 } else {
                     name.textContent = item.data.id || 'Энкаунтер';
                 }
@@ -1258,9 +1258,7 @@ function renderNodeContentItems() {
                 iconEl.textContent = ev.icon || '✨';
             } else if (item.type === 'encounter') {
                 const enc = item.data;
-                if (enc.class === 'boss') iconEl.textContent = '👑';
-                else if (enc.class === 'elite') iconEl.textContent = '💀';
-                else iconEl.textContent = '😡';
+                iconEl.textContent = enc.icon || (enc.class === 'boss' ? '👑' : enc.class === 'elite' ? '💀' : '😡');
             } else if (item.type === 'raid') {
                 const raid = item.data;
                 iconEl.textContent = raid.icon || '⚔️';
@@ -1282,30 +1280,115 @@ async function showContentItemModal(item, index) {
         body.style.padding = '8px';
         if (item.type === 'encounter') {
             const enc = item.data;
-            const title = document.createElement('div');
-            title.style.fontSize = '1.1em';
-            title.style.fontWeight = 'bold';
-            title.style.marginBottom = '12px';
-            title.style.textAlign = 'center';
-            title.textContent = 'Энкаунтер: ' + (enc.id || 'Бой');
-            body.appendChild(title);
+            const iconBlock = document.createElement('div');
+            iconBlock.style.textAlign = 'center';
+            iconBlock.style.marginBottom = '16px';
+            iconBlock.style.padding = '12px';
+            iconBlock.style.background = '#1a1a1a';
+            iconBlock.style.border = '1px solid #654321';
+            iconBlock.style.borderRadius = '8px';
+            iconBlock.style.boxShadow = '0 4px 10px rgba(0,0,0,0.4)';
+            const iconEl = document.createElement('div');
+            iconEl.style.fontSize = '3em';
+            iconEl.textContent = enc.icon || (enc.class === 'boss' ? '👑' : enc.class === 'elite' ? '💀' : '😡');
+            iconBlock.appendChild(iconEl);
+            const nameEl = document.createElement('div');
+            nameEl.style.fontSize = '1.2em';
+            nameEl.style.fontWeight = '600';
+            nameEl.style.color = '#cd853f';
+            nameEl.style.marginTop = '8px';
+            nameEl.textContent = enc.name || enc.id || 'Энкаунтер';
+            iconBlock.appendChild(nameEl);
+            body.appendChild(iconBlock);
+            (function(){ const sep = document.createElement('div'); sep.style.height = '1px'; sep.style.background = '#444'; sep.style.opacity = '0.6'; sep.style.margin = '8px 0'; body.appendChild(sep); })();
             if (enc.monsters && Array.isArray(enc.monsters)) {
-                const monstersList = document.createElement('div');
-                monstersList.style.display = 'flex';
-                monstersList.style.flexDirection = 'column';
-                monstersList.style.gap = '6px';
-                monstersList.style.marginTop = '8px';
-                enc.monsters.forEach(function(m) {
-                    const row = document.createElement('div');
-                    row.style.display = 'flex';
-                    row.style.alignItems = 'center';
-                    row.style.gap = '8px';
-                    const name = document.createElement('span');
-                    name.textContent = (m.id || 'Монстр') + ': ' + (m.amount || '?');
-                    row.appendChild(name);
-                    monstersList.appendChild(row);
+                const enemiesTitle = document.createElement('div');
+                enemiesTitle.style.margin = '6px 0';
+                enemiesTitle.style.color = '#cd853f';
+                enemiesTitle.style.textAlign = 'center';
+                enemiesTitle.textContent = 'Возможные противники';
+                body.appendChild(enemiesTitle);
+                const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
+                const enemiesWrapTpl = document.getElementById('tpl-rewards-list');
+                const enemiesWrap = enemiesWrapTpl ? enemiesWrapTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                const enemiesItems = enemiesWrap.querySelector('[data-role="items"]') || enemiesWrap;
+                const uniqEnemyIds = Array.from(new Set((enc.monsters || []).map(function(g){ return g && g.id; }).filter(Boolean)));
+                uniqEnemyIds.forEach(function(id){
+                    const itemTpl = document.getElementById('tpl-reward-unit');
+                    const el = itemTpl ? itemTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                    if (!itemTpl) el.className = 'reward-item';
+                    el.classList.add('clickable');
+                    const m = monsters[id] || { name: id, view: '👤' };
+                    const monsterData = enc.monsters.find(function(mon){ return mon && mon.id === id; });
+                    const amountText = monsterData && monsterData.amount ? monsterData.amount : '?';
+                    const iconEl = el.querySelector('.reward-icon') || el;
+                    const nameEl = el.querySelector('.reward-name');
+                    if (iconEl) iconEl.textContent = m.view || '👤';
+                    if (nameEl) nameEl.textContent = `${m.name || id} (${amountText})`;
+                    el.addEventListener('click', function(e){ try { e.stopPropagation(); } catch {} showUnitInfoModal(id); });
+                    enemiesItems.appendChild(el);
                 });
-                body.appendChild(monstersList);
+                body.appendChild(enemiesWrap);
+                (function(){ const sep = document.createElement('div'); sep.style.height = '1px'; sep.style.background = '#444'; sep.style.opacity = '0.6'; sep.style.margin = '10px 0 8px 0'; body.appendChild(sep); })();
+            }
+            const rewardsTitle = document.createElement('div');
+            rewardsTitle.style.margin = '10px 0 6px 0';
+            rewardsTitle.style.color = '#cd853f';
+            rewardsTitle.style.textAlign = 'center';
+            rewardsTitle.textContent = 'Возможные награды';
+            body.appendChild(rewardsTitle);
+            let rewards = [];
+            if (enc.rewardId) {
+                const rewardsCfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('rewards') : null;
+                const rewardsTables = rewardsCfg && Array.isArray(rewardsCfg.tables) ? rewardsCfg.tables : [];
+                const rewardTable = rewardsTables.find(function(t){ return t && t.id === enc.rewardId; });
+                if (rewardTable && Array.isArray(rewardTable.rewards)) {
+                    rewards = rewardTable.rewards;
+                }
+            } else if (Array.isArray(enc.rewards)) {
+                rewards = enc.rewards;
+            }
+            if (rewards.length > 0) {
+                const curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
+                const curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
+                const curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
+                const monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ const m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
+                const rewardsWrapTpl = document.getElementById('tpl-rewards-list');
+                const rewardsWrap = rewardsWrapTpl ? rewardsWrapTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                const rewardsItems = rewardsWrap.querySelector('[data-role="items"]') || rewardsWrap;
+                rewards.forEach(function(r){
+                    if (r && r.type === 'currency') {
+                        const tplItem = document.getElementById('tpl-reward-currency');
+                        const el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                        if (!tplItem) el.className = 'reward-item';
+                        const cd = curById[r.id] || { name: r.id, icon: '💠' };
+                        const iconEl = el.querySelector('.reward-icon') || el;
+                        const nameEl = el.querySelector('.reward-name');
+                        if (iconEl) iconEl.textContent = cd.icon || '💠';
+                        if (nameEl) nameEl.textContent = cd.name || r.id;
+                        rewardsItems.appendChild(el);
+                    } else if (r && (r.type === 'monster' || r.type === 'unit')) {
+                        const tplItem = document.getElementById('tpl-reward-unit');
+                        const el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
+                        if (!tplItem) el.className = 'reward-item';
+                        el.classList.add('clickable');
+                        const m = monsters[r.id] || { name: r.id, view: '👤' };
+                        const iconEl = el.querySelector('.reward-icon') || el;
+                        const nameEl = el.querySelector('.reward-name');
+                        if (iconEl) iconEl.textContent = m.view || '👤';
+                        if (nameEl) nameEl.textContent = m.name || r.id;
+                        el.addEventListener('click', function(e){ try { e.stopPropagation(); } catch {} showUnitInfoModal(r.id); });
+                        rewardsItems.appendChild(el);
+                    }
+                });
+                body.appendChild(rewardsWrap);
+            } else {
+                const noRewards = document.createElement('div');
+                noRewards.style.textAlign = 'center';
+                noRewards.style.color = '#888';
+                noRewards.style.padding = '8px';
+                noRewards.textContent = 'Награды не указаны';
+                body.appendChild(noRewards);
             }
         } else if (item.type === 'event') {
             const ev = item.data;
