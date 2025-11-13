@@ -192,6 +192,20 @@
         } catch { return null; }
     }
 
+    function pickRaidFor(tier){
+        try {
+            const cfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('raids') : null;
+            const list = (cfg && Array.isArray(cfg.raids)) ? cfg.raids : [];
+            const t = Number(tier || 1);
+            if (isNaN(t)) return null;
+            const pool = list.filter(function(r){
+                return Number(r && r.tier) === t;
+            });
+            if (pool.length === 0) return null;
+            return pickWeighted(pool, r => Number(r.weight||1));
+        } catch { return null; }
+    }
+
     function populateNodeContent(node, tier, typesMix){
         if (!node || node.type === 'start') return [];
         const count = Math.floor(Math.random() * 5) + 1;
@@ -235,6 +249,12 @@
                 if (encounter && !usedIds.has('encounter_' + encounter.id)) {
                     item = { type: 'encounter', id: encounter.id, data: encounter };
                     usedIds.add('encounter_' + encounter.id);
+                }
+            } else if (contentType === 'raid') {
+                const raid = pickRaidFor(nodeTier);
+                if (raid && !usedIds.has('raid_' + raid.id)) {
+                    item = { type: 'raid', id: raid.id, data: raid };
+                    usedIds.add('raid_' + raid.id);
                 }
             }
             
@@ -365,7 +385,7 @@
         return svg;
     }
 
-    window.AdventureGraph = { generateAdventureMap, getNeighbors, isNodeAvailable, pickEncounterFor, pickEventFor, populateNodeContent, renderSvgGraph };
+    window.AdventureGraph = { generateAdventureMap, getNeighbors, isNodeAvailable, pickEncounterFor, pickEventFor, pickRaidFor, populateNodeContent, renderSvgGraph };
 })();
 
 
