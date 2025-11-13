@@ -417,6 +417,9 @@ function renderAdventure() {
     ensureAdventureTabs();
     try { const tabs = document.getElementById('adventure-tabs'); if (tabs) updateTabsActive(tabs); } catch {}
     renderAdventureSubscreen();
+    if ((window.AppState && window.AppState.subscreen) === 'map' || !window.AppState || !window.AppState.subscreen) {
+        setTimeout(function(){ renderThreatLevelIndicator(); }, 100);
+    }
 }
 
 function ensureAdventureTabs() {
@@ -515,6 +518,7 @@ async function renderAdventureSubscreen() {
         renderPool();
     } else if (subscreen === 'map') {
         renderMapBoard();
+        setTimeout(function(){ renderThreatLevelIndicator(); }, 50);
     } else if (subscreen === 'tavern') {
         renderTavern();
     } else if (subscreen === 'hero') {
@@ -913,6 +917,10 @@ function renderMapBoard() {
             const idx = Number(adventureState.currentStageIndex || 0);
             const secNum = (function(){ const s = adventureState && adventureState.config && adventureState.config.sectors; return (Array.isArray(s) && s[idx] && s[idx].number) || (idx+1); })();
             sectorEl.textContent = total > 0 ? ('Сектор: ' + secNum + '/' + total + '🌍') : '';
+            sectorEl.style.color = '#cd853f';
+            sectorEl.style.fontSize = '1.05em';
+            sectorEl.style.fontWeight = '600';
+            sectorEl.style.textShadow = '1px 1px 3px rgba(0,0,0,0.7)';
         }
     } catch {}
     // Ленивая генерация карты сектора, если её нет
@@ -1029,18 +1037,34 @@ function renderMapBoard() {
 
 function renderThreatLevelIndicator(){
     const container = document.getElementById('adventure-threat-indicator');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    if (!adventureState.sectorStartDay || !adventureState.map) {
+    if (!container) {
+        if (console && console.log) console.log('[Threat] Container not found');
         return;
+    }
+    container.innerHTML = '';
+    container.style.position = 'relative';
+    container.style.zIndex = '0';
+    
+    if (!adventureState.map) {
+        if (console && console.log) console.log('[Threat] Map not found');
+        return;
+    }
+    
+    if (!adventureState.sectorStartDay) {
+        const currentDay = (window.AdventureTime && typeof window.AdventureTime.getCurrentDay === 'function') ? window.AdventureTime.getCurrentDay() : 1;
+        adventureState.sectorStartDay = currentDay;
+        adventureState.sectorThreatLevel = getCurrentThreatLevel();
+        persistAdventure();
     }
     
     const currentDay = (window.AdventureTime && typeof window.AdventureTime.getCurrentDay === 'function') ? window.AdventureTime.getCurrentDay() : 1;
     const daysInSector = currentDay - adventureState.sectorStartDay;
     const sectorNumber = getSectorNumberByIndex(adventureState.currentStageIndex || 0);
     const scheme = getPathSchemeForSector(sectorNumber);
-    if (!scheme) return;
+    if (!scheme) {
+        if (console && console.log) console.log('[Threat] Scheme not found for sector', sectorNumber);
+        return;
+    }
     
     const pathLength = calculatePathLength(adventureState.map);
     const thresholds = calculateThreatThresholds(pathLength, scheme);
@@ -1049,27 +1073,73 @@ function renderThreatLevelIndicator(){
     const wrapper = document.createElement('div');
     wrapper.style.display = 'flex';
     wrapper.style.alignItems = 'center';
-    wrapper.style.gap = '8px';
-    wrapper.style.fontSize = '0.9em';
+    wrapper.style.gap = '6px';
+    wrapper.style.flex = '1';
+    wrapper.style.cursor = 'pointer';
+    wrapper.style.position = 'relative';
+    wrapper.addEventListener('click', function(){ showThreatDetailsModal(daysInSector, threatLevel, thresholds, pathLength, scheme); });
     
     const label = document.createElement('span');
     label.textContent = 'Угроза:';
     label.style.color = '#cd853f';
+    label.style.fontSize = '1.05em';
+    label.style.fontWeight = '600';
+    label.style.textShadow = '1px 1px 3px rgba(0,0,0,0.7)';
+    label.style.minWidth = '70px';
     wrapper.appendChild(label);
     
-    const barContainer = document.createElement('div');
-    barContainer.style.display = 'flex';
-    barContainer.style.alignItems = 'center';
-    barContainer.style.gap = '2px';
-    barContainer.style.width = '200px';
-    barContainer.style.height = '20px';
-    barContainer.style.background = '#1a1a1a';
-    barContainer.style.border = '1px solid #654321';
-    barContainer.style.borderRadius = '4px';
-    barContainer.style.position = 'relative';
-    barContainer.style.overflow = 'hidden';
+    const barWrapper = document.createElement('div');
+    barWrapper.style.flex = '1';
+    barWrapper.style.position = 'relative';
+    barWrapper.style.height = '32px';
+    barWrapper.style.minWidth = '200px';
+    barWrapper.style.border = '2px solid #8b7355';
+    barWrapper.style.borderRadius = '6px';
+    barWrapper.style.boxShadow = 'inset 0 2px 8px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)';
+    barWrapper.style.overflow = 'hidden';
     
     const maxDays = thresholds[2];
+    const threshold0Percent = (thresholds[0] / maxDays) * 100;
+    const threshold1Percent = (thresholds[1] / maxDays) * 100;
+    
+    const baseBg = document.createElement('div');
+    baseBg.style.position = 'absolute';
+    baseBg.style.left = '0';
+    baseBg.style.top = '0';
+    baseBg.style.width = '100%';
+    baseBg.style.height = '100%';
+    baseBg.style.background = 'linear-gradient(135deg, #1a0f08 0%, #2d1a0b 50%, #1a0f08 100%)';
+    barWrapper.appendChild(baseBg);
+    
+    const zone1 = document.createElement('div');
+    zone1.style.position = 'absolute';
+    zone1.style.left = '0';
+    zone1.style.top = '0';
+    zone1.style.width = threshold0Percent + '%';
+    zone1.style.height = '100%';
+    zone1.style.background = 'linear-gradient(135deg, rgba(74,124,89,0.25) 0%, rgba(90,156,105,0.2) 50%, rgba(74,124,89,0.25) 100%)';
+    zone1.style.borderRight = '2px solid rgba(192,192,192,0.5)';
+    barWrapper.appendChild(zone1);
+    
+    const zone2 = document.createElement('div');
+    zone2.style.position = 'absolute';
+    zone2.style.left = threshold0Percent + '%';
+    zone2.style.top = '0';
+    zone2.style.width = (threshold1Percent - threshold0Percent) + '%';
+    zone2.style.height = '100%';
+    zone2.style.background = 'linear-gradient(135deg, rgba(184,134,11,0.25) 0%, rgba(218,165,32,0.2) 50%, rgba(184,134,11,0.25) 100%)';
+    zone2.style.borderRight = '2px solid rgba(212,175,55,0.6)';
+    barWrapper.appendChild(zone2);
+    
+    const zone3 = document.createElement('div');
+    zone3.style.position = 'absolute';
+    zone3.style.left = threshold1Percent + '%';
+    zone3.style.top = '0';
+    zone3.style.width = (100 - threshold1Percent) + '%';
+    zone3.style.height = '100%';
+    zone3.style.background = 'linear-gradient(135deg, rgba(139,0,0,0.25) 0%, rgba(165,42,42,0.2) 50%, rgba(139,0,0,0.25) 100%)';
+    barWrapper.appendChild(zone3);
+    
     const fillPercent = Math.min(100, (daysInSector / maxDays) * 100);
     
     const fillBar = document.createElement('div');
@@ -1078,53 +1148,241 @@ function renderThreatLevelIndicator(){
     fillBar.style.top = '0';
     fillBar.style.height = '100%';
     fillBar.style.width = fillPercent + '%';
-    fillBar.style.transition = 'width 0.3s ease';
+    fillBar.style.transition = 'width 0.5s ease, background 0.3s ease';
     
     if (threatLevel === 0) {
-        fillBar.style.background = '#4a4';
+        fillBar.style.background = 'linear-gradient(90deg, #4a7c59 0%, #5a9c69 50%, #4a7c59 100%)';
+        fillBar.style.boxShadow = 'inset 0 1px 3px rgba(255,255,255,0.2), 0 0 8px rgba(74,124,89,0.4)';
     } else if (threatLevel === 1) {
-        fillBar.style.background = '#fa4';
+        fillBar.style.background = 'linear-gradient(90deg, #b8860b 0%, #daa520 50%, #b8860b 100%)';
+        fillBar.style.boxShadow = 'inset 0 1px 3px rgba(255,255,255,0.25), 0 0 10px rgba(218,165,32,0.5)';
     } else {
-        fillBar.style.background = '#a44';
+        fillBar.style.background = 'linear-gradient(90deg, #8b0000 0%, #a52a2a 50%, #8b0000 100%)';
+        fillBar.style.boxShadow = 'inset 0 1px 3px rgba(255,200,200,0.2), 0 0 12px rgba(165,42,42,0.6)';
     }
     
-    barContainer.appendChild(fillBar);
+    barWrapper.appendChild(fillBar);
     
-    const segment1 = document.createElement('div');
-    segment1.style.position = 'absolute';
-    segment1.style.left = (thresholds[0] / maxDays * 100) + '%';
-    segment1.style.top = '0';
-    segment1.style.width = '2px';
-    segment1.style.height = '100%';
-    segment1.style.background = '#888';
-    barContainer.appendChild(segment1);
+    const cellCount = maxDays;
+    const cellWidth = 100 / cellCount;
     
-    const segment2 = document.createElement('div');
-    segment2.style.position = 'absolute';
-    segment2.style.left = (thresholds[1] / maxDays * 100) + '%';
-    segment2.style.top = '0';
-    segment2.style.width = '2px';
-    segment2.style.height = '100%';
-    segment2.style.background = '#888';
-    barContainer.appendChild(segment2);
+    for (let i = 0; i <= cellCount; i++) {
+        const tick = document.createElement('div');
+        tick.style.position = 'absolute';
+        tick.style.left = (i * cellWidth) + '%';
+        tick.style.top = '0';
+        tick.style.width = '1px';
+        tick.style.height = '100%';
+        tick.style.background = i % 5 === 0 ? 'rgba(205,133,63,0.5)' : 'rgba(139,115,85,0.2)';
+        barWrapper.appendChild(tick);
+    }
     
-    wrapper.appendChild(barContainer);
+    wrapper.appendChild(barWrapper);
     
-    const levelNames = ['Нет угрозы', 'Умеренная угроза', 'Серьезная угроза'];
-    const levelLabel = document.createElement('span');
-    levelLabel.textContent = levelNames[threatLevel] || '';
-    levelLabel.style.color = threatLevel === 0 ? '#4a4' : (threatLevel === 1 ? '#fa4' : '#a44');
-    levelLabel.style.fontWeight = '600';
-    levelLabel.style.minWidth = '120px';
-    wrapper.appendChild(levelLabel);
+    const threshold1 = document.createElement('div');
+    threshold1.style.position = 'absolute';
+    threshold1.style.left = threshold0Percent + '%';
+    threshold1.style.top = '0';
+    threshold1.style.width = '3px';
+    threshold1.style.height = '100%';
+    threshold1.style.background = 'linear-gradient(to bottom, transparent, #c0c0c0, transparent)';
+    threshold1.style.boxShadow = '0 0 4px rgba(192,192,192,0.6)';
+    barWrapper.appendChild(threshold1);
     
-    const daysLabel = document.createElement('span');
-    daysLabel.textContent = `(${daysInSector} дн.)`;
-    daysLabel.style.color = '#888';
-    daysLabel.style.fontSize = '0.85em';
-    wrapper.appendChild(daysLabel);
+    const threshold2 = document.createElement('div');
+    threshold2.style.position = 'absolute';
+    threshold2.style.left = threshold1Percent + '%';
+    threshold2.style.top = '0';
+    threshold2.style.width = '3px';
+    threshold2.style.height = '100%';
+    threshold2.style.background = 'linear-gradient(to bottom, transparent, #d4af37, transparent)';
+    threshold2.style.boxShadow = '0 0 6px rgba(212,175,55,0.7)';
+    barWrapper.appendChild(threshold2);
+    
+    const indicator = document.createElement('div');
+    indicator.style.position = 'absolute';
+    indicator.style.left = fillPercent + '%';
+    indicator.style.top = '0';
+    indicator.style.width = '10px';
+    indicator.style.height = '100%';
+    indicator.style.background = 'linear-gradient(to bottom, #d4af37 0%, #b8860b 50%, #8b7355 100%)';
+    indicator.style.border = '2px solid #654321';
+    indicator.style.borderLeft = '3px solid #d4af37';
+    indicator.style.borderRight = '3px solid #d4af37';
+    indicator.style.borderRadius = '2px';
+    indicator.style.boxShadow = '0 2px 8px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.3), 0 0 8px rgba(212,175,55,0.6)';
+    indicator.style.transform = 'translateX(-50%)';
+    indicator.style.transition = 'left 0.5s ease';
+    indicator.style.pointerEvents = 'none';
+    barWrapper.appendChild(indicator);
+    
+    wrapper.appendChild(barWrapper);
+    
+    const threatIcons = ['🛡️', '⚔️', '💀'];
+    const iconEl = document.createElement('span');
+    iconEl.textContent = threatIcons[threatLevel] || '🛡️';
+    iconEl.style.fontSize = '1.3em';
+    iconEl.style.transition = 'transform 0.3s ease';
+    wrapper.appendChild(iconEl);
+    
+    wrapper.addEventListener('mouseenter', function(){
+        wrapper.style.opacity = '0.9';
+        iconEl.style.transform = 'scale(1.1)';
+    });
+    wrapper.addEventListener('mouseleave', function(){
+        wrapper.style.opacity = '1';
+        iconEl.style.transform = 'scale(1)';
+    });
     
     container.appendChild(wrapper);
+}
+
+function showThreatDetailsModal(daysInSector, threatLevel, thresholds, pathLength, scheme){
+    try {
+        if (!window.UI || typeof window.UI.showModal !== 'function') return;
+        
+        const body = document.createElement('div');
+        body.style.padding = '12px';
+        body.style.minWidth = '400px';
+        
+        const titleSection = document.createElement('div');
+        titleSection.style.textAlign = 'center';
+        titleSection.style.marginBottom = '16px';
+        titleSection.style.padding = '12px';
+        titleSection.style.background = 'linear-gradient(135deg, #2d1a0b 0%, #1a0f08 100%)';
+        titleSection.style.border = '2px solid #8b7355';
+        titleSection.style.borderRadius = '8px';
+        titleSection.style.boxShadow = 'inset 0 2px 6px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.4)';
+        
+        const threatIcons = ['🛡️', '⚔️', '💀'];
+        const levelNames = ['Нет угрозы', 'Умеренная угроза', 'Серьезная угроза'];
+        
+        const iconEl = document.createElement('div');
+        iconEl.textContent = threatIcons[threatLevel] || '🛡️';
+        iconEl.style.fontSize = '3em';
+        iconEl.style.marginBottom = '8px';
+        titleSection.appendChild(iconEl);
+        
+        const titleText = document.createElement('div');
+        titleText.textContent = levelNames[threatLevel] || '';
+        titleText.style.fontSize = '1.4em';
+        titleText.style.fontWeight = '600';
+        titleText.style.color = '#cd853f';
+        titleText.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+        titleSection.appendChild(titleText);
+        
+        body.appendChild(titleSection);
+        
+        const separator = document.createElement('div');
+        separator.style.height = '2px';
+        separator.style.margin = '16px 0';
+        separator.style.background = 'linear-gradient(to right, transparent, #8b7355, transparent)';
+        body.appendChild(separator);
+        
+        const infoSection = document.createElement('div');
+        infoSection.style.display = 'flex';
+        infoSection.style.flexDirection = 'column';
+        infoSection.style.gap = '12px';
+        
+        const daysRow = document.createElement('div');
+        daysRow.style.display = 'flex';
+        daysRow.style.justifyContent = 'space-between';
+        daysRow.style.padding = '8px';
+        daysRow.style.background = 'rgba(26,15,8,0.6)';
+        daysRow.style.borderRadius = '6px';
+        daysRow.style.border = '1px solid #654321';
+        
+        const daysLabel = document.createElement('span');
+        daysLabel.textContent = 'Дней в секторе:';
+        daysLabel.style.color = '#cd853f';
+        daysLabel.style.fontWeight = '600';
+        daysRow.appendChild(daysLabel);
+        
+        const daysValue = document.createElement('span');
+        daysValue.textContent = daysInSector;
+        daysValue.style.color = '#cd853f';
+        daysValue.style.fontWeight = '600';
+        daysRow.appendChild(daysValue);
+        
+        infoSection.appendChild(daysRow);
+        
+        const thresholdsRow = document.createElement('div');
+        thresholdsRow.style.display = 'flex';
+        thresholdsRow.style.flexDirection = 'column';
+        thresholdsRow.style.gap = '6px';
+        thresholdsRow.style.padding = '8px';
+        thresholdsRow.style.background = 'rgba(26,15,8,0.6)';
+        thresholdsRow.style.borderRadius = '6px';
+        thresholdsRow.style.border = '1px solid #654321';
+        
+        const thresholdsTitle = document.createElement('div');
+        thresholdsTitle.textContent = 'Пороги угрозы:';
+        thresholdsTitle.style.color = '#cd853f';
+        thresholdsTitle.style.fontWeight = '600';
+        thresholdsTitle.style.marginBottom = '4px';
+        thresholdsRow.appendChild(thresholdsTitle);
+        
+        const thresholdLabels = ['Нет угрозы', 'Умеренная угроза', 'Серьезная угроза'];
+        thresholds.forEach(function(threshold, index){
+            const thresholdItem = document.createElement('div');
+            thresholdItem.style.display = 'flex';
+            thresholdItem.style.justifyContent = 'space-between';
+            thresholdItem.style.fontSize = '0.95em';
+            
+            const label = document.createElement('span');
+            label.textContent = thresholdLabels[index] + ':';
+            label.style.color = '#cd853f';
+            thresholdItem.appendChild(label);
+            
+            const value = document.createElement('span');
+            value.textContent = threshold + ' дн.';
+            value.style.color = '#cd853f';
+            value.style.fontWeight = '600';
+            thresholdItem.appendChild(value);
+            
+            thresholdsRow.appendChild(thresholdItem);
+        });
+        
+        infoSection.appendChild(thresholdsRow);
+        
+        const multiplierRow = document.createElement('div');
+        multiplierRow.style.display = 'flex';
+        multiplierRow.style.flexDirection = 'column';
+        multiplierRow.style.gap = '8px';
+        multiplierRow.style.padding = '12px';
+        multiplierRow.style.background = 'linear-gradient(135deg, rgba(139,0,0,0.3) 0%, rgba(26,15,8,0.6) 100%)';
+        multiplierRow.style.borderRadius = '6px';
+        multiplierRow.style.border = '2px solid #8b0000';
+        multiplierRow.style.boxShadow = 'inset 0 2px 6px rgba(0,0,0,0.5)';
+        
+        const multiplierTitle = document.createElement('div');
+        multiplierTitle.textContent = '⚔️ Влияние на босса сектора:';
+        multiplierTitle.style.color = '#cd853f';
+        multiplierTitle.style.fontWeight = '600';
+        multiplierTitle.style.fontSize = '1.1em';
+        multiplierTitle.style.marginBottom = '4px';
+        multiplierRow.appendChild(multiplierTitle);
+        
+        const levels = Array.isArray(scheme.threatLevels) ? scheme.threatLevels : [1.0, 1.5, 2.0];
+        const currentMultiplier = levels[threatLevel] || 1.0;
+        
+        const multiplierDesc = document.createElement('div');
+        multiplierDesc.style.color = '#cd853f';
+        multiplierDesc.style.fontSize = '1em';
+        multiplierDesc.style.lineHeight = '1.5';
+        if (threatLevel === 0) {
+            multiplierDesc.textContent = 'Модификатор не применяется. Босс сражается с базовой силой.';
+        } else {
+            multiplierDesc.innerHTML = `Количество юнитов босса умножено на <strong style="color:#cd853f; font-size:1.2em;">${currentMultiplier}x</strong>`;
+        }
+        multiplierRow.appendChild(multiplierDesc);
+        
+        infoSection.appendChild(multiplierRow);
+        
+        body.appendChild(infoSection);
+        
+        window.UI.showModal(body, { type: 'info', title: 'Уровень угрозы сектора' });
+    } catch {}
 }
 
 async function onGraphNodeClick(nodeId) {
@@ -1392,6 +1650,7 @@ async function movePlayerToNode(nodeId){
     } catch {}
     adventureState.movingToNodeId = undefined;
     persistAdventure();
+    renderThreatLevelIndicator();
     renderNodeContentItems();
 }
 
