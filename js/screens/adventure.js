@@ -40,7 +40,9 @@ let adventureState = {
     inBattle: false,
     lastResult: '',
     nodeContents: {},
-    currentNodeContent: []
+    currentNodeContent: [],
+    sectorStartDay: null,
+    sectorThreatLevel: 0
 };
 
 let adventureUserLoaded = false;
@@ -65,7 +67,7 @@ async function showAdventureSetup() {
     } catch {}
     // Полный сброс сохранения приключения при входе на экран подготовки
     try { localStorage.removeItem('adventureState'); } catch {}
-    adventureState = { config: null, currencies: {}, pool: {}, selectedClassId: null, currentStageIndex: 0, completedEncounterIds: [], inBattle: false, lastResult: '', nodeContents: {}, currentNodeContent: [] };
+    adventureState = { config: null, currencies: {}, pool: {}, selectedClassId: null, currentStageIndex: 0, completedEncounterIds: [], inBattle: false, lastResult: '', nodeContents: {}, currentNodeContent: [], sectorStartDay: null, sectorThreatLevel: 0 };
     window.adventureState = adventureState;
     restoreAdventure();
     if (adventureState.config) {
@@ -188,6 +190,8 @@ function initAdventureState(cfg) {
     adventureState.lastResult = '';
     adventureState.nodeContents = adventureState.nodeContents || {};
     adventureState.currentNodeContent = adventureState.currentNodeContent || [];
+    adventureState.sectorStartDay = adventureState.sectorStartDay || null;
+    adventureState.sectorThreatLevel = adventureState.sectorThreatLevel || 0;
     persistAdventure();
     window.adventureState = adventureState;
     try { if (window.AdventureTime && typeof window.AdventureTime.init === 'function') window.AdventureTime.init(); } catch {}
@@ -222,6 +226,50 @@ function getPathSchemeForSector(sectorNumber){
     } catch { return null; }
 }
 
+function calculatePathLength(map){
+    if (!map || !map.nodes) return 0;
+    const nodes = Object.values(map.nodes);
+    if (nodes.length === 0) return 0;
+    const maxX = Math.max(...nodes.map(function(n){ return n.x || 0; }));
+    return maxX;
+}
+
+function calculateThreatThresholds(pathLength, scheme){
+    const multipliers = Array.isArray(scheme && scheme.threatDayMultipliers) ? scheme.threatDayMultipliers : [1.0, 1.25, 1.5];
+    const additions = Array.isArray(scheme && scheme.threatDayAdditions) ? scheme.threatDayAdditions : [3, 5, 5];
+    return [
+        Math.floor(pathLength * multipliers[0] + additions[0]),
+        Math.floor(pathLength * multipliers[1] + additions[1]),
+        Math.floor(pathLength * multipliers[2] + additions[2])
+    ];
+}
+
+function getCurrentThreatLevel(){
+    if (!adventureState.sectorStartDay) return 0;
+    const currentDay = (window.AdventureTime && typeof window.AdventureTime.getCurrentDay === 'function') ? window.AdventureTime.getCurrentDay() : 1;
+    const daysInSector = currentDay - adventureState.sectorStartDay;
+    const sectorNumber = getSectorNumberByIndex(adventureState.currentStageIndex || 0);
+    const scheme = getPathSchemeForSector(sectorNumber);
+    if (!scheme) return 0;
+    const map = adventureState.map;
+    if (!map) return 0;
+    const pathLength = calculatePathLength(map);
+    const thresholds = calculateThreatThresholds(pathLength, scheme);
+    if (daysInSector <= thresholds[0]) return 0;
+    if (daysInSector <= thresholds[1]) return 1;
+    if (daysInSector <= thresholds[2]) return 2;
+    return 2;
+}
+
+function getThreatMultiplier(){
+    const sectorNumber = getSectorNumberByIndex(adventureState.currentStageIndex || 0);
+    const scheme = getPathSchemeForSector(sectorNumber);
+    if (!scheme) return 1.0;
+    const levels = Array.isArray(scheme.threatLevels) ? scheme.threatLevels : [1.0, 1.5, 2.0];
+    const threatLevel = getCurrentThreatLevel();
+    return levels[threatLevel] || 1.0;
+}
+
 function ensureSectorSeeds(count){
     adventureState.sectorSeeds = Array.isArray(adventureState.sectorSeeds) ? adventureState.sectorSeeds : [];
     for (let i = adventureState.sectorSeeds.length; i < count; i++) adventureState.sectorSeeds[i] = Date.now() + i * 7919;
@@ -250,6 +298,9 @@ function generateSectorMap(index){
         adventureState.nodeContents = {};
     }
     adventureState.currentNodeContent = [];
+    const currentDay = (window.AdventureTime && typeof window.AdventureTime.getCurrentDay === 'function') ? window.AdventureTime.getCurrentDay() : 1;
+    adventureState.sectorStartDay = currentDay;
+    adventureState.sectorThreatLevel = 0;
     try {
         if (window.Raids && typeof window.Raids.clearNonStarted === 'function') window.Raids.clearNonStarted();
     } catch {}
@@ -873,6 +924,12 @@ function renderMapBoard() {
             generateSectorMap(adventureState.currentStageIndex || 0);
         } catch {}
     }
+    if (adventureState.map && !adventureState.sectorStartDay) {
+        const currentDay = (window.AdventureTime && typeof window.AdventureTime.getCurrentDay === 'function') ? window.AdventureTime.getCurrentDay() : 1;
+        adventureState.sectorStartDay = currentDay;
+        adventureState.sectorThreatLevel = getCurrentThreatLevel();
+        persistAdventure();
+    }
     const map = adventureState.map;
     if (!map || !map.nodes) { board.innerHTML = '<div>Карта недоступна</div>'; return; }
     const svg = (window.AdventureGraph && window.AdventureGraph.renderSvgGraph) ? window.AdventureGraph.renderSvgGraph(board, map, { colW:160, colH:120, padX:120, padY:120 }) : null;
@@ -966,7 +1023,108 @@ function renderMapBoard() {
             }, 0);
         }
     } catch {}
+    renderThreatLevelIndicator();
     renderNodeContentItems();
+}
+
+function renderThreatLevelIndicator(){
+    const container = document.getElementById('adventure-threat-indicator');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (!adventureState.sectorStartDay || !adventureState.map) {
+        return;
+    }
+    
+    const currentDay = (window.AdventureTime && typeof window.AdventureTime.getCurrentDay === 'function') ? window.AdventureTime.getCurrentDay() : 1;
+    const daysInSector = currentDay - adventureState.sectorStartDay;
+    const sectorNumber = getSectorNumberByIndex(adventureState.currentStageIndex || 0);
+    const scheme = getPathSchemeForSector(sectorNumber);
+    if (!scheme) return;
+    
+    const pathLength = calculatePathLength(adventureState.map);
+    const thresholds = calculateThreatThresholds(pathLength, scheme);
+    const threatLevel = getCurrentThreatLevel();
+    
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center';
+    wrapper.style.gap = '8px';
+    wrapper.style.fontSize = '0.9em';
+    
+    const label = document.createElement('span');
+    label.textContent = 'Угроза:';
+    label.style.color = '#cd853f';
+    wrapper.appendChild(label);
+    
+    const barContainer = document.createElement('div');
+    barContainer.style.display = 'flex';
+    barContainer.style.alignItems = 'center';
+    barContainer.style.gap = '2px';
+    barContainer.style.width = '200px';
+    barContainer.style.height = '20px';
+    barContainer.style.background = '#1a1a1a';
+    barContainer.style.border = '1px solid #654321';
+    barContainer.style.borderRadius = '4px';
+    barContainer.style.position = 'relative';
+    barContainer.style.overflow = 'hidden';
+    
+    const maxDays = thresholds[2];
+    const fillPercent = Math.min(100, (daysInSector / maxDays) * 100);
+    
+    const fillBar = document.createElement('div');
+    fillBar.style.position = 'absolute';
+    fillBar.style.left = '0';
+    fillBar.style.top = '0';
+    fillBar.style.height = '100%';
+    fillBar.style.width = fillPercent + '%';
+    fillBar.style.transition = 'width 0.3s ease';
+    
+    if (threatLevel === 0) {
+        fillBar.style.background = '#4a4';
+    } else if (threatLevel === 1) {
+        fillBar.style.background = '#fa4';
+    } else {
+        fillBar.style.background = '#a44';
+    }
+    
+    barContainer.appendChild(fillBar);
+    
+    const segment1 = document.createElement('div');
+    segment1.style.position = 'absolute';
+    segment1.style.left = (thresholds[0] / maxDays * 100) + '%';
+    segment1.style.top = '0';
+    segment1.style.width = '2px';
+    segment1.style.height = '100%';
+    segment1.style.background = '#888';
+    barContainer.appendChild(segment1);
+    
+    const segment2 = document.createElement('div');
+    segment2.style.position = 'absolute';
+    segment2.style.left = (thresholds[1] / maxDays * 100) + '%';
+    segment2.style.top = '0';
+    segment2.style.width = '2px';
+    segment2.style.height = '100%';
+    segment2.style.background = '#888';
+    barContainer.appendChild(segment2);
+    
+    wrapper.appendChild(barContainer);
+    
+    const levelNames = ['Нет угрозы', 'Умеренная угроза', 'Серьезная угроза'];
+    const levelLabel = document.createElement('span');
+    levelLabel.textContent = levelNames[threatLevel] || '';
+    levelLabel.style.color = threatLevel === 0 ? '#4a4' : (threatLevel === 1 ? '#fa4' : '#a44');
+    levelLabel.style.fontWeight = '600';
+    levelLabel.style.minWidth = '120px';
+    wrapper.appendChild(levelLabel);
+    
+    const daysLabel = document.createElement('span');
+    daysLabel.textContent = `(${daysInSector} дн.)`;
+    daysLabel.style.color = '#888';
+    daysLabel.style.fontSize = '0.85em';
+    wrapper.appendChild(daysLabel);
+    
+    container.appendChild(wrapper);
 }
 
 async function onGraphNodeClick(nodeId) {
@@ -1220,6 +1378,7 @@ async function movePlayerToNode(nodeId){
     }
     
     adventureState.currentNodeId = nodeId;
+    adventureState.sectorThreatLevel = getCurrentThreatLevel();
     persistAdventure();
     
     try {
@@ -1906,6 +2065,8 @@ async function startEncounterBattle(encData) {
     const attackers = pickSquadForBattle();
     if (attackers.length === 0) return;
     for (const g of attackers) { adventureState.pool[g.id] -= g.count; if (adventureState.pool[g.id] < 0) adventureState.pool[g.id] = 0; }
+    const isBoss = enc.class === 'boss';
+    const threatMultiplier = isBoss ? getThreatMultiplier() : 1.0;
     const cfg = {
         battleConfig: { name: adventureState.config.adventure.name, defendersStart: true },
         armies: {
@@ -1923,6 +2084,9 @@ async function startEncounterBattle(encData) {
                     } else {
                         const n = Number(v); if (!isNaN(n)) cnt = Math.max(0, Math.floor(n));
                     }
+                }
+                if (isBoss && threatMultiplier > 1.0) {
+                    cnt = Math.floor(cnt * threatMultiplier);
                 }
                 return { id: g.id, count: cnt };
             }) }
