@@ -1078,7 +1078,8 @@ async function showNodePreviewModal(nodeId) {
                 icon.className = 'achievement-icon';
                 icon.style.fontSize = '1.6em';
                 if (item.type === 'event') {
-                    icon.textContent = '✨';
+                    const ev = item.data;
+                    icon.textContent = ev.icon || '✨';
                 } else if (item.type === 'encounter') {
                     const enc = item.data;
                     if (enc.class === 'boss') icon.textContent = '👑';
@@ -1253,7 +1254,8 @@ function renderNodeContentItems() {
         const iconEl = el.querySelector('.node-content-icon') || el.querySelector('[data-role="icon"]');
         if (iconEl) {
             if (item.type === 'event') {
-                iconEl.textContent = '✨';
+                const ev = item.data;
+                iconEl.textContent = ev.icon || '✨';
             } else if (item.type === 'encounter') {
                 const enc = item.data;
                 if (enc.class === 'boss') iconEl.textContent = '👑';
@@ -1307,33 +1309,26 @@ async function showContentItemModal(item, index) {
             }
         } else if (item.type === 'event') {
             const ev = item.data;
-            const title = document.createElement('div');
-            title.style.fontSize = '1.1em';
-            title.style.fontWeight = 'bold';
-            title.style.marginBottom = '12px';
-            title.style.textAlign = 'center';
-            title.textContent = ev.name || ev.id || 'Событие';
-            body.appendChild(title);
-            if (ev.description) {
-                const desc = document.createElement('div');
-                desc.style.textAlign = 'center';
-                desc.style.marginBottom = '12px';
-                desc.textContent = ev.description;
-                body.appendChild(desc);
-            }
-            if (ev.options && Array.isArray(ev.options) && ev.options.length > 0) {
-                const opts = document.createElement('div');
-                opts.style.display = 'flex';
-                opts.style.flexDirection = 'column';
-                opts.style.gap = '6px';
-                opts.style.marginTop = '8px';
-                ev.options.forEach(function(opt) {
-                    const optRow = document.createElement('div');
-                    optRow.textContent = '• ' + (opt.text || opt.id || 'Опция');
-                    opts.appendChild(optRow);
-                });
-                body.appendChild(opts);
-            }
+            const iconBlock = document.createElement('div');
+            iconBlock.style.textAlign = 'center';
+            iconBlock.style.marginBottom = '16px';
+            iconBlock.style.padding = '12px';
+            iconBlock.style.background = '#1a1a1a';
+            iconBlock.style.border = '1px solid #654321';
+            iconBlock.style.borderRadius = '8px';
+            iconBlock.style.boxShadow = '0 4px 10px rgba(0,0,0,0.4)';
+            const iconEl = document.createElement('div');
+            iconEl.style.fontSize = '3em';
+            iconEl.textContent = ev.icon || '✨';
+            iconBlock.appendChild(iconEl);
+            const nameEl = document.createElement('div');
+            nameEl.style.fontSize = '1.2em';
+            nameEl.style.fontWeight = '600';
+            nameEl.style.color = '#cd853f';
+            nameEl.style.marginTop = '8px';
+            nameEl.textContent = ev.name || ev.id || 'Событие';
+            iconBlock.appendChild(nameEl);
+            body.appendChild(iconBlock);
         } else if (item.type === 'raid') {
             const raidDef = item.data;
             const desc = document.createElement('div');
