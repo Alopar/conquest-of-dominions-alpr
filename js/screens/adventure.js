@@ -1414,6 +1414,26 @@ async function showContentItemModal(item, index) {
             body.appendChild(iconBlock);
         } else if (item.type === 'raid') {
             const raidDef = item.data;
+            const iconBlock = document.createElement('div');
+            iconBlock.style.textAlign = 'center';
+            iconBlock.style.marginBottom = '16px';
+            iconBlock.style.padding = '12px';
+            iconBlock.style.background = '#1a1a1a';
+            iconBlock.style.border = '1px solid #654321';
+            iconBlock.style.borderRadius = '8px';
+            iconBlock.style.boxShadow = '0 4px 10px rgba(0,0,0,0.4)';
+            const iconEl = document.createElement('div');
+            iconEl.style.fontSize = '3em';
+            iconEl.textContent = raidDef.icon || '⚔️';
+            iconBlock.appendChild(iconEl);
+            const nameEl = document.createElement('div');
+            nameEl.style.fontSize = '1.2em';
+            nameEl.style.fontWeight = '600';
+            nameEl.style.color = '#cd853f';
+            nameEl.style.marginTop = '8px';
+            nameEl.textContent = raidDef.name || raidDef.id || 'Рейд';
+            iconBlock.appendChild(nameEl);
+            body.appendChild(iconBlock);
             const desc = document.createElement('div');
             desc.style.textAlign = 'center';
             desc.style.margin = '8px 0 10px 0';
