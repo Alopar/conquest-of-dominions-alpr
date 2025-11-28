@@ -6,6 +6,79 @@
     </div>
 </template>
 
+<!-- Боевой юнит -->
+<template id="tpl-battle-unit">
+    <div class="unit" data-role="unit-root">
+        <span data-slot="icon"></span>
+        <div class="hp-bar"></div>
+    </div>
+</template>
+
+<!-- Индикатор угрозы -->
+<template id="tpl-threat-indicator">
+    <div class="threat-indicator-container">
+        <span class="threat-label">Угроза:</span>
+        <div class="threat-bar-wrapper">
+            <div class="threat-bar-bg"></div>
+            <div class="threat-bar-zone zone-safe" data-role="zone0"></div>
+            <div class="threat-bar-zone zone-warn" data-role="zone1"></div>
+            <div class="threat-bar-zone zone-danger" data-role="zone2"></div>
+            <div class="threat-fill-bar" data-role="fillBar"></div>
+            <div class="threat-ticks" data-role="ticks"></div>
+            <div class="threat-threshold threshold-1" data-role="threshold1"></div>
+            <div class="threat-threshold threshold-2" data-role="threshold2"></div>
+            <div class="threat-indicator-marker" data-role="marker"></div>
+        </div>
+        <span class="threat-icon" data-slot="icon">🛡️</span>
+    </div>
+</template>
+
+<!-- Модалка: Детали угрозы -->
+<template id="tpl-threat-details-modal">
+    <div class="threat-details-body">
+        <div class="threat-title-section">
+            <div class="threat-big-icon" data-slot="bigIcon">🛡️</div>
+            <div class="threat-title-text" data-slot="levelName"></div>
+        </div>
+        <div class="threat-separator"></div>
+        <div class="threat-info-section">
+            <div class="threat-row-box">
+                <span class="threat-label-text">Дней в секторе:</span>
+                <span class="threat-value-text" data-slot="days">0</span>
+            </div>
+            <div class="threat-row-box threat-col">
+                <div class="threat-subtitle">Пороги угрозы:</div>
+                <div class="threat-threshold-list" data-role="thresholdList"></div>
+            </div>
+            <div class="threat-multiplier-box">
+                <div class="threat-subtitle">⚔️ Влияние на босса сектора:</div>
+                <div class="threat-desc" data-role="multiplierDesc"></div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Модалка: Превью ноды -->
+<template id="tpl-node-preview-modal">
+    <div class="node-preview-body">
+        <div class="node-travel-info" data-role="travelInfo" style="display:none;">
+            <div class="node-travel-text" data-slot="travelText"></div>
+        </div>
+        <div class="node-travel-sep" data-role="travelSep" style="display:none;"></div>
+        
+        <div class="node-empty-text" data-role="emptyText" style="display:none;">Эта нода не содержит событий.</div>
+        
+        <div class="node-content-list" data-role="contentList"></div>
+    </div>
+</template>
+
+<template id="tpl-node-content-card">
+    <div class="achievement-card node-content-card">
+        <div class="achievement-icon" data-slot="icon"></div>
+        <div class="achievement-name" data-slot="name"></div>
+    </div>
+</template>
+
 <!-- Герой: шкалы развития -->
 <template id="tpl-dev-tracks-screen">
     <div class="hero-dev-root">
@@ -168,10 +241,10 @@
 
 <template id="tpl-achievement-item">
     <div class="achievement-card clickable" data-id="">
-        <div class="achievement-icon">🏆</div>
-        <div class="achievement-name">Достижение</div>
-        <div class="achievement-progress">0 / 0</div>
-        <div class="achievement-status" style="display:none;">Достигнуто</div>
+        <div class="achievement-icon" data-slot="icon">🏆</div>
+        <div class="achievement-name" data-slot="name">Достижение</div>
+        <div class="achievement-progress" data-slot="progress">0 / 0</div>
+        <div class="achievement-status" data-slot="status" style="display:none;">Достигнуто</div>
     </div>
     <!-- Используются классы: .achievement-card(.achieved) с .achievement-icon, .achievement-name, .achievement-progress, .achievement-status -->
 </template>
@@ -278,3 +351,61 @@
     </div>
 </template>
 
+<!-- Таблица отладки модов -->
+<template id="tpl-mods-debug-table">
+    <table class="bestiary-table unit-info-table">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Path</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody data-role="body"></tbody>
+    </table>
+</template>
+
+<template id="tpl-mods-debug-row">
+    <tr>
+        <td data-slot="type"></td>
+        <td data-slot="path"></td>
+        <td data-slot="value"></td>
+    </tr>
+</template>
+
+<!-- Таблица пула юнитов -->
+<template id="tpl-pool-table">
+    <table class="bestiary-table unit-info-table">
+        <thead>
+            <tr>
+                <th class="icon-cell">👤</th>
+                <th>Имя</th>
+                <th>ID</th>
+                <th>Кол-во</th>
+            </tr>
+        </thead>
+        <tbody data-role="body"></tbody>
+    </table>
+</template>
+
+<template id="tpl-pool-row">
+    <tr>
+        <td class="icon-cell" data-slot="icon"></td>
+        <td data-slot="name"></td>
+        <td data-slot="id"></td>
+        <td data-slot="count"></td>
+    </tr>
+</template>
+
+<!-- Элемент таверны (покупка) -->
+<template id="tpl-tavern-item">
+    <div class="tavern-item-card">
+        <div class="tavern-unit-preview" data-role="preview"></div>
+        <button class="btn" data-action="buy" data-slot="price">100 💰</button>
+    </div>
+</template>
+
+<!-- Лог боя -->
+<template id="tpl-battle-log-entry">
+    <div class="log-entry" data-slot="text"></div>
+</template>

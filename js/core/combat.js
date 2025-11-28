@@ -1,4 +1,11 @@
-function arrangeUnitsIntoFormation(units) {
+import { rollDice } from './dice.js';
+import { callIfExists } from './errorHandler.js';
+
+/**
+ * @param {Array<Object>} units
+ * @returns {Array<Object>}
+ */
+export function arrangeUnitsIntoFormation(units) {
     if (!Array.isArray(units) || units.length === 0) return units;
     const types = (window.battleConfig && window.battleConfig.unitTypes) ? window.battleConfig.unitTypes : {};
     const getRole = (u) => {
@@ -53,34 +60,47 @@ function arrangeUnitsIntoFormation(units) {
     return result;
 }
 
-window.arrangeUnitsIntoFormation = arrangeUnitsIntoFormation;
-
-function rollToHit(role, meleeHit, rangeHit) {
-    const roll = window.rollDice ? window.rollDice(20) : Math.floor(Math.random() * 20) + 1;
+/**
+ * @param {string} role
+ * @param {number} meleeHit
+ * @param {number} rangeHit
+ * @returns {{roll: number, isHit: boolean, isCrit: boolean, threshold: number}}
+ */
+export function rollToHit(role, meleeHit, rangeHit) {
+    const roll = rollDice(20);
     const isCrit = (roll === 20);
     const threshold = (role === 'range') ? Number(rangeHit) : Number(meleeHit);
     const isHit = isCrit || (roll >= threshold);
     return { roll, isHit, isCrit, threshold };
 }
 
-function applyDamageToTarget(target, damage, color, defenderArmy) {
+/**
+ * @param {Object} target
+ * @param {number} damage
+ * @param {string} color
+ * @param {string} defenderArmy
+ */
+export function applyDamageToTarget(target, damage, color, defenderArmy) {
     target.hp -= Number(damage || 0);
     if (window.queueAnimation) window.queueAnimation({ type: 'hit', unitId: target.id, army: defenderArmy, hitColor: color });
     if (target.hp <= 0) {
         target.hp = 0;
         target.alive = false;
         if (window.addToLog) window.addToLog(`💀 ${target.name} погибает!`);
-        try { if (window.Achievements && typeof window.Achievements.onUnitKilled === 'function') window.Achievements.onUnitKilled(target.typeId); } catch {}
+        callIfExists('Achievements', 'onUnitKilled', [target.typeId], undefined);
         if (window.queueAnimation) window.queueAnimation({ type: 'kill', unitId: target.id, army: defenderArmy });
     }
 }
 
-function selectNextTarget(attacker, enemies, actedTargets) {
+/**
+ * @param {Object} attacker
+ * @param {Array<Object>} enemies
+ * @param {Set<string>} actedTargets
+ * @returns {Object|null}
+ */
+export function selectNextTarget(attacker, enemies, actedTargets) {
     const alive = enemies.filter(u => u.alive && !actedTargets.has(u.id));
     if (alive.length === 0) return null;
-    return window.selectTargetByRules(attacker, alive);
+    return window.selectTargetByRules ? window.selectTargetByRules(attacker, alive) : null;
 }
 
-window.rollToHit = rollToHit;
-window.applyDamageToTarget = applyDamageToTarget;
-window.selectNextTarget = selectNextTarget;

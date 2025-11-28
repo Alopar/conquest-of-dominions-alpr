@@ -16,22 +16,25 @@ function showScreen(id) {
 
 // Рендер одного юнита
 function renderUnit(unit, army) {
-    const unitDiv = document.createElement('div');
+    const displayIcon = (unit.alive || ((typeof window.isKillPending === 'function') && window.isKillPending(unit.id, army))) ? unit.view : '💀';
+    
+    const unitDiv = window.UI.renderTemplate('tpl-battle-unit', {
+        slots: { icon: displayIcon }
+    });
+    
+    if (!unitDiv) return document.createElement('div');
+
     let className = 'unit';
     if (!unit.alive) className += ' dead';
     else if (unit.hasAttackedThisTurn) className += ' attacked';
     unitDiv.className = className;
+    
     unitDiv.dataset.unitId = unit.id;
     unitDiv.dataset.army = army;
-    const pending = (typeof window.isKillPending === 'function') && window.isKillPending(unit.id, army);
-    const displayIcon = (unit.alive || pending) ? unit.view : '💀';
+
     const hpPct = Math.max(0, Math.min(100, (unit.hp / unit.maxHp) * 100));
-    unitDiv.innerHTML = `
-        ${displayIcon}
-        <div class="hp-bar"></div>
-    `;
     unitDiv.style.setProperty('--hp', hpPct + '%');
-    // Панель устарела — убираем hover-логику
+
     unitDiv.addEventListener('click', function(){
         try {
             if (!(window.UI && typeof window.UI.showModal === 'function')) return;
@@ -40,39 +43,26 @@ function renderUnit(unit, army) {
             const t = types[unit.typeId];
             const role = t && t.type ? String(t.type) : '';
             const targets = Number(unit.targets || 1);
+            
             let body = null;
             if (tpl) {
-                const frag = tpl.content.cloneNode(true);
-                body = document.createElement('div');
-                body.appendChild(frag);
-                const root = body.querySelector('table');
-                if (root) {
-                    const iconNameEl = body.querySelector('[data-role="iconName"]');
-                    const typeEl = body.querySelector('[data-role="type"]');
-                    const hpEl = body.querySelector('[data-role="hp"]');
-                    const damageEl = body.querySelector('[data-role="damage"]');
-                    const targetsEl = body.querySelector('[data-role="targets"]');
-
-                    if (iconNameEl) iconNameEl.textContent = `${String(unit.view || '')} ${String(unit.name || '')}`;
-                    if (typeEl) typeEl.textContent = `ТИП: ${String(role || '')}`;
-                    if (hpEl) hpEl.textContent = `НР: ${unit.hp}/${unit.maxHp} ❤️`;
-                    if (damageEl) damageEl.textContent = `УРОН: ${unit.damage} 💥`;
-                    if (targetsEl) targetsEl.textContent = `ЦЕЛИ: ${targets} 🎯`;
-
-                    try {
-                        root.querySelectorAll('td').forEach(function(td){ td.style.textTransform = 'uppercase'; });
-                    } catch {}
-                }
+                body = window.UI.renderTemplate('tpl-unit-modal-body', {
+                    slots: {
+                        iconName: `${String(unit.view || '')} ${String(unit.name || '')}`,
+                        type: `ТИП: ${String(role || '')}`,
+                        hp: `НР: ${unit.hp}/${unit.maxHp} ❤️`,
+                        damage: `УРОН: ${unit.damage} 💥`,
+                        targets: `ЦЕЛИ: ${targets} 🎯`
+                    }
+                });
+                // Дополнительная стилизация для таблиц внутри модалки, если нужно, теперь в CSS
             } else {
+                // Фолбэк, если шаблона нет (на всякий случай)
                 body = document.createElement('div');
-                const row1 = document.createElement('div');
-                row1.textContent = `${unit.view} ${unit.name}  |  ТИП: ${role}`;
-                const row2 = document.createElement('div');
-                row2.textContent = `НР: ${unit.hp}/${unit.maxHp} ❤️  |  УРОН: ${unit.damage} 💥  |  ЦЕЛИ: ${targets} 🎯`;
-                row1.style.textTransform = 'uppercase';
-                row2.style.textTransform = 'uppercase';
-                body.appendChild(row1);
-                body.appendChild(row2);
+                body.innerHTML = `
+                    <div style="text-transform:uppercase">${unit.view} ${unit.name} | ТИП: ${role}</div>
+                    <div style="text-transform:uppercase">НР: ${unit.hp}/${unit.maxHp} ❤️ | УРОН: ${unit.damage} 💥 | ЦЕЛИ: ${targets} 🎯</div>
+                `;
             }
             window.UI.showModal(body, { type: 'info', title: 'Описание существа' });
         } catch {}
@@ -270,9 +260,11 @@ function addToLog(message) {
     const logDiv = document.getElementById('battle-log');
     if (!logDiv) return;
 
-    const entry = document.createElement('div');
-    entry.className = 'log-entry';
-    entry.textContent = message;
+    const entry = window.UI.renderTemplate('tpl-battle-log-entry', {
+        slots: { text: message }
+    });
+    
+    if (!entry) return;
 
     // Добавляем новую запись в начало
     if (logDiv.firstChild) {
@@ -799,18 +791,21 @@ function renderAchievementsGrid(){
     let items = [];
     try { items = (window.Achievements && typeof window.Achievements.getAll === 'function') ? window.Achievements.getAll() : []; } catch { items = []; }
     items.forEach(function(a){
-        const tpl = document.getElementById('tpl-achievement-item');
-        const el = tpl ? tpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
-        if (!tpl) el.className = 'achievement-card clickable';
-        if (a.achieved) el.classList.add('achieved');
-        const iconEl = el.querySelector('.achievement-icon') || el;
-        const nameEl = el.querySelector('.achievement-name');
-        const progEl = el.querySelector('.achievement-progress');
-        const statusEl = el.querySelector('.achievement-status');
-        if (iconEl) iconEl.textContent = a.icon || '🏆';
-        if (nameEl) nameEl.textContent = a.name;
-        if (progEl) progEl.textContent = (a.current || 0) + ' / ' + a.amount;
-        if (statusEl) statusEl.style.display = a.achieved ? '' : 'none';
+        const el = window.UI.renderTemplate('tpl-achievement-item', {
+            slots: {
+                icon: a.icon || '🏆',
+                name: a.name,
+                progress: (a.current || 0) + ' / ' + a.amount
+            }
+        });
+        
+        if (!el) return;
+
+        if (a.achieved) {
+            el.classList.add('achieved');
+            const statusEl = el.querySelector('[data-slot="status"]');
+            if (statusEl) statusEl.style.display = '';
+        }
 
         try {
             if (window.UI && typeof window.UI.attachTooltip === 'function') {
@@ -825,6 +820,8 @@ function renderAchievementsGrid(){
         el.addEventListener('click', function(){
             try {
                 if (!(window.UI && typeof window.UI.showModal === 'function')) return;
+                // Для тела модалки пока создадим элементы, т.к. оно динамическое
+                // Можно было бы создать шаблон tpl-achievement-modal, но структура простая
                 const body = document.createElement('div');
                 body.style.display = 'grid';
                 body.style.gridTemplateColumns = '1fr';

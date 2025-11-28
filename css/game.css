@@ -16,6 +16,13 @@
     transition: all 0.2s ease;
 }
 
+/* Поддержка для шаблонизированного юнита, где иконка обернута */
+.unit span[data-slot="icon"] {
+    pointer-events: none;
+    display: inline-block;
+    line-height: 1;
+}
+
 .unit:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(0,0,0,0.5), inset 0 1px 3px rgba(255,255,255,0.4);

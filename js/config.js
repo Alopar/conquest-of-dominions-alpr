@@ -70,8 +70,7 @@ async function loadDefaultConfig() {
     }
 }
 
-// Скачивание образца конфигурации — удалено по требованиям (примеры не используются)
-async function downloadSampleConfig() { try {} catch {} }
+async function downloadSampleConfig() {}
 
 // Делаем функции доступными глобально
 window.loadConfigFile = loadConfigFile;
@@ -79,19 +78,18 @@ window.loadDefaultConfig = loadDefaultConfig;
 window.downloadSampleConfig = downloadSampleConfig;
 window.initBattleConfig = initBattleConfig;
 
-// Синхронизация UI экрана «Схватка» с текущим состоянием конфига
 function syncFightUI() {
-    try {
-        const statusDiv = document.getElementById('file-status');
-        const battleBtn = document.getElementById('battle-btn');
+    safeCall(function() {
+        var statusDiv = document.getElementById('file-status');
+        var battleBtn = document.getElementById('battle-btn');
         if (statusDiv && window.battleConfig && window.battleConfig.battleConfig) {
-            const cfg = window.battleConfig.battleConfig;
-            const description = cfg.description ? ` - ${cfg.description}` : '';
-            statusDiv.textContent = `✅ Загружена конфигурация: "${cfg.name}"${description}`;
+            var cfg = window.battleConfig.battleConfig;
+            var description = cfg.description ? ' - ' + cfg.description : '';
+            statusDiv.textContent = '✅ Загружена конфигурация: "' + cfg.name + '"' + description;
             statusDiv.className = 'file-status success';
         }
         if (battleBtn) battleBtn.disabled = !window.configLoaded;
-    } catch {}
+    }, undefined, 'syncFightUI');
 }
 
 window.syncFightUI = syncFightUI;

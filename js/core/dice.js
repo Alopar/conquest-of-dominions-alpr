@@ -1,14 +1,22 @@
-function rollDice(sides) {
+/**
+ * @param {number} sides
+ * @returns {number}
+ */
+export function rollDice(sides) {
     return Math.floor(Math.random() * sides) + 1;
 }
 
-function parseDamage(damageStr) {
-    const match = damageStr.match(/(\d+)d(\d+)/);
+/**
+ * @param {string} damageStr
+ * @returns {number}
+ */
+export function parseDamage(damageStr) {
+    var match = damageStr.match(/(\d+)d(\d+)/);
     if (match) {
-        const count = parseInt(match[1]);
-        const sides = parseInt(match[2]);
-        let total = 0;
-        for (let i = 0; i < count; i++) {
+        var count = parseInt(match[1]);
+        var sides = parseInt(match[2]);
+        var total = 0;
+        for (var i = 0; i < count; i++) {
             total += rollDice(sides);
         }
         return total;
@@ -16,11 +24,15 @@ function parseDamage(damageStr) {
     return 1;
 }
 
-function getMaxDamageValue(damageStr) {
-    const match = damageStr && typeof damageStr === 'string' ? damageStr.match(/(\d+)d(\d+)/) : null;
+/**
+ * @param {string} damageStr
+ * @returns {number}
+ */
+export function getMaxDamageValue(damageStr) {
+    var match = damageStr && typeof damageStr === 'string' ? damageStr.match(/(\d+)d(\d+)/) : null;
     if (match) {
-        const count = parseInt(match[1]);
-        const sides = parseInt(match[2]);
+        var count = parseInt(match[1]);
+        var sides = parseInt(match[2]);
         if (Number.isFinite(count) && Number.isFinite(sides) && count > 0 && sides > 0) {
             return count * sides;
         }
@@ -28,6 +40,3 @@ function getMaxDamageValue(damageStr) {
     return 1;
 }
 
-window.rollDice = rollDice;
-window.parseDamage = parseDamage;
-window.getMaxDamageValue = getMaxDamageValue;
