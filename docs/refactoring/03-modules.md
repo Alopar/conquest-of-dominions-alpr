@@ -25,11 +25,11 @@
 - [x] `showUpgradeInfoModal()` - модалка улучшения
 
 ### 3.2 adventure/setup.js
-- [ ] `showAdventureSetup()` - показ экрана настройки
-- [ ] `loadAdventureFile()` - загрузка файла
-- [ ] `loadDefaultAdventure()` - загрузка дефолтного
-- [ ] `renderHeroClassSelectionSetup()` - выбор класса (~100 строк)
-- [ ] `onHeroClassClick()` - клик по классу (~80 строк)
+- [x] `showAdventureSetup()` - показ экрана настройки
+- [x] `loadAdventureFile()` - загрузка файла
+- [x] `loadDefaultAdventure()` - загрузка дефолтного
+- [x] `renderHeroClassSelectionSetup()` - выбор класса (~100 строк)
+- [x] `onHeroClassClick()` - клик по классу (~80 строк)
 
 ### 3.3 adventure/map-render.js
 - [x] `renderMapBoard()` - рендер карты (~130 строк)

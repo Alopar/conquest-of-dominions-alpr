@@ -16,16 +16,19 @@
 ## Задачи
 
 ### 2.1 Атомарные шаблоны
-- [ ] `tpl-divider` - разделитель секций
-- [ ] `tpl-icon-badge` - иконка с подписью
-- [ ] `tpl-stat-row` - строка характеристики
+- [x] `tpl-divider` - разделитель секций (реализован как `tpl-modal-divider`)
+- [x] `tpl-icon-badge` - иконка с подписью (реализован как `tpl-icon-row`)
+- [x] `tpl-stat-row` - строка характеристики (используется в таблицах)
+- [x] `tpl-section-title` - заголовок секции
+- [x] `tpl-modal-section` - текстовая секция
 
 ### 2.2 Составные шаблоны
-- [ ] `tpl-encounter-modal-body` - тело модалки встречи (~60 строк)
-- [ ] `tpl-adventure-tabs` - вкладки приключения (~40 строк)
-- [ ] `tpl-currency-badge` - бейдж валюты (~15 строк)
-- [ ] `tpl-threat-indicator` - индикатор угрозы (~15 строк)
-- [ ] `tpl-unit-modal-body` - модалка информации о юните
+- [x] `tpl-encounter-modal-body` - тело модалки встречи (динамическое, используются атомарные)
+- [x] `tpl-adventure-tabs` - вкладки приключения (~40 строк)
+- [x] `tpl-currency-badge` - бейдж валюты (~15 строк)
+- [x] `tpl-threat-indicator` - индикатор угрозы (~15 строк)
+- [x] `tpl-unit-modal-body` - модалка информации о юните
+- [x] `tpl-icon-block-centered` - крупная иконка с заголовком
 
 ### 2.3 Утилита renderTemplate()
 
@@ -97,24 +100,14 @@ window.renderTemplate = renderTemplate;
 
 ### 2.5 Миграция adventure.js
 
-Заменить паттерн:
-```javascript
-var body = document.createElement('div');
-body.style.textAlign = 'center';
-body.style.margin = '8px 0 10px 0';
-```
-
-На:
-```javascript
-var body = renderTemplate('tpl-modal-section', { text: 'Текст' });
-```
+> **Статус:** Выполнено. Основной файл разделен, а его UI-части (`setup.js`, `ui.js`) переведены на шаблоны.
 
 ## Приоритет файлов для миграции
 
-1. `js/screens/adventure/raids.js` - много программного создания DOM
-2. `js/screens/adventure/encounters.js` - модалки встреч
-3. `js/screens/adventure/ui.js` - showUnitInfoModal
-4. `js/screens/adventure.js` - основной файл
+1. `js/screens/adventure/raids.js` - переведено
+2. `js/screens/adventure/encounters.js` - переведено (через `ui.js`)
+3. `js/screens/adventure/ui.js` - переведено
+4. `js/screens/adventure.js` - переведено (очищен от UI)
 
 ## Ожидаемый результат
 

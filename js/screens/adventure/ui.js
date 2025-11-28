@@ -144,22 +144,22 @@ function renderTavern() {
             if (btn) btn.disabled = !canBuy;
 
             // Создаем превью юнита
-            var tplItem = document.getElementById('tpl-reward-unit');
-            var el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
-            if (!tplItem) el.className = 'reward-item';
+            var el = window.UI.renderTemplate('tpl-reward-unit', {
+                slots: {
+                    icon: m.view || '👤',
+                    name: m.name || item.id
+                }
+            });
             
-            var iconEl = el.querySelector('.reward-icon') || el;
-            var nameEl = el.querySelector('.reward-name');
-            if (iconEl) iconEl.textContent = m.view || '👤';
-            if (nameEl) nameEl.textContent = m.name || item.id;
-            el.classList.add('clickable');
-            
-            (function(itemId) {
-                el.addEventListener('click', function() { showUnitInfoModal(itemId); });
-            })(item.id);
-            
-            var previewSlot = card.querySelector('[data-role="preview"]');
-            if (previewSlot) previewSlot.appendChild(el);
+            if (el) {
+                el.classList.add('clickable');
+                (function(itemId) {
+                    el.addEventListener('click', function() { showUnitInfoModal(itemId); });
+                })(item.id);
+                
+                var previewSlot = card.querySelector('[data-role="preview"]');
+                if (previewSlot) previewSlot.appendChild(el);
+            }
 
             hostAvail.appendChild(card);
         }
@@ -175,22 +175,22 @@ function renderTavern() {
             var available = Math.max(0, total - inRaids);
             if (available <= 0) continue;
             
-            var tplItem = document.getElementById('tpl-reward-unit');
-            var el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
-            if (!tplItem) el.className = 'reward-item';
-            
             var m = monsters[id] || { name: id, view: '👤' };
-            var iconEl = el.querySelector('.reward-icon') || el;
-            var nameEl = el.querySelector('.reward-name');
-            if (iconEl) iconEl.textContent = m.view || '👤';
-            if (nameEl) nameEl.textContent = (m.name || id) + ' x' + available;
             
-            el.classList.add('clickable');
-            (function(uid) {
-                el.addEventListener('click', function() { showUnitInfoModal(uid); });
-            })(id);
+            var el = window.UI.renderTemplate('tpl-reward-unit', {
+                slots: {
+                    icon: m.view || '👤',
+                    name: (m.name || id) + ' x' + available
+                }
+            });
             
-            hostArmy.appendChild(el);
+            if (el) {
+                el.classList.add('clickable');
+                (function(uid) {
+                    el.addEventListener('click', function() { showUnitInfoModal(uid); });
+                })(id);
+                hostArmy.appendChild(el);
+            }
         }
     }
 }
@@ -267,20 +267,16 @@ function renderNodeContentItems() {
     
     contents.forEach(function(item, index) {
         var icon = '✨';
-        var name = 'Энкаунтер';
         
         if (item.type === 'event') {
             var ev = item.data;
             icon = ev.icon || '✨';
-            name = item.data.name || item.data.id || 'Событие';
         } else if (item.type === 'encounter') {
             var enc = item.data;
             icon = enc.icon || (enc.class === 'boss' ? '👑' : enc.class === 'elite' ? '💀' : '😡');
-            name = item.data.name || item.data.id || 'Энкаунтер';
         } else if (item.type === 'raid') {
             var raid = item.data;
             icon = raid.icon || '⚔️';
-            name = item.data.name || item.data.id || 'Рейд';
         }
 
         var el = window.UI.renderTemplate('tpl-node-content-item', {
@@ -299,6 +295,252 @@ function renderNodeContentItems() {
     });
 }
 
+async function showContentItemModal(item, index) {
+    try {
+        if (!window.UI || typeof window.UI.showModal !== 'function') return;
+        
+        var body = document.createElement('div');
+        body.style.padding = '8px';
+
+        if (item.type === 'encounter') {
+            var enc = item.data;
+            
+            var iconBlock = window.UI.renderTemplate('tpl-icon-block-centered', {
+                slots: {
+                    icon: enc.icon || (enc.class === 'boss' ? '👑' : enc.class === 'elite' ? '💀' : '😡'),
+                    title: enc.name || enc.id || 'Энкаунтер'
+                }
+            });
+            if (iconBlock) body.appendChild(iconBlock);
+            
+            var sep1 = window.UI.renderTemplate('tpl-modal-divider');
+            if (sep1) body.appendChild(sep1);
+            
+            if (enc.monsters && Array.isArray(enc.monsters)) {
+                var enemiesTitle = window.UI.renderTemplate('tpl-section-title', { slots: { text: 'Возможные противники' } });
+                if (enemiesTitle) body.appendChild(enemiesTitle);
+                
+                var monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ var m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
+                var enemiesWrap = window.UI.renderTemplate('tpl-rewards-list');
+                var enemiesItems = enemiesWrap ? enemiesWrap.querySelector('[data-role="items"]') : document.createElement('div');
+                if (!enemiesWrap) enemiesItems.className = 'rewards-list';
+                
+                var uniqEnemyIds = Array.from(new Set((enc.monsters || []).map(function(g){ return g && g.id; }).filter(Boolean)));
+                uniqEnemyIds.forEach(function(id){
+                    var m = monsters[id] || { name: id, view: '👤' };
+                    var monsterData = enc.monsters.find(function(mon){ return mon && mon.id === id; });
+                    var amountText = monsterData && monsterData.amount ? monsterData.amount : '?';
+                    
+                    var el = window.UI.renderTemplate('tpl-reward-unit', {
+                        slots: {
+                            icon: m.view || '👤',
+                            name: (m.name || id) + ' (' + amountText + ')'
+                        }
+                    });
+                    
+                    if (el) {
+                        el.classList.add('clickable');
+                        el.addEventListener('click', function(e){ try { e.stopPropagation(); } catch(e) {} showUnitInfoModal(id); });
+                        enemiesItems.appendChild(el);
+                    }
+                });
+                if (enemiesWrap) body.appendChild(enemiesWrap); else body.appendChild(enemiesItems);
+                
+                var sep2 = window.UI.renderTemplate('tpl-modal-divider');
+                if (sep2) body.appendChild(sep2);
+            }
+            
+            var rewardsTitle = window.UI.renderTemplate('tpl-section-title', { slots: { text: 'Возможные награды' } });
+            if (rewardsTitle) body.appendChild(rewardsTitle);
+            
+            var rewards = [];
+            if (enc.rewardId) {
+                var rewardsCfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('rewards') : null;
+                var rewardsTables = rewardsCfg && Array.isArray(rewardsCfg.tables) ? rewardsCfg.tables : [];
+                var rewardTable = rewardsTables.find(function(t){ return t && t.id === enc.rewardId; });
+                if (rewardTable && Array.isArray(rewardTable.rewards)) {
+                    rewards = rewardTable.rewards;
+                }
+            } else if (Array.isArray(enc.rewards)) {
+                rewards = enc.rewards;
+            }
+            
+            if (rewards.length > 0) {
+                var curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
+                var curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
+                var curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
+                var monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ var m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
+                
+                var rewardsWrap = window.UI.renderTemplate('tpl-rewards-list');
+                var rewardsItems = rewardsWrap ? rewardsWrap.querySelector('[data-role="items"]') : document.createElement('div');
+                if (!rewardsWrap) rewardsItems.className = 'rewards-list';
+                
+                rewards.forEach(function(r){
+                    if (r && r.type === 'currency') {
+                        var cd = curById[r.id] || { name: r.id, icon: '💠' };
+                        var el = window.UI.renderTemplate('tpl-reward-currency', {
+                            slots: {
+                                icon: cd.icon || '💠',
+                                name: cd.name || r.id
+                            }
+                        });
+                        if (el) rewardsItems.appendChild(el);
+                    } else if (r && (r.type === 'monster' || r.type === 'unit')) {
+                        var m = monsters[r.id] || { name: r.id, view: '👤' };
+                        var el = window.UI.renderTemplate('tpl-reward-unit', {
+                            slots: {
+                                icon: m.view || '👤',
+                                name: m.name || r.id
+                            }
+                        });
+                        if (el) {
+                            el.classList.add('clickable');
+                            el.addEventListener('click', function(e){ try { e.stopPropagation(); } catch(e) {} showUnitInfoModal(r.id); });
+                            rewardsItems.appendChild(el);
+                        }
+                    }
+                });
+                if (rewardsWrap) body.appendChild(rewardsWrap); else body.appendChild(rewardsItems);
+            } else {
+                var noRewards = window.UI.renderTemplate('tpl-modal-section', { slots: { text: 'Награды не указаны' } });
+                if (noRewards) {
+                    noRewards.style.color = '#888';
+                    body.appendChild(noRewards);
+                }
+            }
+        } else if (item.type === 'event') {
+            var ev = item.data;
+            var iconBlock = window.UI.renderTemplate('tpl-icon-block-centered', {
+                slots: {
+                    icon: ev.icon || '✨',
+                    title: ev.name || ev.id || 'Событие'
+                }
+            });
+            if (iconBlock) body.appendChild(iconBlock);
+        } else if (item.type === 'raid') {
+            var raidDef = item.data;
+            var iconBlock = window.UI.renderTemplate('tpl-icon-block-centered', {
+                slots: {
+                    icon: raidDef.icon || '⚔️',
+                    title: raidDef.name || raidDef.id || 'Рейд'
+                }
+            });
+            if (iconBlock) body.appendChild(iconBlock);
+            
+            var desc = window.UI.renderTemplate('tpl-modal-section', { slots: { text: 'Длительность: ' + raidDef.duration_days + ' дней' } });
+            if (desc) body.appendChild(desc);
+            
+            var sep = window.UI.renderTemplate('tpl-modal-divider');
+            if (sep) body.appendChild(sep);
+            
+            var encCfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('encounters') : null;
+            var encounters = encCfg && Array.isArray(encCfg.encounters) ? encCfg.encounters : [];
+            var enc = encounters.find(function(e){ return e && e.id === raidDef.encounter_id; });
+            
+            if (enc) {
+                var enemiesTitle = window.UI.renderTemplate('tpl-section-title', { slots: { text: 'Возможные противники' } });
+                if (enemiesTitle) body.appendChild(enemiesTitle);
+                
+                var monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ var m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
+                var enemiesWrap = window.UI.renderTemplate('tpl-rewards-list');
+                var enemiesItems = enemiesWrap ? enemiesWrap.querySelector('[data-role="items"]') : document.createElement('div');
+                if (!enemiesWrap) enemiesItems.className = 'rewards-list';
+                
+                var uniqEnemyIds = Array.from(new Set((enc.monsters || []).map(function(g){ return g && g.id; }).filter(Boolean)));
+                uniqEnemyIds.forEach(function(id){
+                    var m = monsters[id] || { name: id, view: '👤' };
+                    var el = window.UI.renderTemplate('tpl-reward-unit', {
+                        slots: {
+                            icon: m.view || '👤',
+                            name: m.name || id
+                        }
+                    });
+                    if (el) {
+                        el.classList.add('clickable');
+                        el.addEventListener('click', function(e){ try { e.stopPropagation(); } catch(e) {} showUnitInfoModal(id); });
+                        enemiesItems.appendChild(el);
+                    }
+                });
+                if (enemiesWrap) body.appendChild(enemiesWrap); else body.appendChild(enemiesItems);
+                
+                var sep2 = window.UI.renderTemplate('tpl-modal-divider');
+                if (sep2) body.appendChild(sep2);
+            }
+            
+            var rewardsTitle = window.UI.renderTemplate('tpl-section-title', { slots: { text: 'Возможные награды' } });
+            if (rewardsTitle) body.appendChild(rewardsTitle);
+            
+            var rewardsCfg = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('rewards') : null;
+            var rewardsTables = rewardsCfg && Array.isArray(rewardsCfg.tables) ? rewardsCfg.tables : [];
+            var rewardTable = rewardsTables.find(function(t){ return t && t.id === raidDef.reward_id; });
+            
+            if (rewardTable && Array.isArray(rewardTable.rewards)) {
+                var curDefs = (window.StaticData && window.StaticData.getConfig) ? window.StaticData.getConfig('currencies') : null;
+                var curList = curDefs && Array.isArray(curDefs.currencies) ? curDefs.currencies : [];
+                var curById = {}; curList.forEach(function(c){ curById[c.id] = c; });
+                
+                var rewardsWrap = window.UI.renderTemplate('tpl-rewards-list');
+                var rewardsItems = rewardsWrap ? rewardsWrap.querySelector('[data-role="items"]') : document.createElement('div');
+                if (!rewardsWrap) rewardsItems.className = 'rewards-list';
+                
+                rewardTable.rewards.forEach(function(r){
+                    if (r && r.type === 'currency') {
+                        var cd = curById[r.id] || { name: r.id, icon: '💠' };
+                        var el = window.UI.renderTemplate('tpl-reward-currency', {
+                            slots: {
+                                icon: cd.icon || '💠',
+                                name: cd.name || r.id
+                            }
+                        });
+                        if (el) rewardsItems.appendChild(el);
+                    }
+                });
+                if (rewardsWrap) body.appendChild(rewardsWrap); else body.appendChild(rewardsItems);
+            }
+        }
+
+        var titleText = item.type === 'event' ? 'Событие' : (item.type === 'raid' ? 'Рейд' : 'Энкаунтер');
+        var h = window.UI.showModal(body, { type: 'dialog', title: titleText, yesText: 'Начать', noText: 'Закрыть' });
+        var proceed = await h.closed;
+        
+        if (proceed) {
+            if (item.type === 'encounter') {
+                if (window.startEncounterBattle) window.startEncounterBattle(item.data);
+            } else if (item.type === 'event') {
+                if (window.handleEventFromContent) await window.handleEventFromContent(item.data);
+            } else if (item.type === 'raid') {
+                var raidDef = item.data;
+                if (window.Raids && typeof window.Raids.addAvailableRaids === 'function') {
+                    window.Raids.addAvailableRaids([raidDef.id]);
+                }
+                var allRaids = (window.Raids && typeof window.Raids.getAllRaids === 'function') ? window.Raids.getAllRaids() : [];
+                var raidInstance = allRaids.find(function(r){ return r.raidDefId === raidDef.id && r.status === 'available'; });
+                if (raidInstance) {
+                    if (window.showArmySplitModal) await window.showArmySplitModal(raidInstance, raidDef);
+                    var idx = adventureState.currentNodeContent.findIndex(function(ci) {
+                        return ci.type === item.type && ci.id === item.id && ci.data && ci.data.id === item.data.id;
+                    });
+                    if (idx >= 0) {
+                        adventureState.currentNodeContent.splice(idx, 1);
+                        persistAdventure();
+                        renderNodeContentItems();
+                    }
+                }
+                return;
+            }
+            
+            var idx = adventureState.currentNodeContent.findIndex(function(ci) {
+                return ci.type === item.type && ci.id === item.id && ci.data && ci.data.id === item.data.id;
+            });
+            if (idx >= 0) {
+                adventureState.currentNodeContent.splice(idx, 1);
+                persistAdventure();
+                renderNodeContentItems();
+            }
+        }
+    } catch(e) { console.error(e); }
+}
+
 window.getAdventureMoveDurationMs = getAdventureMoveDurationMs;
 window.renderModsDebug = renderModsDebug;
 window.renderPool = renderPool;
@@ -309,3 +551,4 @@ window.updateBeginAdventureButtonState = updateBeginAdventureButtonState;
 window.renderBeginButtonOnMain = renderBeginButtonOnMain;
 window.showUnitInfoModal = showUnitInfoModal;
 window.renderNodeContentItems = renderNodeContentItems;
+window.showContentItemModal = showContentItemModal;

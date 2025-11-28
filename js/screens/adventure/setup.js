@@ -158,29 +158,20 @@
         } catch {}
         
         var list = classesCfg && Array.isArray(classesCfg.classes) ? classesCfg.classes : (Array.isArray(classesCfg) ? classesCfg : []);
-        var frag = window.UI && typeof window.UI.cloneTemplate === 'function' ? window.UI.cloneTemplate('tpl-hero-class-item') : null;
         
         for (var i = 0; i < list.length; i++) {
             var c = list[i];
-            var el;
-            if (frag) {
-                el = frag.cloneNode(true).firstElementChild;
-            } else {
-                el = document.createElement('div'); 
-                el.className = 'hero-class-item';
-                var icon = document.createElement('div'); 
-                icon.className = 'hero-class-icon'; 
-                el.appendChild(icon);
-                var name = document.createElement('div'); 
-                name.className = 'hero-class-name'; 
-                el.appendChild(name);
-            }
-            el.dataset.id = c.id;
             
-            var iconEl = el.querySelector('[data-role="icon"]') || el.querySelector('.hero-class-icon');
-            var nameEl = el.querySelector('[data-role="name"]') || el.querySelector('.hero-class-name');
-            if (iconEl) iconEl.textContent = c.icon || '❓';
-            if (nameEl) nameEl.textContent = c.name || c.id;
+            var el = window.UI.renderTemplate('tpl-hero-class-item', {
+                slots: {
+                    icon: c.icon || '❓',
+                    name: c.name || c.id
+                }
+            });
+            
+            if (!el) continue;
+            
+            el.dataset.id = c.id;
             
             var requiredAchId = c.requiresAchievementId;
             var isLocked = false;
@@ -206,38 +197,41 @@
     async function onHeroClassClick(c, isLocked) {
         var body = document.createElement('div');
         
-        var desc = document.createElement('div');
-        desc.className = 'modal-section';
-        desc.textContent = c.description || '';
-        body.appendChild(desc);
+        var desc = window.UI.renderTemplate('tpl-modal-section', {
+            slots: { text: c.description || '' }
+        });
+        if (desc) body.appendChild(desc);
         
-        var sep1 = document.createElement('div');
-        sep1.className = 'modal-divider';
-        body.appendChild(sep1);
+        var sep1 = window.UI.renderTemplate('tpl-modal-divider');
+        if (sep1) body.appendChild(sep1);
         
-        var armyTitle = document.createElement('div'); 
-        armyTitle.className = 'section-title';
-        armyTitle.textContent = 'Начальная армия'; 
-        body.appendChild(armyTitle);
+        var armyTitle = window.UI.renderTemplate('tpl-section-title', {
+            slots: { text: 'Начальная армия' }
+        });
+        if (armyTitle) body.appendChild(armyTitle);
         
         if (Array.isArray(c.startingArmy) && c.startingArmy.length > 0) {
             var monsters = (window.StaticData && window.StaticData.getConfig) ? (function(){ var m = window.StaticData.getConfig('monsters'); return (m && m.unitTypes) ? m.unitTypes : m; })() : {};
-            var listTpl = document.getElementById('tpl-rewards-list');
-            var wrap = listTpl ? listTpl.content.firstElementChild.cloneNode(true) : document.createElement('div');
-            var items = wrap.querySelector('[data-role="items"]') || wrap;
+            
+            var wrap = window.UI.renderTemplate('tpl-rewards-list');
+            var items = wrap ? (wrap.querySelector('[data-role="items"]') || wrap) : document.createElement('div');
+            
+            if (!wrap) items.style.cssText = 'display:flex; flex-wrap:wrap; justify-content:center; gap:12px;';
             
             for (var i = 0; i < c.startingArmy.length; i++) {
                 var g = c.startingArmy[i];
-                var tplItem = document.getElementById('tpl-reward-unit');
-                var el = tplItem ? tplItem.content.firstElementChild.cloneNode(true) : document.createElement('div');
-                if (!tplItem) el.className = 'reward-item';
-                el.classList.add('clickable');
                 var m = monsters[g.id] || { name: g.id, view: '👤' };
-                var iconEl = el.querySelector('.reward-icon') || el;
-                var nameEl = el.querySelector('.reward-name');
-                if (iconEl) iconEl.textContent = m.view || '👤';
-                if (nameEl) nameEl.textContent = (m.name || g.id) + ' x' + g.count;
                 
+                var el = window.UI.renderTemplate('tpl-reward-unit', {
+                    slots: {
+                        icon: m.view || '👤',
+                        name: (m.name || g.id) + ' x' + g.count
+                    }
+                });
+                
+                if (!el) continue;
+                
+                el.classList.add('clickable');
                 (function(unitId){
                     el.addEventListener('click', function(e){ 
                         try { e.stopPropagation(); } catch {} 
@@ -247,32 +241,35 @@
                 
                 items.appendChild(el);
             }
-            body.appendChild(wrap);
+            if (wrap) body.appendChild(wrap); else body.appendChild(items);
         }
         
         if (isLocked) {
-            var sep2 = document.createElement('div');
-            sep2.className = 'modal-divider';
-            body.appendChild(sep2);
+            var sep2 = window.UI.renderTemplate('tpl-modal-divider');
+            if (sep2) body.appendChild(sep2);
             
-            var reqTitle = document.createElement('div'); 
-            reqTitle.className = 'section-title';
-            reqTitle.textContent = 'Требуется достижение'; 
-            body.appendChild(reqTitle);
+            var reqTitle = window.UI.renderTemplate('tpl-section-title', {
+                slots: { text: 'Требуется достижение' }
+            });
+            if (reqTitle) body.appendChild(reqTitle);
             
-            var row = document.createElement('div'); 
-            row.className = 'flex-center';
+            var achIcon = '🏆';
+            var achName = c.requiresAchievementId || '';
             try {
                 var ach = (window.Achievements && typeof window.Achievements.getById === 'function') ? window.Achievements.getById(c.requiresAchievementId) : null;
-                var icon = document.createElement('span'); 
-                icon.textContent = ach && ach.icon ? ach.icon : '🏆';
-                var name = document.createElement('span'); 
-                name.textContent = ach && ach.name ? ach.name : (c.requiresAchievementId || ''); 
-                name.style.fontWeight = '600';
-                row.appendChild(icon); 
-                row.appendChild(name);
+                if (ach) {
+                    achIcon = ach.icon || '🏆';
+                    achName = ach.name || achName;
+                }
             } catch {}
-            body.appendChild(row);
+            
+            var row = window.UI.renderTemplate('tpl-icon-row', {
+                slots: {
+                    icon: achIcon,
+                    text: achName
+                }
+            });
+            if (row) body.appendChild(row);
             
             try {
                 if (window.UI && typeof window.UI.showModal === 'function') {
@@ -335,4 +332,3 @@
     window.onHeroClassClick = onHeroClassClick;
     window.updateBeginAdventureButtonState = updateBeginAdventureButtonState;
 })();
-
