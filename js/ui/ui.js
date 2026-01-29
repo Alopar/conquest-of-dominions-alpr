@@ -617,19 +617,6 @@ function retryBattle() {
 window.finishBattleToAdventure = finishBattleToAdventure;
 window.retryBattle = retryBattle;
 
-// Временный роут на экран «Конфигурация» (экран будет добавлен в задаче 3)
-async function showConfigScreen() {
-    try { if (typeof window.showConfig === 'function') { await window.showConfig(); return; } } catch {}
-    try {
-        if (window.Router && typeof window.Router.setScreen === 'function') {
-            await window.Router.setScreen('config');
-        } else {
-            window.showScreen('config-screen');
-        }
-    } catch { window.showScreen('config-screen'); }
-}
-
-window.showConfigScreen = showConfigScreen;
 
 // Экран «Достижения»
 async function showAchievements() {
