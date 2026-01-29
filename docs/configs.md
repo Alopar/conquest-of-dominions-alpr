@@ -12,7 +12,6 @@
 - currencies → assets/configs/game/currencies_config.json
 - developmentTracks → assets/configs/game/development_tracks.json
 - achievements → assets/configs/game/achievements_config.json
-- battleSetup → assets/configs/game/battle_setup.json
 
 ## События и награды
 
