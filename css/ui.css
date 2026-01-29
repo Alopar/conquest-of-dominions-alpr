@@ -106,6 +106,81 @@
 .bestiary-table tr:hover td {
     background: rgba(205,133,63,0.08);
 }
+/* Мобильные улучшения */
+body.is-mobile {
+    touch-action: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+@media (max-width: 900px) and (orientation: landscape) {
+    :root {
+        font-size: 14px;
+    }
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9em;
+    }
+    .modal-window {
+        min-width: 90vw;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+#mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: #0d0d0d;
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    pointer-events: auto;
+}
+
+#mobile-overlay.show-rotate {
+    display: flex;
+}
+
+.mobile-message {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.mobile-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    animation: rotateIcon 2s infinite linear;
+}
+
+.mobile-text {
+    font-size: 1.5em;
+    color: #cd853f;
+    font-weight: 600;
+}
+
+.fullscreen-prompt p {
+    font-size: 1.1em;
+    margin: 10px 0;
+}
+
+@keyframes rotateIcon {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 /* UI компоненты - кнопки, формы, панели, меню */
 
 .btn {
@@ -291,7 +366,7 @@
 }
 
 .log-panel {
-    width: 25vw;
+    width: 25%;
     background-color: #1a1a1a;
     border-left: 3px solid #654321;
     padding: 20px;
@@ -350,7 +425,7 @@
     padding: 16px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.7);
     min-width: 600px;
-    max-width: 90vw;
+    max-width: 95%;
 }
 .modal-title { font-size: 1.1em; margin-bottom: 12px; color: #cd853f; display:none; text-align: center; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #654321; padding-bottom: 8px; }
 .modal-body { margin: 8px 0 12px 0; }

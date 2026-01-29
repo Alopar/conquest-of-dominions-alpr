@@ -2,6 +2,9 @@
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async function() {
+    // Инициализация мобильной обертки
+    try { if (window.MobileWrapper && typeof window.MobileWrapper.init === 'function') window.MobileWrapper.init(); } catch {}
+
     try {
         if (!window._templatesLoaded) {
             const res = await fetch('fragments/templates.html', { cache: 'no-store' });
