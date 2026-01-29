@@ -40,13 +40,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Полный сброс прогресса приключения при полном перезапуске приложения
     try { localStorage.removeItem('adventureState'); } catch {}
 
-    // Автоматически инициализируем сетап боя из StaticData, если есть
-    try {
-        if (window.StaticData && window.initBattleConfig) {
-            const battleSetup = window.StaticData.getConfig && window.StaticData.getConfig('battleSetup');
-            if (battleSetup) await window.initBattleConfig(battleSetup, 'static');
-        }
-    } catch {}
 
     try {
         window.addEventListener('keydown', function(e){

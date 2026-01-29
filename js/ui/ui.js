@@ -336,126 +336,11 @@ function updateBattleStats(){
     el.textContent = `⚔️ Атакующие ${aAlive}/${aAll} · 🛡️ Защитники ${dAlive}/${dAll} · ⏳ Ход ${turn}`;
 }
 
-// Экран "Схватка"
-async function showFight() {
-    try {
-        if (window.Router && typeof window.Router.setScreen === 'function') {
-            await window.Router.setScreen('fight');
-        } else {
-            showScreen('fight-screen');
-        }
-    } catch { showScreen('fight-screen'); }
-    const logDiv = document.getElementById('battle-log');
-    if (logDiv) logDiv.innerHTML = '';
-    try {
-        // Инициализация сетапа боя теперь централизована в app.js через StaticData
-    } catch {}
-    if (typeof window.syncFightUI === 'function') window.syncFightUI();
 
-    try {
-        const host = document.getElementById('fight-config-panel');
-        if (host && window.UI && typeof window.UI.mountConfigPanel === 'function') {
-            host.innerHTML = '';
-            window.UI.mountConfigPanel(host, {
-                title: '⚙️ Конфигурация боя',
-                fileLabelText: '',
-                statusId: 'file-status',
-                inputId: 'config-file',
-                onFile: function(file){ if (window.loadConfigFile) window.loadConfigFile(file); },
-                onSample: function(){ try { downloadSampleConfig(); } catch {} },
-                primaryText: '🚩 Начать бой! 🚩',
-                primaryId: 'battle-btn',
-                primaryDisabled: true,
-                onPrimary: function(){ try { startBattle(); } catch {} },
-                getStatusText: function(){
-                    try {
-                        if (window.configLoaded && window.battleConfig && window.battleConfig.battleConfig) {
-                            const cfg = window.battleConfig.battleConfig;
-                            const description = cfg.description ? ' - ' + cfg.description : '';
-                            return `✅ Загружена конфигурация: "${cfg.name}"${description}`;
-                        }
-                    } catch {}
-                    return '';
-                }
-            });
-            try { if (typeof window.syncFightUI === 'function') window.syncFightUI(); } catch {}
-        }
-    } catch {}
-}
-
-function backToIntroFromFight() {
-    try {
-        if (window.Router && typeof window.Router.setScreen === 'function') {
-            window.Router.setScreen('intro');
-        } else {
-            showScreen('intro-screen');
-        }
-    } catch { showScreen('intro-screen'); }
-    const logDiv = document.getElementById('battle-log');
-    if (logDiv) logDiv.innerHTML = '';
-}
-
-// Запуск боя
-async function startBattle() {
-    if (!window.configLoaded) {
-        try {
-            if (window.UI && typeof window.UI.alert === 'function') {
-                await window.UI.alert('Сначала загрузите конфигурацию!');
-            } else {
-                alert('Сначала загрузите конфигурацию!');
-            }
-        } catch { try { alert('Сначала загрузите конфигурацию!'); } catch {} }
-        return;
-    }
-    // Разрешаем сетап из StaticData ('static') или локальную загрузку ('fight')
-    if (window.battleConfigSource !== 'fight' && window.battleConfigSource !== 'static') {
-        if (window.loadDefaultConfig) {
-            try { await window.loadDefaultConfig(); } catch {}
-        }
-    }
-    await proceedStartBattle();
-}
-
-async function proceedStartBattle() {
-    const logDiv = document.getElementById('battle-log');
-    if (logDiv) {
-        logDiv.innerHTML = '';
-    }
-    const btnHome = document.getElementById('battle-btn-home');
-    if (btnHome) btnHome.style.display = '';
-    await showBattle();
-    initializeArmies();
-    renderArmies();
-
-    window.addToLog('🚩 Бой начался!');
-    window.addToLog(`Атакующие: ${window.gameState.attackers.length} юнитов`);
-    window.addToLog(`Защитники: ${window.gameState.defenders.length} юнитов`);
-    try { window._autoPlaySpeed = 1; } catch {}
-    try {
-        const spBtn = document.getElementById('auto-speed-btn');
-        if (spBtn) spBtn.textContent = '⏩ x1';
-    } catch {}
-    try { if (typeof window._rescheduleAutoPlayTick === 'function') window._rescheduleAutoPlayTick(); } catch {}
-    try {
-        try { if (window._stopAutoPlay) window._stopAutoPlay(); } catch {}
-        let autoEnabled = false;
-        try {
-            const s = (window.GameSettings && typeof window.GameSettings.get === 'function') ? window.GameSettings.get() : (typeof window.getCurrentSettings === 'function' ? window.getCurrentSettings() : null);
-            autoEnabled = !!(s && s.battleSettings && s.battleSettings.autoPlay);
-        } catch {}
-        if (autoEnabled && typeof window.toggleAutoPlay === 'function' && !window._autoPlayActive) {
-            window.toggleAutoPlay();
-        }
-    } catch {}
-}
 
 // Делаем функции доступными глобально
-window.startBattle = startBattle;
-window.proceedStartBattle = proceedStartBattle;
 window.showIntro = showIntro;
 window.showBattle = showBattle;
-window.showFight = showFight;
-window.backToIntroFromFight = backToIntroFromFight;
 window.addToLog = addToLog;
 window.renderArmies = renderArmies;
 window.updateButtonStates = updateButtonStates;
@@ -548,11 +433,8 @@ window.cycleAutoSpeed = function(){
         timerId = setTimeout(tick, getStepDelay());
     };
 })();
-window.proceedStartBattle = proceedStartBattle;
 window.showIntro = showIntro;
 window.showBattle = showBattle;
-window.showFight = showFight;
-window.backToIntroFromFight = backToIntroFromFight;
 window.addToLog = addToLog;
 window.renderArmies = renderArmies;
 window.updateButtonStates = updateButtonStates;
