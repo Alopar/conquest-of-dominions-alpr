@@ -3,26 +3,19 @@ let _monstersCache = null;
 
 function setMonstersConfig(rawConfig) {
     if (!rawConfig || typeof rawConfig !== 'object') return;
-    try { window._monstersRaw = rawConfig; } catch {}
-    try {
-        const meta = rawConfig._meta || {};
-        window._monstersMetaName = meta.name || '';
-        window._monstersMetaDescription = meta.description || '';
-    } catch {}
     _monstersCache = rawConfig.unitTypes || rawConfig;
-    try { localStorage.setItem('monsters_config', JSON.stringify(rawConfig)); } catch {}
 }
 
-// Загрузка типов монстров теперь из StaticData; оставлено для совместимости
-async function loadMonstersConfig(options) {
+// Загрузка типов монстров из StaticData
+async function loadMonstersConfig() {
     if (_monstersCache) return _monstersCache;
-    try {
-        if (window.StaticData && typeof window.StaticData.getConfig === 'function') {
-            const cfg = window.StaticData.getConfig('monsters');
+    
+    if (window.StaticData && typeof window.StaticData.getConfig === 'function') {
+        const cfg = window.StaticData.getConfig('monsters');
+        if (cfg) {
             setMonstersConfig(cfg);
-            return _monstersCache;
         }
-    } catch {}
+    }
     return _monstersCache || {};
 }
 

@@ -45,8 +45,6 @@ let adventureState = {
     sectorThreatLevel: 0
 };
 
-let adventureUserLoaded = false;
-
 async function showAdventureSetup() {
     try {
         if (window.Router && typeof window.Router.setScreen === 'function') {
@@ -72,9 +70,7 @@ async function showAdventureSetup() {
         renderHeroClassSelectionSetup();
         const btn = document.getElementById('adventure-begin-btn'); if (btn) btn.disabled = true;
     }
-    if (!adventureUserLoaded) {
-        loadDefaultAdventure();
-    }
+    loadDefaultAdventure();
 }
 
 async function backToIntroFromAdventure() {
@@ -97,34 +93,10 @@ async function backToIntroFromAdventure() {
     } catch { showScreen('intro-screen'); }
 }
 
-async function loadAdventureFile(file) {
-    const reader = new FileReader();
-    reader.onload = async function(e) {
-        try {
-            const cfg = JSON.parse(e.target.result);
-            window.validateAdventureConfig(cfg);
-            try {
-                if (window.StaticData && typeof window.StaticData.setUserConfig === 'function') {
-                    window.StaticData.setUserConfig('adventure', cfg);
-                    if (typeof window.StaticData.setUseUser === 'function') window.StaticData.setUseUser('adventure', true);
-                }
-            } catch {}
-            initAdventureState(cfg);
-            renderHeroClassSelectionSetup();
-            updateBeginAdventureButtonState();
-            adventureUserLoaded = true;
-        } catch (err) {
-        }
-    };
-    reader.onerror = function() {
-    };
-    reader.readAsText(file);
-}
 
 async function loadDefaultAdventure() {
     try {
         const cfg = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('adventure') : null;
-        window.validateAdventureConfig(cfg);
         initAdventureState(cfg);
         renderHeroClassSelectionSetup();
         const btn = document.getElementById('adventure-begin-btn'); if (btn) btn.disabled = true;
@@ -155,7 +127,7 @@ function beginAdventureFromSetup() {
     loadDefaultAdventure().then(() => { applySelectedClassStartingArmy(); showAdventure(); });
 }
 
-// удалено локальное перекрытие validateAdventureConfig — используется глобальный валидатор из validators.js
+// логика валидации удалена
 
 function initAdventureState(cfg) {
     adventureState.config = cfg;
@@ -2899,7 +2871,6 @@ async function startRaidBattle(raidInstance) {
 
 window.showAdventureSetup = showAdventureSetup;
 window.backToIntroFromAdventure = backToIntroFromAdventure;
-window.loadAdventureFile = loadAdventureFile;
 window.loadDefaultAdventure = loadDefaultAdventure;
 window.downloadSampleAdventureConfig = downloadSampleAdventureConfig;
 window.beginAdventureFromSetup = beginAdventureFromSetup;

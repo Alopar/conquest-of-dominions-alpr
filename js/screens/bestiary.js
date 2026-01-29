@@ -1,10 +1,8 @@
 // Гарантируем регистрацию функций для глобального доступа
 window.showBestiary = showBestiary;
 window.backToIntroFromBestiary = backToIntroFromBestiary;
-window.uploadMonstersConfigFile = uploadMonstersConfigFile;
-window.downloadMonstersConfig = downloadMonstersConfig;
-// Экран бестиария для просмотра и управления типами монстров
 
+// Экран бестиария для просмотра и управления типами монстров
 let bestiaryMonsters = {};
 
 // Показать экран бестиария
@@ -39,13 +37,15 @@ async function loadAndRenderBestiary() {
         bestiaryMonsters = cfg && typeof cfg === 'object' ? (cfg.unitTypes || cfg) : {};
         renderBestiaryTable();
     } catch (e) {
-        document.getElementById('bestiary-table').innerHTML = '<tr><td colspan="7">Ошибка загрузки конфига монстров</td></tr>';
+        const table = document.getElementById('bestiary-table');
+        if (table) table.innerHTML = '<tr><td colspan="7">Ошибка загрузки конфига монстров</td></tr>';
     }
 }
 
 // Отрисовать таблицу монстров
 function renderBestiaryTable() {
     const table = document.getElementById('bestiary-table');
+    if (!table) return;
     table.innerHTML = '';
     const monsterIds = Object.keys(bestiaryMonsters);
     for (let i = 0; i < monsterIds.length; i++) {
@@ -65,61 +65,5 @@ function renderBestiaryTable() {
     }
 }
 
-// Панель действий: загрузка/выгрузка конфига монстров
-function ensureBestiaryPanel() { /* Панель конфигурации убрана; управление на экране «Конфигурация» */ }
-
-// Загрузить monsters_config.json с диска
-function uploadMonstersConfigFile(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const config = JSON.parse(e.target.result);
-            // Простая валидация
-            if (typeof config !== 'object' || Array.isArray(config)) throw new Error();
-            bestiaryMonsters = config;
-            // Сохраняем в localStorage (опционально)
-            localStorage.setItem('monsters_config', JSON.stringify(config));
-            renderBestiaryTable();
-        } catch {
-            try {
-                if (window.UI && typeof window.UI.alert === 'function') {
-                    window.UI.alert('Ошибка: некорректный файл конфигурации монстров!');
-                } else {
-                    alert('Ошибка: некорректный файл конфигурации монстров!');
-                }
-            } catch { try { alert('Ошибка: некорректный файл конфигурации монстров!'); } catch {} }
-        }
-    };
-    reader.readAsText(file);
-}
-
-// Скачать текущий monsters_config.json
-function downloadMonstersConfig() {
-    let data = null;
-    try { data = window._monstersRaw || null; } catch {}
-    if (!data) {
-        data = {
-            _meta: {
-                name: (window._monstersMetaName || 'Бестиарий'),
-                description: (window._monstersMetaDescription || '')
-            },
-            unitTypes: bestiaryMonsters
-        };
-    }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'monsters_config.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
 window.showBestiary = showBestiary;
 window.backToIntroFromBestiary = backToIntroFromBestiary;
-window.uploadMonstersConfigFile = uploadMonstersConfigFile;
-window.downloadMonstersConfig = downloadMonstersConfig;
