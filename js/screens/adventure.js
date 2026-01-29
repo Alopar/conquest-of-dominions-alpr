@@ -60,8 +60,6 @@ async function showAdventureSetup() {
     const scr = document.getElementById('adventure-setup-screen');
     if (scr) { scr.classList.add('active'); scr.style.display = 'flex'; }
     try {
-        const host = document.getElementById('adventure-config-panel');
-        if (host) { host.innerHTML = ''; host.style.display = 'none'; }
         // Сбрасываем выбранный класс при входе на экран подготовки
         adventureState.selectedClassId = null;
     } catch {}
@@ -71,10 +69,6 @@ async function showAdventureSetup() {
     window.adventureState = adventureState;
     restoreAdventure();
     if (adventureState.config) {
-        const cfg = adventureState.config;
-        const statusDiv = document.getElementById('adventure-file-status') || (document.querySelector('#adventure-config-panel [data-role="status"]'));
-        const d = cfg.adventure && cfg.adventure.description ? ` - ${cfg.adventure.description}` : '';
-        if (statusDiv) { statusDiv.textContent = `✅ Загружено приключение: "${cfg.adventure.name}"${d}`; statusDiv.className = 'file-status success'; }
         renderHeroClassSelectionSetup();
         const btn = document.getElementById('adventure-begin-btn'); if (btn) btn.disabled = true;
     }
@@ -116,20 +110,13 @@ async function loadAdventureFile(file) {
                 }
             } catch {}
             initAdventureState(cfg);
-            const statusDiv = document.getElementById('adventure-file-status') || (document.querySelector('#adventure-config-panel [data-role="status"]'));
-            const d = cfg.adventure && cfg.adventure.description ? ` - ${cfg.adventure.description}` : '';
-            if (statusDiv) { statusDiv.textContent = `✅ Загружено приключение: "${cfg.adventure.name}"${d}`; statusDiv.className = 'file-status success'; }
             renderHeroClassSelectionSetup();
             updateBeginAdventureButtonState();
             adventureUserLoaded = true;
         } catch (err) {
-            const statusDiv = document.getElementById('adventure-file-status');
-            if (statusDiv) { statusDiv.textContent = `❌ Ошибка загрузки: ${err.message}`; statusDiv.className = 'file-status error'; }
         }
     };
     reader.onerror = function() {
-        const statusDiv = document.getElementById('adventure-file-status') || (document.querySelector('#adventure-config-panel [data-role="status"]'));
-        if (statusDiv) { statusDiv.textContent = '❌ Ошибка чтения файла'; statusDiv.className = 'file-status error'; }
     };
     reader.readAsText(file);
 }
@@ -139,14 +126,9 @@ async function loadDefaultAdventure() {
         const cfg = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('adventure') : null;
         window.validateAdventureConfig(cfg);
         initAdventureState(cfg);
-        const statusDiv = document.getElementById('adventure-file-status') || (document.querySelector('#adventure-config-panel [data-role="status"]'));
-        const d = cfg.adventure && cfg.adventure.description ? ` - ${cfg.adventure.description}` : '';
-        if (statusDiv) { statusDiv.textContent = `✅ Загружено приключение: "${cfg.adventure.name}"${d}`; statusDiv.className = 'file-status success'; }
         renderHeroClassSelectionSetup();
         const btn = document.getElementById('adventure-begin-btn'); if (btn) btn.disabled = true;
     } catch (err) {
-        const statusDiv = document.getElementById('adventure-file-status');
-        if (statusDiv) { statusDiv.textContent = `❌ Ошибка загрузки стандартного приключения: ${err.message}`; statusDiv.className = 'file-status error'; }
     }
 }
 

@@ -79,84 +79,6 @@
         } catch {}
     }
 
-    function mountFileInput(container, options) {
-        try {
-            if (!container) return null;
-            const groupRoot = mountTemplate('tpl-file-input', container, {
-                slots: {
-                    labelText: (options && options.labelText) || 'Загрузить файл',
-                    buttonText: (options && options.buttonText) || '📁 ВЫБРАТЬ ФАЙЛ'
-                }
-            });
-            const input = groupRoot ? groupRoot.querySelector('input[type="file"]') : null;
-            const btn = groupRoot ? groupRoot.querySelector('[data-action="open"]') : null;
-            const label = groupRoot ? groupRoot.querySelector('.file-label') : null;
-            if (groupRoot) container.appendChild(groupRoot);
-            if (label && options && options.showLabel === false) {
-                label.remove();
-            }
-            if (input) {
-                if (options && options.accept) input.setAttribute('accept', options.accept);
-                if (options && options.id) input.id = options.id;
-            }
-            if (label && input && (options && options.id)) {
-                label.setAttribute('for', options.id);
-            }
-            if (btn && input) {
-                btn.addEventListener('click', function(){ input.click(); });
-            }
-            if (input) {
-                input.addEventListener('change', function(){
-                    try {
-                        if (!options || options.keepButtonText !== true) {
-                            if (btn && input.files && input.files[0]) btn.textContent = input.files[0].name;
-                        }
-                        if (options && typeof options.onFile === 'function' && input.files && input.files[0]) {
-                            options.onFile(input.files[0]);
-                        }
-                    } catch {}
-                });
-            }
-            return groupRoot;
-        } catch { return null; }
-    }
-
-    function mountConfigPanel(container, options) {
-        if (!container) return null;
-        const panel = mountTemplate('tpl-config-panel', container, { slots: { title: (options && options.title) || '⚙️ Конфигурация' } });
-        if (!panel) return null;
-        const status = panel.querySelector('[data-role="status"]');
-        const fileSlot = panel.querySelector('[data-role="file-slot"]');
-        const sampleBtnWrap = panel.querySelector('[data-role="sample-slot"]');
-        const primaryRow = panel.querySelector('[data-role="primary-row"]');
-        const primaryBtn = panel.querySelector('[data-action="primary"]');
-
-        if (status && options && options.statusId) { try { status.id = options.statusId; } catch {} }
-        if (status && options && typeof options.getStatusText === 'function') {
-            try { status.textContent = String(options.getStatusText()); } catch {}
-        }
-        if (fileSlot && (options && options.fileInput !== false)) {
-            mountFileInput(fileSlot, {
-                labelText: (options && typeof options.fileLabelText === 'string') ? options.fileLabelText : 'Загрузить файл',
-                buttonText: (options && options.fileButtonText) || '📁 ЗАГРУЗИТЬ',
-                accept: (options && options.accept) || '.json,application/json',
-                id: (options && options.inputId) || undefined,
-                onFile: (options && typeof options.onFile === 'function') ? options.onFile : undefined,
-                keepButtonText: true,
-                showLabel: !!(options && options.fileLabelText)
-            });
-        } else if (fileSlot) { fileSlot.remove(); }
-
-        if (sampleBtnWrap) {
-            if (options && typeof options.onSample === 'function') sampleBtnWrap.querySelector('[data-action="sample"]').addEventListener('click', options.onSample);
-            else sampleBtnWrap.remove();
-        }
-
-        if (primaryRow) { primaryRow.remove(); }
-
-        return panel;
-    }
-
     let modalStack = [];
 
     function getFocusable(container) {
@@ -529,5 +451,5 @@
         } catch {}
     }
 
-    window.UI = { ensureScreenLoaded, ensureMenuBar, mountTemplate, cloneTemplate, applyTableHead, mountFileInput, mountConfigPanel, showModal, confirm: confirmModal, alert: alertModal, showToast, attachTooltip, clearTooltips, closeTopModal };
+    window.UI = { ensureScreenLoaded, ensureMenuBar, mountTemplate, cloneTemplate, applyTableHead, showModal, confirm: confirmModal, alert: alertModal, showToast, attachTooltip, clearTooltips, closeTopModal };
 })();

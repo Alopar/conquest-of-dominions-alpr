@@ -7,6 +7,10 @@ window.app = window.app || {
     monsters: null
 };
 
+// Глобальные переменные для обратной совместимости
+window.battleConfig = null;
+window.configLoaded = false;
+
 function setBattleConfig(config, source) {
     window.app.config.battle = config || null;
     window.app.config.source = source;

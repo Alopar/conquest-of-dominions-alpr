@@ -19,10 +19,6 @@ async function showBestiary() {
     } catch {}
     if (typeof window.showScreen === 'function') window.showScreen('bestiary-screen');
     try {
-        const host = document.getElementById('bestiary-config-panel');
-        if (host) { host.innerHTML = ''; host.style.display = 'none'; }
-    } catch {}
-    try {
         if (window.StaticData && typeof window.StaticData.getConfig === 'function') {
             const cfg = window.StaticData.getConfig('monsters');
             bestiaryMonsters = cfg && typeof cfg === 'object' ? (cfg.unitTypes || cfg) : {};
@@ -41,15 +37,6 @@ async function loadAndRenderBestiary() {
     try {
         const cfg = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('monsters') : null;
         bestiaryMonsters = cfg && typeof cfg === 'object' ? (cfg.unitTypes || cfg) : {};
-        const status = document.querySelector('#bestiary-config-panel [data-role="status"]');
-        if (status) {
-            try {
-                const name = window._monstersMetaName || 'Базовый бестиарий';
-                const desc = window._monstersMetaDescription ? ' - ' + window._monstersMetaDescription : '';
-                status.textContent = '✅ Загружен бестиарий: "' + name + '"' + desc;
-                status.className = 'file-status success';
-            } catch {}
-        }
         renderBestiaryTable();
     } catch (e) {
         document.getElementById('bestiary-table').innerHTML = '<tr><td colspan="7">Ошибка загрузки конфига монстров</td></tr>';
