@@ -8,4 +8,3 @@
 - adventure → `fragments/adventure-main.html` → `#adventure-screen`
 - bestiary → `fragments/bestiary.html` → `#bestiary-screen`
 - settings → `fragments/settings.html` → `#settings-screen`
-- rules → `fragments/rules.html` → `#rules-screen`

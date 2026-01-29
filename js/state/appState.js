@@ -54,7 +54,6 @@ window.setAdventureState = setAdventureState;
         'fight': { id: 'fight-screen', frag: 'fragments/fight-screen.html', menu: { backLabel: 'Главная', back: function(){ if (window.backToIntroFromFight) window.backToIntroFromFight(); else if (window.showIntro) window.showIntro(); } } },
         'battle': { id: 'battle-screen', frag: 'fragments/battle-screen.html', menu: { backLabel: 'Главная' } },
         'settings': { id: 'settings-screen', frag: 'fragments/settings.html' },
-        'rules': { id: 'rules-screen', frag: 'fragments/rules.html' },
         'bestiary': { id: 'bestiary-screen', frag: 'fragments/bestiary.html', menu: { backLabel: 'Главная', back: function(){ if (window.backToIntroFromBestiary) window.backToIntroFromBestiary(); else if (window.showIntro) window.showIntro(); } } },
         'adventure-setup': { id: 'adventure-setup-screen', frag: 'fragments/adventure-setup.html', menu: { backLabel: 'Главная', back: function(){ if (window.backToIntroFromAdventure) window.backToIntroFromAdventure(); else if (window.showIntro) window.showIntro(); } } },
         'adventure': { id: 'adventure-screen', frag: 'fragments/adventure-main.html', menu: { backLabel: 'Главная', back: function(){ if (window.backToIntroFromAdventure) window.backToIntroFromAdventure(); else if (window.showIntro) window.showIntro(); } } },

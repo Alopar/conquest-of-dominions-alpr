@@ -749,38 +749,6 @@ async function showConfigScreen() {
 
 window.showConfigScreen = showConfigScreen;
 
-async function showRules() {
-    try {
-        if (window.Router && typeof window.Router.setScreen === 'function') {
-            await window.Router.setScreen('rules');
-        } else {
-            showScreen('rules-screen');
-        }
-    } catch { showScreen('rules-screen'); }
-
-    const container = document.getElementById('rules-content');
-    if (!container) return;
-    container.textContent = 'Загрузка правил...';
-    try {
-        const url = 'assets/info/game_rules.md?_=' + Date.now();
-        const res = await fetch(url, { cache: 'no-store' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const md = await res.text();
-        const html = md
-            .replace(/^###\s+(.*)$/gm, '<h3>$1</h3>')
-            .replace(/^##\s+(.*)$/gm, '<h2>$1</h2>')
-            .replace(/^#\s+(.*)$/gm, '<h1>$1</h1>')
-            .replace(/^-\s+(.*)$/gm, '<li>$1</li>')
-            .replace(/(<li>.*<\/li>)(\s*(<li>.*<\/li>))+?/gms, m => `<ul>${m}</ul>`)
-            .replace(/`([^`]+)`/g, '<code>$1</code>');
-        container.innerHTML = html;
-    } catch (e) {
-        container.textContent = 'Не удалось загрузить правила';
-    }
-}
-
-window.showRules = showRules;
-
 // Экран «Достижения»
 async function showAchievements() {
     try {
