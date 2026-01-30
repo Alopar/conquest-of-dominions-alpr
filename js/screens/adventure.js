@@ -551,7 +551,13 @@ function renderTavern() {
     const hostArmy = document.getElementById('tavern-army-list');
     if (hostAvail) hostAvail.innerHTML = '';
     if (hostArmy) hostArmy.innerHTML = '';
-    const monsters = window.battleConfig && window.battleConfig.unitTypes ? window.battleConfig.unitTypes : {};
+    
+    // Получаем данные о монстрах из StaticData, так как battleConfig может быть пуст до первого боя
+    const monsters = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? (function(){
+        const m = window.StaticData.getConfig('monsters');
+        return (m && m.unitTypes) ? m.unitTypes : (m || {});
+    })() : {};
+
     let list = [];
     try {
         const m = (window.StaticData && typeof window.StaticData.getConfig === 'function') ? window.StaticData.getConfig('mercenaries') : null;

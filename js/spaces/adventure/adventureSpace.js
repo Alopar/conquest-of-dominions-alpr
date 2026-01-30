@@ -125,6 +125,9 @@
             }
 
             try {
+                if (typeof ensureAdventureTabs === 'function') {
+                    ensureAdventureTabs();
+                }
                 if (typeof renderAdventureSubscreen === 'function') {
                     renderAdventureSubscreen(subscreenName);
                 }
