@@ -15,8 +15,8 @@
 
         setupAutoScaling() {
             const updateScale = () => {
-                const appShell = document.getElementById('app-shell');
-                if (!appShell) return;
+                const appEl = document.getElementById('app') || document.getElementById('app-shell');
+                if (!appEl) return;
 
                 const baseWidth = 1024;
                 const baseHeight = 576;
@@ -25,27 +25,24 @@
 
                 const scale = Math.min(windowWidth / baseWidth, windowHeight / baseHeight);
 
-                // Применяем масштабирование и точное центрирование
-                appShell.style.width = `${baseWidth}px`;
-                appShell.style.height = `${baseHeight}px`;
-                appShell.style.transform = `scale(${scale})`;
-                appShell.style.transformOrigin = '0 0';
+                appEl.style.width = `${baseWidth}px`;
+                appEl.style.height = `${baseHeight}px`;
+                appEl.style.transform = `scale(${scale})`;
+                appEl.style.transformOrigin = '0 0';
                 
                 const offsetX = (windowWidth - baseWidth * scale) / 2;
                 const offsetY = (windowHeight - baseHeight * scale) / 2;
                 
-                appShell.style.position = 'absolute';
-                appShell.style.left = `${offsetX}px`;
-                appShell.style.top = `${offsetY}px`;
+                appEl.style.position = 'absolute';
+                appEl.style.left = `${offsetX}px`;
+                appEl.style.top = `${offsetY}px`;
                 
-                // Исправляем проблему с возможным смещением body
                 document.body.style.width = `${windowWidth}px`;
                 document.body.style.height = `${windowHeight}px`;
             };
 
             window.addEventListener('resize', updateScale);
             updateScale();
-            // Повторный вызов через небольшую задержку для учета появления/скрытия панелей браузера
             setTimeout(updateScale, 500);
         },
 

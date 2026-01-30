@@ -11,15 +11,62 @@
     <link rel="stylesheet" href="css/screens.css">
 </head>
 <body>
-    <div id="app-shell">
-        <div id="screen-layer"></div>
-        <div id="modal-layer" aria-live="assertive"></div>
-        <div id="toast-layer" aria-live="polite"></div>
-        <div id="tooltip-layer"></div>
-    </div>
-    <div id="mobile-overlay"></div>
+    <!-- Level 0: App Wrapper -->
+    <div id="app-wrapper">
+        <!-- Level 1: App -->
+        <div id="app">
+            <!-- App Loading Screen -->
+            <div id="app-loading" class="app-loading">
+                <div class="app-loading-content">
+                    <div class="app-loading-icon">⚔️</div>
+                    <div class="app-loading-text">Загрузка...</div>
+                    <div class="app-loading-progress">
+                        <div class="app-loading-bar"></div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Подключение JavaScript файлов -->
+            <!-- Level 2: Game Orchestrator -->
+            <div id="game" style="display: none;">
+                <!-- Level 3: Game Spaces Container -->
+                <div id="game-spaces">
+                    <!-- Lobby Space -->
+                    <div id="lobby-space" class="game-space" data-space="lobby">
+                        <div class="space-screens"></div>
+                    </div>
+                    <!-- Adventure Space -->
+                    <div id="adventure-space" class="game-space" data-space="adventure">
+                        <div class="space-screens"></div>
+                    </div>
+                    <!-- Battle Space -->
+                    <div id="battle-space" class="game-space" data-space="battle">
+                        <div class="space-screens"></div>
+                    </div>
+                </div>
+
+                <!-- UI Layers -->
+                <div id="modal-layer" aria-live="assertive"></div>
+                <div id="toast-layer" aria-live="polite"></div>
+                <div id="tooltip-layer"></div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div class="loading-message">Загрузка данных...</div>
+        </div>
+
+        <!-- Mobile Overlay -->
+        <div id="mobile-overlay"></div>
+    </div>
+
+    <!-- Legacy screen-layer for backward compatibility -->
+    <template id="legacy-screen-layer">
+        <div id="screen-layer"></div>
+    </template>
+
+    <!-- JavaScript Files -->
     <!-- IO -->
     <script src="js/io/download.js"></script>
     <!-- Core -->
@@ -46,13 +93,23 @@
     <script src="js/screens/settings.js"></script>
     <!-- Game/UI -->
     <script src="js/ui/uiToolkit.js"></script>
+    <script src="js/ui/layers.js"></script>
     <script src="js/game.js"></script>
     <script src="js/screens/adventureGraph.js"></script>
     <script src="js/screens/adventure.js"></script>
     <script src="js/ui/ui.js"></script>
+    <!-- Game Architecture -->
+    <script src="js/game/spaceManager.js"></script>
+    <script src="js/game/orchestrator.js"></script>
+    <!-- Spaces -->
+    <script src="js/spaces/lobby/lobbySpace.js"></script>
+    <script src="js/spaces/adventure/adventureSpace.js"></script>
+    <script src="js/spaces/battle/battleSpace.js"></script>
     <!-- Effects/App Bootstrap -->
     <script src="js/ui/animations.js"></script>
     <script src="js/ui/mobileWrapper.js"></script>
+    <script src="js/app/loadingManager.js"></script>
+    <script src="js/app/bootstrap.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

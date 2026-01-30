@@ -1,5 +1,5 @@
 (function(){
-    async function ensureScreenLoaded(id, url) {
+    async function ensureScreenLoaded(id, url, targetContainer) {
         if (document.getElementById(id)) return;
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -8,9 +8,36 @@
         doc.querySelectorAll('template').forEach(function(t){ document.body.appendChild(t); });
         const el = doc.getElementById(id) || doc.querySelector('.screen');
         if (el) {
-            const screenLayer = document.getElementById('screen-layer') || document.body;
-            screenLayer.appendChild(el);
+            let container = targetContainer;
+            if (!container) {
+                container = _findScreenContainer(id);
+            }
+            if (!container) {
+                container = document.getElementById('screen-layer') || document.getElementById('game-spaces') || document.body;
+            }
+            container.appendChild(el);
         }
+    }
+
+    function _findScreenContainer(screenId) {
+        const screenToSpace = {
+            'intro-screen': 'lobby',
+            'settings-screen': 'lobby',
+            'bestiary-screen': 'lobby',
+            'achievements-screen': 'lobby',
+            'adventure-setup-screen': 'lobby',
+            'adventure-screen': 'adventure',
+            'adventure-result-screen': 'adventure',
+            'battle-screen': 'battle'
+        };
+        const spaceName = screenToSpace[screenId];
+        if (spaceName) {
+            const space = document.getElementById(spaceName + '-space');
+            if (space) {
+                return space.querySelector('.space-screens') || space;
+            }
+        }
+        return null;
     }
 
     function ensureMenuBar(screenId, options) {

@@ -1,15 +1,26 @@
-// Универсальное переключение экранов
 function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => {
-        s.classList.remove('active');
-        try { s.style.setProperty('display', 'none', 'important'); } catch { s.style.display = 'none'; }
-    });
+    const targetEl = document.getElementById(id);
+    if (!targetEl) return;
+
+    const parentSpace = targetEl.closest('.game-space');
+
+    if (parentSpace) {
+        parentSpace.querySelectorAll('.screen').forEach(s => {
+            s.classList.remove('active');
+            try { s.style.setProperty('display', 'none', 'important'); } catch { s.style.display = 'none'; }
+        });
+    } else {
+        document.querySelectorAll('.screen').forEach(s => {
+            s.classList.remove('active');
+            try { s.style.setProperty('display', 'none', 'important'); } catch { s.style.display = 'none'; }
+        });
+    }
+
     try { if (window.UI && typeof window.UI.clearTooltips === 'function') window.UI.clearTooltips(); } catch {}
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.classList.add('active');
+
+    targetEl.classList.add('active');
     const mode = (id === 'intro-screen' || id === 'battle-screen' || id === 'adventure-screen') ? 'flex' : 'block';
-    try { el.style.setProperty('display', mode, 'important'); } catch { el.style.display = mode; }
+    try { targetEl.style.setProperty('display', mode, 'important'); } catch { targetEl.style.display = mode; }
 }
 
 // Функции пользовательского интерфейса
@@ -282,15 +293,18 @@ function addToLog(message) {
     }
 }
 
-// Переключение экранов
 async function showIntro() {
     try {
-        const current = (window.AppState && window.AppState.screen) || null;
-        const needsConfirm = current === 'adventure' || current === 'battle';
+        const currentSpace = (window.AppState && window.AppState.space) || null;
+        const currentScreen = (window.AppState && window.AppState.screen) || null;
+        const needsConfirm = currentSpace === 'adventure' || currentSpace === 'battle' ||
+                           currentScreen === 'adventure' || currentScreen === 'battle';
         if (needsConfirm) {
             let proceed = true;
             try {
-                if (window.UI && typeof window.UI.showModal === 'function') {
+                if (window.GameOrchestrator && typeof window.GameOrchestrator.requestConfirmExit === 'function') {
+                    proceed = await window.GameOrchestrator.requestConfirmExit();
+                } else if (window.UI && typeof window.UI.showModal === 'function') {
                     const h = window.UI.showModal('Игровой прогресс будет потерян. Выйти на главную?', { type: 'dialog', title: 'Подтверждение', yesText: 'Да', noText: 'Отмена' });
                     proceed = await h.closed;
                 } else {
@@ -300,13 +314,17 @@ async function showIntro() {
             if (!proceed) return;
         }
     } catch {}
+
     try {
-        if (window.Router && typeof window.Router.setScreen === 'function') {
-            window.Router.setScreen('intro');
+        if (window.GameOrchestrator && typeof window.GameOrchestrator.switchSpace === 'function') {
+            await window.GameOrchestrator.switchSpace('lobby', { screen: 'intro' });
+        } else if (window.Router && typeof window.Router.setScreen === 'function') {
+            await window.Router.setScreen('intro');
         } else {
             showScreen('intro-screen');
         }
     } catch { showScreen('intro-screen'); }
+
     try { window.battleConfigSource = undefined; } catch {}
     const logDiv = document.getElementById('battle-log');
     if (logDiv) logDiv.innerHTML = '';
